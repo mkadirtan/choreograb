@@ -1,7 +1,7 @@
 {"producer":{"name":"Blender","version":"2.79 (sub 0)","exporter_version":"5.6.4","file":"simpleMan2_6.babylon"},
 "autoClear":true,"clearColor":[0,0,0],"ambientColor":[0.2,0.2,0.3],"gravity":[0,-9.81,0],
 "materials":[{"name":"simpleMan2_6.Material.001","id":"simpleMan2_6.Material.001","ambient":[0.5868,0.5868,0.5868],"diffuse":[0.5868,0.5868,0.5868],"specular":[0,0,0],"emissive":[0,0,0],"specularPower":28,"alpha":1,"backFaceCulling":true,"checkReadyOnlyOnce":false,"maxSimultaneousLights":4, 
-"diffuseTexture":{"name":"OMO1.PNG","level":1,"hasAlpha":1,"coordinatesMode":0,"uOffset":0,"vOffset":0,"uScale":1,"vScale":1,"uAng":0,"vAng":0,"wAng":0,"wrapU":1,"wrapV":1,"coordinatesIndex":0}}],
+"diffuseTexture":{"name":"simpleMan.jpg","level":1,"hasAlpha":1,"coordinatesMode":0,"uOffset":0,"vOffset":0,"uScale":1,"vScale":1,"uAng":0,"vAng":0,"wAng":0,"wrapU":1,"wrapV":1,"coordinatesIndex":0}}],
 "multiMaterials":[],
 "skeletons":[{"name":"Armature","id":0,"dimensionsAtRest":[1.2221,4.9078,1.3266],"bones":[
 {"name":"root","index":0,"matrix":[-1,0,0,0,0,-0.4068,-0.9135,0,0,0.9135,-0.4068,0,-0.001,0.8389,1.0138,1],"rest":[-1,0,0,0,0,-0.4068,-0.9135,0,0,0.9135,-0.4068,0,-0.001,0.7757,1.0138,1],"parentBoneIndex":-1,"length":0.7774
