@@ -4,6 +4,8 @@ Lisans falan yok diye çalmayın :D
 
 ## Güncellemeler
 
+### Doğum Günün Kutlu Olsun Eceee
+
 ### v1.00
 Modüler yapıya geçme amaçlı my_ js dosyaları oluşturuldu. Import export yapısı ve thisinstance muhabbetini çözmek lazım.
 
