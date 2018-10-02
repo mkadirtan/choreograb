@@ -109,7 +109,7 @@ CreateAnimatableMesh.prototype = {
 				//Duration of every tween is the time difference between subsequent keys.
 				let deltaTime = entry.T-array[index-1].T;
 				//entry = array[index], therefore index-1 obtains element just before;
-				tl.fromTo(property, deltaT, array[index-1].value, entry.value, array[index-1].T);
+				tl.fromTo(property, deltaTime, array[index-1].value, entry.value, array[index-1].T);
 				let animation = new TimelineMax().fromTo()
 			}
 		});
