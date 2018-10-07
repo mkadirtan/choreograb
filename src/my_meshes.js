@@ -1,7 +1,27 @@
 import * as BABYLON from 'babylonjs';
 import {TweenLite, TimelineMax} from 'gsap/TweenMax';
 
-export default function CreateAnimatableMesh(MeshCreator){
+
+//Adjust size declarations to variables in the next version.
+function initDefaults(scene){
+	let ground = CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene));
+	let restrictedArea = {
+		_xmin: ground.getBoundingInfo().minimum.x,
+		_xmax: ground.getBoundingInfo().maximum.x,
+		_zmin: ground.getBoundingInfo().minimum.z,
+		_zmax: ground.getBoundingInfo().maximum.z,
+		restrict: function(x,y){
+			x>this._xmax?x=this._xmax;
+			x<this._xmin?x=this._xmin;
+			z>this._ymax?z=this._zmax;
+			z<this._ymin?z=this._zmin;
+			return {x, z};
+		}
+	};
+	let parentMesh = CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreateBox("parentMesh", {size: 1}, scene), {visible: false});
+	let pickingPlane = CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreatePlane("pickingPlane", {size: 120}, scene), {visibility: 0});
+}
+function CreateAnimatableMesh(MeshCreator){
 	this.mesh = new MeshCreator;
 	Object.defineProperty(this, "data", {
 		value: {
@@ -18,7 +38,7 @@ export default function CreateAnimatableMesh(MeshCreator){
 		configurable: true,
 		writeable: true
 	});
-
+	Choreograb.Timeline.registerTimeline(this);
 	//Add all the animations to animationGroup.
 	//Animation differentiations are based on ranges
 	//Ex: walk animation is in range of frames 0-9
@@ -39,7 +59,7 @@ CreateAnimatableMesh.prototype = {
 		if(aniObj.animatePos){
 			pushKeys(aniObj.positionPush, this.data.position, "pos")
 		};
-		
+
 		if(aniObj.animateRot){
 			pushKeys(aniObj.rotationPush, this.data.rotation, "rot");
 		};
@@ -65,6 +85,7 @@ CreateAnimatableMesh.prototype = {
 			};
 			updateTimeline(type);
 		};
+		return this;
 	},
 	//Updates the timeline of selected data type.
 	updateTimeline: function(type){
@@ -114,7 +135,8 @@ CreateAnimatableMesh.prototype = {
 			}
 		});
 
-    	tl.seek(tl.totalDuration()/2).seek(slider.value-0.001);
+    	tl.seek(tl.totalDuration()/2).seek(slider.value);
+			return this;
 	},
 	getAniObj: function(){
 		return {
@@ -124,13 +146,14 @@ CreateAnimatableMesh.prototype = {
 			"animatePosition": animationSettings.animatePosition,
 			"animateRotation": animationSettings.animateRotation,
 			"sensitivity": animationSettings.sensitivity
-		}
+		};
 	}
 };
 
-export function CreateNonAnimatableMesh(MeshCreator){
+function CreateNonAnimatableMesh(MeshCreator, defaults){
 	let result = new MeshCreator;
-	result.isPickable = false;
+	result.isPickable = defaults.isPickable || false;
+	result.visible = defaults.visible || true;
+	result.visibility = defaults.visibility || 1;
 	return result;
 };
-
