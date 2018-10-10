@@ -1,30 +1,24 @@
 import * as GUI from 'babylon-gui';
 
-
 //Width, height etc pointing to an object in the prototype,
 //Therefore hoping to change all buttons properties at the
 //same time and change it 'dynamically'
-let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("myUI");
-let defaults = {
-	width: "120px",
-	height: "50px",
-	color: "white",
-	background: "green"
-};
 
-function createStacks(){
+function initGUI(scene){
+	let advancedTexture = new BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", scene);
+
 	let leftPanel = new BABYLON.GUI.StackPanel("leftPanel");
 	leftPanel.width = "140px";
 	leftPanel.height = 0.75
-	leftPanel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-	leftPanel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+	leftPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+	leftPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
 	leftPanel.isVertical = true;
 
 	let rightPanel = new BABYLON.GUI.StackPanel("rightPanel");
 	rightPanel.width = "140px";
 	rightPanel.height = 0.75
-	rightPanel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-	rightPanel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+	rightPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+	rightPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
 	rightPanel.isVertical = true;
 
 	let slider = new BABYLON.GUI.Slider("slider");
@@ -33,7 +27,7 @@ function createStacks(){
 	slider.value = 0;
 	slider.height = 0.25;
 	slider.width = 1;
-	slider.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+	slider.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
 	/*
 	slider.onPointerDownObservable.add(function () {
 			slider.onValueChangedObservable.add(function(){
@@ -60,26 +54,68 @@ function createStacks(){
 			}
 	);
 	*/
-
 	advancedTexture.addControl(leftPanel);
 	advancedTexture.addControl(rightPanel);
 	advancedTexture.addControl(slider);
-
+	let guiElements = {
+		setTimeline: function(timeline){
+			this.timeline = vars.timeline
+			slider.onPointerDownObservable.add(function(){
+				slider.onValueChangedObservable.add(function(){
+					if(this.slider.value <= this.timeline.totalDuration()){
+						timeline.seek(this.slider.value, false);
+					}
+				})
+			});
+			slider.onPointerUpObservable.add(function(){
+				slider.onValueChangedObservable.clear();
+			});
+		},
+		timeline: null,
+		advancedTexture,
+		leftPanel,
+		rightPanel,
+		slider
+	};
+	return guiElements;
 }
-
-function CreateButton(defaults){
-	if(!defaults.stack){
+/**
+ * vars contain:
+ * stack, name, width, height, color, background, func
+ *
+ * Generic button constructor.
+ *
+ */
+function CreateButton(vars){
+	if(!vars.stack){
 		console.log("Error: CreateButton needs a stack to append the button to!");
 		return;
 	}
-	let result = new BABYLON.GUI.Button.CreateSimpleButton(defaults.name);
-	result.width = defaults.width;
-	result.height = defaults.height;
-	result.color = defaults.color;
-	result.background = defaults.background;
-	if(defaults.func){
-		result.onPointerUpObservable.add(defaults.func);
+	let result = new BABYLON.GUI.Button.CreateSimpleButton(vars.name);
+	result.width = vars.width || defaults.width;
+	result.height = vars.height || defaults.height;
+	result.color = vars.color || defaults.color;
+	result.background = vars.background || defaults.background;
+	if(vars.func){
+		result.onPointerUpObservable.add(vars.func);
 	}
-	defaults.stack.addControl(result);
+	vars.stack.addControl(result);
 	return result;
 };
+
+/**
+ * Default properties of generic buttons for undefined properties.
+ */
+
+CreateButton.prototype = {
+	defaults: {
+		width: "120px",
+		height: "50px",
+		color: "white",
+		background: "green"
+	}
+};
+
+GIU={
+	
+}

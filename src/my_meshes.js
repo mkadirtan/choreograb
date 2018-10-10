@@ -3,26 +3,43 @@ import {TweenLite, TimelineMax} from 'gsap/TweenMax';
 
 
 //Adjust size declarations to variables in the next version.
-function initDefaults(scene){
-	let ground = CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene));
-	let restrictedArea = {
-		_xmin: ground.getBoundingInfo().minimum.x,
-		_xmax: ground.getBoundingInfo().maximum.x,
-		_zmin: ground.getBoundingInfo().minimum.z,
-		_zmax: ground.getBoundingInfo().maximum.z,
+function initMeshes(scene){
+	let ground = {
+		mesh: CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene)),
 		restrict: function(x,y){
-			x>this._xmax?x=this._xmax;
-			x<this._xmin?x=this._xmin;
-			z>this._ymax?z=this._zmax;
-			z<this._ymin?z=this._zmin;
-			return {x, z};
+			x>this._xmax?x=this._xmax:x<this._xmin?x=this._xmin:null;
+			z>this._ymax?z=this._zmax:z<this._ymin?z=this._zmin:null;
+			return {x, z}
+		},
+		updateCoordinates: function(){
+			this._xmin = ground.getBoundingInfo().minimum.x,
+			this._xmax = ground.getBoundingInfo().maximum.x,
+			this._zmin = ground.getBoundingInfo().minimum.z,
+			this._zmax = ground.getBoundingInfo().maximum.z,
 		}
+		//_xmin: 10, _xmax: 10, _zmin: 10, _zmax: 10 //Check if this line is deletable!
 	};
+	ground.updateCoordinates();
 	let parentMesh = CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreateBox("parentMesh", {size: 1}, scene), {visible: false});
 	let pickingPlane = CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreatePlane("pickingPlane", {size: 120}, scene), {visibility: 0});
+	let meshElements = {ground, parentMesh, pickingPlane};
+	return meshElements;
 }
-function CreateAnimatableMesh(MeshCreator){
-	this.mesh = new MeshCreator;
+
+//Define modelUrl!
+
+let characterLoadFunction = function(modelUrl){
+    BABYLON.SceneLoader.ImportMeshAsync("", path.dirname(modelUrl), path.basename(modelUrl)).then(function(result){
+        loadedMesh = result.meshes[0];
+        loadedMesh.name = "character";
+        loadedMesh.position = {x: 0, y: -character.getBoundingInfo().minimum.y, z: 0}
+        return character;
+    })
+};
+
+function CreateAnimatableMesh(MeshCreator, isImport){
+	if(isImport === undefined){isImport = false};
+	isImport?(this.mesh = MeshCreator):(this.mesh = new MeshCreator);
 	Object.defineProperty(this, "data", {
 		value: {
 			"name": this.mesh.name,
@@ -39,6 +56,7 @@ function CreateAnimatableMesh(MeshCreator){
 		writeable: true
 	});
 	Choreograb.Timeline.registerTimeline(this);
+	scene.add(this.mesh);
 	//Add all the animations to animationGroup.
 	//Animation differentiations are based on ranges
 	//Ex: walk animation is in range of frames 0-9
@@ -72,7 +90,7 @@ CreateAnimatableMesh.prototype = {
 			let isDuplicate = false;
 			current.forEach(
 				function(entry, index, array){
-					if(Math.abs(entry.T - aniObj.T) <= aniObj.sensitivity){
+					if(Math.abs(entry.T - aniObj.T) <= aniObj.keyframeSensitivity){
 						array[index] = push;
 						isDuplicate = true;
 						console.log("Notification: A keyframe duplicate was found, replacing old keyframe entry!")
@@ -138,22 +156,28 @@ CreateAnimatableMesh.prototype = {
     	tl.seek(tl.totalDuration()/2).seek(slider.value);
 			return this;
 	},
-	getAniObj: function(){
+	getAniObj: function(animationSettings){
 		return {
 			"T": slider.T,
 			"positionPush": {"T": slider.T, "value": this.mesh.position},
 			"rotationPush": {"T": slider.T, "value": this.mesh.rotation},
 			"animatePosition": animationSettings.animatePosition,
 			"animateRotation": animationSettings.animateRotation,
-			"sensitivity": animationSettings.sensitivity
+			"keyframeSensitivity": animationSettings.keyframeSensitivity
 		};
 	}
 };
 
-function CreateNonAnimatableMesh(MeshCreator, defaults){
+function CreateNonAnimatableMesh(MeshCreator, vars){
 	let result = new MeshCreator;
-	result.isPickable = defaults.isPickable || false;
-	result.visible = defaults.visible || true;
-	result.visibility = defaults.visibility || 1;
+	result.isPickable = vars.isPickable || false;
+	result.visible = vars.visible || true;
+	result.visibility = vars.visibility || 1;
 	return result;
 };
+
+export Mesh = {
+	initMeshes
+}
+
+
