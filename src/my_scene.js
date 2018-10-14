@@ -1,3 +1,5 @@
+import * as BABYLON from 'babylonjs';
+
 let initScene = function(){
     let canvas = document.getElementById("renderCanvas");
     let engine = new BABYLON.Engine(canvas,  true, {stencil: true}); //Stencil: Edge renderer
@@ -20,3 +22,7 @@ let initScene = function(){
     });
     return scene;
   };
+
+export let Scene = {
+    initScene
+};

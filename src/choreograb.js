@@ -5,21 +5,16 @@
  * Licence file is in the root directory of this source tree.
  */
 
-import * from 'my_gui';
-import {} from 'my_meshes';
-import {} from 'my_timeline';
+import * as GUI from 'my_gui';
+import * as Mesh from 'my_meshes';
+import * as Timeline from 'my_timeline';
+import * as Scene from 'my_scene';
 
 let Choreograb = {
-	Mesh: Mesh,
-	GUI: {
-		defaults_button,
-		CreateButton,
-		initGUI,
-		initStacks
-	},
-  	Scene: {
-    	initScene,
-  	}
+	Mesh,
+    GUI,
+    Scene,
+    Timeline
 };
 
-export default Choreograb;
+export Choreograb;

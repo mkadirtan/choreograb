@@ -12,33 +12,32 @@ function initMeshes(scene){
 			return {x, z}
 		},
 		updateCoordinates: function(){
-			this._xmin = ground.getBoundingInfo().minimum.x,
-			this._xmax = ground.getBoundingInfo().maximum.x,
-			this._zmin = ground.getBoundingInfo().minimum.z,
-			this._zmax = ground.getBoundingInfo().maximum.z,
+			this._xmin = ground.getBoundingInfo().minimum.x;
+			this._xmax = ground.getBoundingInfo().maximum.x;
+			this._zmin = ground.getBoundingInfo().minimum.z;
+			this._zmax = ground.getBoundingInfo().maximum.z;
 		}
 		//_xmin: 10, _xmax: 10, _zmin: 10, _zmax: 10 //Check if this line is deletable!
 	};
 	ground.updateCoordinates();
 	let parentMesh = CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreateBox("parentMesh", {size: 1}, scene), {visible: false});
 	let pickingPlane = CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreatePlane("pickingPlane", {size: 120}, scene), {visibility: 0});
-	let meshElements = {ground, parentMesh, pickingPlane};
-	return meshElements;
+	return {ground, parentMesh, pickingPlane};
 }
 
 //Define modelUrl!
 
 let characterLoadFunction = function(modelUrl){
     BABYLON.SceneLoader.ImportMeshAsync("", path.dirname(modelUrl), path.basename(modelUrl)).then(function(result){
-        loadedMesh = result.meshes[0];
+        let loadedMesh = result.meshes[0];
         loadedMesh.name = "character";
-        loadedMesh.position = {x: 0, y: -character.getBoundingInfo().minimum.y, z: 0}
+        loadedMesh.position = {x: 0, y: -character.getBoundingInfo().minimum.y, z: 0};
         return character;
     })
 };
 
 function CreateAnimatableMesh(MeshCreator, isImport){
-	if(isImport === undefined){isImport = false};
+	if(isImport === undefined){isImport = false}
 	isImport?(this.mesh = MeshCreator):(this.mesh = new MeshCreator);
 	Object.defineProperty(this, "data", {
 		value: {
@@ -67,7 +66,7 @@ function CreateAnimatableMesh(MeshCreator, isImport){
 			this.data.animationGroup.addTargetedAnimation(anim, bone)
 		}
 	};*/
-};
+}
 
 CreateAnimatableMesh.prototype = {
 	addKey: function(aniObj){
@@ -76,11 +75,11 @@ CreateAnimatableMesh.prototype = {
 
 		if(aniObj.animatePos){
 			pushKeys(aniObj.positionPush, this.data.position, "pos")
-		};
+		}
 
 		if(aniObj.animateRot){
 			pushKeys(aniObj.rotationPush, this.data.rotation, "rot");
-		};
+		}
 
 		//Interchangable function to add new keyframes to "current".
 		//push is an object with T and the values to be added.
@@ -94,15 +93,15 @@ CreateAnimatableMesh.prototype = {
 						array[index] = push;
 						isDuplicate = true;
 						console.log("Notification: A keyframe duplicate was found, replacing old keyframe entry!")
-					};
+					}
 				}
 			);
 
 			if(!isDuplicate){
 				current.push(push)
-			};
+			}
 			updateTimeline(type);
-		};
+		}
 		return this;
 	},
 	//Updates the timeline of selected data type.
@@ -126,7 +125,7 @@ CreateAnimatableMesh.prototype = {
 			property = this.mesh.rotation;
 			killObject = {x: true, y: true, z: true};
 			break;
-		};
+		}
 
 		//Sort current keys
 
@@ -134,11 +133,11 @@ CreateAnimatableMesh.prototype = {
 			current.sort(function(a,b){
 				return a.T- b.T;
 			});
-		};
+		}
 
 		//Erase previous timeline data
 
-		this.data.timeline.kill(killObject, property);
+		data.timeline.kill(killObject, property);
 
 		//Add new keys
 
@@ -148,12 +147,11 @@ CreateAnimatableMesh.prototype = {
 				//Duration of every tween is the time difference between subsequent keys.
 				let deltaTime = entry.T-array[index-1].T;
 				//entry = array[index], therefore index-1 obtains element just before;
-				tl.fromTo(property, deltaTime, array[index-1].value, entry.value, array[index-1].T);
-				let animation = new TimelineMax().fromTo()
+				timeline.fromTo(property, deltaTime, array[index-1].value, entry.value, array[index-1].T);
 			}
 		});
 
-    	tl.seek(tl.totalDuration()/2).seek(slider.value);
+    	data.timeline.seek(data.timeline.totalDuration()/2).seek(slider.value);
 			return this;
 	},
 	getAniObj: function(animationSettings){
@@ -176,8 +174,11 @@ function CreateNonAnimatableMesh(MeshCreator, vars){
 	return result;
 };
 
-export Mesh = {
-	initMeshes
+export let Mesh = {
+	initMeshes,
+	characterLoadFunction,
+	CreateAnimatableMesh,
+	CreateNonAnimatableMesh
 }
 
 
