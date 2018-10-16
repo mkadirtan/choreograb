@@ -1,4 +1,4 @@
-import * as TimelineMax from 'TimelineMax';
+import {TimelineMax} from 'gsap';
 
 let registerTimeline = function(mesh, mainTimeline){
   mainTimeline.add(mesh.data.timeline, 0)
@@ -26,16 +26,16 @@ function initTimeline (){
                     this.music.pause();
                     this.timeline.pause();
                 });
-            };
+            }
             if(vars.audioSyncSensitivity){
                 this.audioSyncSensitivity = vars.audioSyncSensitivity;
-            };
+            }
         },
         timeline: new TimelineMax()
     };
-};
+}
 
 export let Timeline = {
     initTimeline,
     registerTimeline
-}
+};

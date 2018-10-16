@@ -1,4 +1,8 @@
-import * as Choreograb from 'choreograb';
+import * as BABYLON from 'babylonjs';
+import * as GUI from 'babylonjs-gui';
+import {TimelineMax} from 'gsap';
+import {Choreograb} from './Choreograb';
+import {Howl, Howler} from 'howler';
 let musicUrl = "./lost_compressed.mp3";
 let modelUrl = "./simpleMan.babylon";
 
@@ -6,19 +10,19 @@ let animationSettings = {
     animatePosition: false,
     animateRotation: false,
     keyframeSensitivity: 0.2,
-    audioSyncSensitivity: 0.05,
+    audioSyncSensitivity: 0.05
 };
 //Load music asynchronously!
 let musicController = new Howl({
     src: [musicUrl],
     autoplay: true,
-    loop: false,
+    loop: false
 });
 
 let scene = Choreograb.Scene.initScene();
 let guiElements = Choreograb.GUI.initGUI(scene);
 let mainTimeline = Choreograb.Timeline.initTimeline();
-guiElements.setTimeline(mainTimeline.timeline);
+guiElements.setTimeline({mainTimeline.timeline});
 mainTimeline.setVars({
     music: musicController,
     slider: guiElements.slider,

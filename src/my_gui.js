@@ -58,12 +58,12 @@ function initGUI(scene){
 	advancedTexture.addControl(rightPanel);
 	advancedTexture.addControl(slider);
     return {
-		setTimeline: function(timeline){
+		setTimeline: function(vars){
 			this.timeline = vars.timeline;
 			slider.onPointerDownObservable.add(function(){
 				slider.onValueChangedObservable.add(function(){
-					if(this.slider.value <= this.timeline.totalDuration()){
-						timeline.seek(this.slider.value, false);
+					if(slider.value <= timeline.totalDuration()){
+						timeline.seek(slider.value, false);
 					}
 				})
 			});
