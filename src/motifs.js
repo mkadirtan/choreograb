@@ -1,4 +1,4 @@
-/*
+/**
  * "Motifs" object is a controller for all motif objects.
  * Its methods are:
  * update:
@@ -78,8 +78,8 @@ let Motifs = {
     set previous(motif){self._previous = motif;}
 };
 
-/*
- * Motifs have properties for
+/**
+ * Motif objects have properties for
  * name, start & end time, guides.
  * "active" token called _isActive.
  */
@@ -93,7 +93,7 @@ function CreateMotif(param){
     this._guides = [];
 }
 
-/*
+/**
  * Every motif has methods;
  * start:
  * Setter & Getter

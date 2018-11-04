@@ -1,4 +1,4 @@
-/*
+/**
  * Every guide has properties for name, type etc. as below.
  * points: are used in creation of parametricShape and containerShape.
  * radius: is used for "circle" type only.
@@ -47,7 +47,7 @@ function CreateGuide(param){
     this.hide();
 }
 
-/*
+/**
  * Guide prototype contains complex 3D calculations for generating;
  * containerShape, snapPoints.
  * These calculations are explained above their respective methods.
@@ -71,7 +71,7 @@ function CreateGuide(param){
  * Setters & Getters are defined at the bottom.
  */
 
-/*
+/**
  * Update methods need to be put.
  * Don't allow playerCount below 2.
  */
@@ -123,7 +123,7 @@ CreateGuide.prototype = {
         }
         return pointB.add(differenceVector.scale(ratio));
     },
-    /*
+    /**
      * Divides the path into equally spaced points on the path.
      * Every point is then pushed to snapPoints array.
      * Special cases arouse when type is "closure" or "circle"
@@ -177,7 +177,7 @@ CreateGuide.prototype = {
         // Last point is a snap point if type is "linear"
         if(isLastMan && isLastPointOccupied) self.snapPoints().push(self.points()[self.points().length-1]);
     },
-    /*
+    /**
      * For every snapPoint, a cyclinderical snap is pushed to snaps array.
      */
     generateSnaps(){
@@ -190,7 +190,7 @@ CreateGuide.prototype = {
             }, scene));
         })
     },
-    /*
+    /**
      * snapPoints and snaps array are cleared out first,
      * then generation procedures are applied.
      */
@@ -200,7 +200,7 @@ CreateGuide.prototype = {
         self.generateSnapPoints();
         self.generateSnaps();
     },
-    /*
+    /**
      * For types "closure" and "circle" a polygon covering the shape is produced.
      * For "linear" type, guide points are offseted in their binormal vectors to
      * obtain a polygon with thickness "size". Variable size needs to be adjusted
@@ -231,7 +231,7 @@ CreateGuide.prototype = {
                 }, scene));
         }
     },
-   /*
+   /**
     * Setters & Getters are available for:
     *  parametricShape, containerShape, snaps, snapPoints,
     *  points, playerCount, type, motif, resolution, radius
