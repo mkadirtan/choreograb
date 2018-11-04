@@ -1,4 +1,4 @@
-let initializeScene = function(){
+export let initializeScene = function(){
     let canvas = document.getElementById("renderCanvas");
     let engine = new BABYLON.Engine(canvas,  true, {stencil: true}); //Stencil: Edge renderer
     let scene = new BABYLON.Scene(engine);
@@ -13,14 +13,15 @@ let initializeScene = function(){
     light1.intensity = 3;
     light2.intensity = 3;
 
+    let ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
+    let parentMesh = BABYLON.MeshBuilder.CreateBox("parentMesh", {size: 1}, scene);
+    parentMesh.isVisible = false;
+    let pickingPlane = BABYLON.MeshBuilder.CreatePlane("pickingPlane", {size: 120}, scene);
+    pickingPlane.visibility = 0;
+    pickingPlane.id = "pickingPlane";
+
     engine.runRenderLoop(function(){
         scene.render();
     });
     return scene;
 };
-
-let ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
-let parentMesh = BABYLON.MeshBuilder.CreateBox("parentMesh", {size: 1}, scene);
-parentMesh.isVisible = false;
-let pickingPlane = BABYLON.MeshBuilder.CreatePlane("pickingPlane", {size: 120}, scene);
-pickingPlane.visibility = 0;

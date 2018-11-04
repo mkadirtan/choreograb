@@ -5,23 +5,23 @@
  * CreateButton constructor
  */
 
-let advancedTexture = new BGUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", scene);
+export let advancedTexture = new BGUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", scene);
 
-let leftPanel = new BGUI.StackPanel("leftPanel");
+export let leftPanel = new BGUI.StackPanel("leftPanel");
 leftPanel.width = "120px";
 leftPanel.height = 0.75;
 leftPanel.horizontalAlignment = BGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
 leftPanel.verticalAlignment = BGUI.Control.VERTICAL_ALIGNMENT_TOP;
 leftPanel.isVertical = true;
 
-let rightPanel = new BGUI.StackPanel("rightPanel");
+export let rightPanel = new BGUI.StackPanel("rightPanel");
 rightPanel.width = "120px";
 rightPanel.height = 0.75;
 rightPanel.horizontalAlignment = BGUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
 rightPanel.verticalAlignment = BGUI.Control.VERTICAL_ALIGNMENT_TOP;
 rightPanel.isVertical = true;
 
-let bottomPanel = new BGUI.StackPanel("bottomPanel");
+export let bottomPanel = new BGUI.StackPanel("bottomPanel");
 bottomPanel.width = 1;
 bottomPanel.height = "120px";
 bottomPanel.horizontalAlignment = BGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
@@ -36,7 +36,7 @@ advancedTexture.addControl(bottomPanel);
  * It assigns name, image, width, size, onClick function of the button,
  * then returns the created BABYLON.GUI.Button object.
  */
-function CreateButton(param){
+export function CreateButton(param){
     let result = new BABYLON.GUI.Button.CreateImageOnlyButton(param.name, param.image);
     result.width = param.width || "60px";
     result.height = param.height || "60px";

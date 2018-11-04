@@ -5,7 +5,7 @@
 /**
  * !Problem with path module and asset paths..!
  */
-function loadModel(param){
+export function loadModel(param){
     BABYLON.SceneLoader.ImportMeshAsync("", path.dirname(param.url), path.basename(param.url)).then(function(result){
         let loadedMesh = result.meshes[0];
         loadedMesh.name = param.name;
@@ -14,14 +14,14 @@ function loadModel(param){
     })
 }
 
-let Player = loadModel({
+export let Player = loadModel({
     name: "Player",
     url: "/mesh.babylon"
 });
 
-let players = [];
+export let players = [];
 
-function CreatePlayer(param){
+export function CreatePlayer(param){
     this.self = this;
     this.mesh = param.mesh;
     this.keys = [];
@@ -70,7 +70,7 @@ CreatePlayer.prototype = {
     }
 };
 
-function generatePlayers(count, player){
+export function generatePlayers(count, player){
     if(!player){
         player = Player;
     }

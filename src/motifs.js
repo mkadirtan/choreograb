@@ -19,7 +19,7 @@
  *  Setter & Getter
  */
 
-let Motifs = {
+export let Motifs = {
     self: this,
     _current: null,
     _next: null,
@@ -84,7 +84,7 @@ let Motifs = {
  * "active" token called _isActive.
  */
 
-function CreateMotif(param){
+export function CreateMotif(param){
     this.self = this;
     this.name = param.name;
     this._isActive = false;

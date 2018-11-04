@@ -4,7 +4,7 @@ import {TimelineMax} from 'gsap';
  * setParams assigns some routines to timeline object.
  * This approach is useful to adjust timeline according to changes.
  */
-function initializeTimeline(){
+export function initializeTimeline(){
     return {
         self: this,
         setParams(param){
@@ -35,9 +35,3 @@ function initializeTimeline(){
         timeline: new TimelineMax()
     };
 }
-/*
- * !This part needs some adjustments.!
- */
-let registerTimeline = function(mesh, mainTimeline){
-    mainTimeline.add(mesh.data.timeline, 0)
-};

@@ -1,3 +1,12 @@
+import * as BABYLON from 'babylonjs';
+import * as GUI from 'babylonjs-gui';
+import {initializeScene} from './scene';
+import {loadModel, Player, players, CreatePlayer, generatePlayers} from './players';
+import {Motifs, CreateMotif} from './motifs';
+import {CreateGuide} from './guides';
+import {initializeTimeline} from './timeline';
+import {advancedTexture, leftPanel, rightPanel, bottomPanel, CreateButton} from './GUI';
+
 /**
  * Initialization step for;
  * scene, players, timeline, music, motif, guide, GUI objects.
@@ -58,6 +67,12 @@
  * leftPanel buttons are;
  * rightPanel buttons are;
  * bottomPanel buttons are;
+ */
+
+/**
+ * Event handlers initalization steps:
+ *
+ *
  */
 
 let timeControl = initializeTimeline();

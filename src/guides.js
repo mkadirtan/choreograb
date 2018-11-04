@@ -11,7 +11,7 @@
  * motif: is the motif to which guide is binded.
  */
 
-function CreateGuide(param){
+export function CreateGuide(param){
     this.self = this;
     this.name = param.name;
     this._type = param.type;
