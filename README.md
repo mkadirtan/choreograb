@@ -6,6 +6,11 @@ Lisans falan yok diye çalmayın :D
 
 ### Doğum Günün Kutlu Olsun Eceee
 
+### v1.01
+Modüler yapıya geçtim sonunda!
+Guide, snap ve player clone'u tam anlamıyla çalışıyor.
+Sırada oyuncu modelini yükleme ve guideları hareket ettirme var!
+
 ### v1.00
 Modüler yapıya geçme amaçlı my_ js dosyaları oluşturuldu. Import export yapısı ve thisinstance muhabbetini çözmek lazım.
 
