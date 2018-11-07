@@ -1,4 +1,4 @@
-import {TimelineMax} from 'gsap';
+import {TimelineMax, TweenMax} from 'gsap';
 /*
  * initializeTimeline returns an object with setParams method and timeline.
  * setParams assigns some routines to timeline object.

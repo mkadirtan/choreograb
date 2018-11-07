@@ -1,15 +1,16 @@
 import * as BABYLON from 'babylonjs';
-import * as GUI from 'babylonjs-gui';
+//import * as GUI from 'babylonjs-gui';
+import {TimelineMax, TweenMax} from 'gsap';
 import {initializeScene} from './scene';
-import {loadModel, Player, players, CreatePlayer, generatePlayers} from './players';
+import {players, CreatePlayer, generatePlayers} from './players';
 import {Motifs, CreateMotif} from './motifs';
 import {CreateGuide} from './guides';
 import {initializeTimeline} from './timeline';
-import {advancedTexture, leftPanel, rightPanel, bottomPanel, CreateButton} from './GUI';
+//import {advancedTexture, leftPanel, rightPanel, bottomPanel, CreateButton} from './GUI';
 
 /**
  * Initialization step for;
- * scene, players, timeline, music, motif, guide, GUI objects.
+ * scene, timeline, players, music, motif, guide, GUI objects.
  */
 
 /**
@@ -20,9 +21,24 @@ import {advancedTexture, leftPanel, rightPanel, bottomPanel, CreateButton} from 
  *  !Scene background color and lights may need to be adjusted!
  *  Add a ground object.
  *  Add pickingPlane and parentMesh for mesh operations.
- *  !This may evolve to become completely gizmo dependent!
  *  Add environmental objects.
  */
+
+//todo remove the need for picking plane!
+
+let scene = initializeScene();
+let Player = BABYLON.MeshBuilder.CreateCylinder("Player",{
+    diameterTop: 0.2,
+        diameterBottom: 0.2,
+    height: 0.2
+}, scene);
+
+/**
+ * Timeline initialization steps:
+ *  Create main timeline object: timeControl.timeline
+ */
+
+let timeControl = initializeTimeline();
 
 /**
  * Players initialization steps:
@@ -31,10 +47,8 @@ import {advancedTexture, leftPanel, rightPanel, bottomPanel, CreateButton} from 
  *  Add timeline data to players and assign their timeline to timeControl.timeline.
  */
 
-/**
- * Timeline initialization steps:
- *  Create main timeline object: timeControl.timeline
- */
+let playerCount = 12;
+generatePlayers(playerCount, new TimelineMax(), timeControl, Player);
 
 /**
  * Motif initialization steps:
@@ -42,11 +56,31 @@ import {advancedTexture, leftPanel, rightPanel, bottomPanel, CreateButton} from 
  *  Load selected motif data and create motif objects.
  */
 
+let testMotif = new CreateMotif("testMotif");
+
 /**
  * Guide initialization steps:
  *  Load selected guide data.
  *  Create guide objects and bind them to motif.
  */
+
+let testPoints = [
+    new BABYLON.Vector3(1,0,1),
+    new BABYLON.Vector3(1,0,-1),
+    new BABYLON.Vector3(-1,0,-1),
+    new BABYLON.Vector3(-1,0,1)
+];
+
+let testGuide = new CreateGuide({
+    name: "testGuide",
+    type: "closure",
+    points: testPoints,
+    playerCount: 4,
+    motif: testMotif,
+    snapShapeFunction: BABYLON.MeshBuilder.CreateCylinder
+});
+
+testMotif.show();
 
 /**
  * GUI initialization steps:
@@ -75,9 +109,7 @@ import {advancedTexture, leftPanel, rightPanel, bottomPanel, CreateButton} from 
  *
  */
 
-let timeControl = initializeTimeline();
-
-let togglePlayButton = CreateButton({
+/*let togglePlayButton = CreateButton({
     stack: bottomPanel,
     name: "togglePlayButton",
     image,
@@ -141,3 +173,4 @@ let addGuideCircleButton = CreateButton({
         motifs.current().addNewGuide("circle")
     }
 });
+*/

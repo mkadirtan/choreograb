@@ -24,7 +24,8 @@ export let Motifs = {
     _current: null,
     _next: null,
     _previous: null,
-    _motifs: null,
+    _motifs: [],
+    _scene: null,
     update(){
         let currentTime = timeline.time();
         if(!(self._current.start() <= currentTime && currentTime <= self._current.end())){
@@ -68,14 +69,41 @@ export let Motifs = {
             }
         })
     },
-    get motifs(){return self._motifs},
-    set motifs(motifs){self._motifs = motifs},
-    get current(){return self._current;},
-    set current(motif){self._current = motif;},
-    get next(){return self._next;},
-    set next(motif){self._next = motif;},
-    get previous(){return self._previous;},
-    set previous(motif){self._previous = motif;}
+    motifs: function(motifs){
+        if(!motifs){
+            return this._motifs;
+        }else{
+            this._motifs = motifs;
+        }
+    },
+    current: function(motif){
+        if(!motif){
+            return this._current;
+        }else{
+            this._current = motif;
+        }
+    },
+    previous: function(motif){
+        if(!motif){
+            return this._previous;
+        }else{
+            this._previous = motif;
+        }
+    },
+    next: function(motif){
+        if(!motif){
+            return this._next;
+        }else{
+            this._next = motif;
+        }
+    },
+    scene: function(scene){
+        if(!scene){
+            return this._scene;
+        }else{
+            this._scene = scene;
+        }
+    },
 };
 
 /**
@@ -84,13 +112,13 @@ export let Motifs = {
  * "active" token called _isActive.
  */
 
-export function CreateMotif(param){
-    this.self = this;
-    this.name = param.name;
+export function CreateMotif(name,scene){
+    this.name = name;
     this._isActive = false;
     this._start = 0;
     this._end = 0;
     this._guides = [];
+    this._scene = scene;
 }
 
 /**
@@ -116,39 +144,73 @@ export function CreateMotif(param){
  */
 
 CreateMotif.prototype = {
-    show(){
-        self._guides.forEach(function(element){
+    show: function(){
+        this.guides().forEach(function(element){
             element.show();
         })
     },
-    hide(){
-        self._guides.forEach(function(element){
+    hide: function(){
+        this.guides().forEach(function(element){
             element.hide();
         })
     },
-    update(){
-        if(self.active()){
-            self.show();
+    update: function(){
+        if(this.active()){
+            this.show();
         }
         else{
-            self.hide();
+            this.hide();
         }
     },
-    addGuide(guide){
-        self._guides.push(guide);
+    addGuide: function(guide){
+        this.guides().push(guide);
     },
-    removeGuide(guide){
+    removeGuide: function(guide){
         guide.hide();
-        self._guides.forEach(function(e, i, a){
+        this.guides().forEach(function(e, i, a){
             if(e === guide){
                 a.splice(i, 1);
             }
         })
     },
-    get active(){return self._isActive;},
-    set active(status){self._isActive = status;},
-    get start(){return self._start;},
-    set start(time){self._start = time;},
-    get end(){return self._end;},
-    set end(time){self._end = time;}
+    active: function(status){
+        if(!status){
+            return this._isActive;
+        }
+        else{
+            this._isActive = status;
+        }
+    },
+    start: function(time){
+        if(!time){
+            return this._start;
+        }
+        else{
+            this._start = time;
+        }
+    },
+    end: function(time){
+        if(!time){
+            return this._end;
+        }
+        else{
+            this._end = time;
+        }
+    },
+    guides: function(guides){
+        if(!guides){
+            return this._guides;
+        }
+        else{
+            this._guides = guides;
+        }
+    },
+    scene: function(scene){
+        if(!scene){
+            return this._scene;
+        }
+        else{
+            this._scene = scene;
+        }
+    }
 };

@@ -5,7 +5,7 @@
 /**
  * !Problem with path module and asset paths..!
  */
-export function loadModel(param){
+/*function loadModel(param){
     BABYLON.SceneLoader.ImportMeshAsync("", path.dirname(param.url), path.basename(param.url)).then(function(result){
         let loadedMesh = result.meshes[0];
         loadedMesh.name = param.name;
@@ -14,22 +14,23 @@ export function loadModel(param){
     })
 }
 
-export let Player = loadModel({
+let Player = loadModel({
     name: "Player",
     url: "/mesh.babylon"
-});
+});*/
 
 export let players = [];
 
 export function CreatePlayer(param){
-    this.self = this;
     this.mesh = param.mesh;
     this.keys = [];
-    this.timeline = new TimelineMax();
+    this.timeline = param.timeline;
+//    this.timeline = new TimelineMax()
 }
 
 CreatePlayer.prototype = {
     addKey: function(param){
+        let self = this;
         self.keys.push({
             motifName: param.motifName,
             position: param.position,
@@ -38,6 +39,7 @@ CreatePlayer.prototype = {
         return self;
     },
     updateAnimation: function(motifs){
+        let self = this;
         /*
          * !Erase previous timeline data here for rotation and position!
          */
@@ -70,16 +72,20 @@ CreatePlayer.prototype = {
     }
 };
 
-export function generatePlayers(count, player){
-    if(!player){
-        player = Player;
+export function generatePlayers(count, timeFunction, timeControl, player, playerArray){
+    //if(!player){
+    //    player = Player;
+    //}
+    if(!playerArray){
+        playerArray = players;
     }
     for(let i = 0; i<count; i++){
         let newPlayer = player.clone("player"+i);
         newPlayer.position.z = -3;
         newPlayer.position.x += i+1;
-        players.push(new CreatePlayer({
-            mesh: newPlayer
+        playerArray.push(new CreatePlayer({
+            mesh: newPlayer,
+            timeline: timeFunction
         }));
         timeControl.timeline.add(players[players.length-1].timeline,0);
     }
