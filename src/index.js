@@ -18,21 +18,15 @@ import {initializeTimeline} from './timeline';
  *  Get canvas element.
  *  Create and bind an engine to canvas element.
  *  Create and bind a scene to engine.
- *  !Scene background color and lights may need to be adjusted!
  *  Add a ground object.
  *  Add pickingPlane and parentMesh for mesh operations.
  *  Add environmental objects.
  */
 
-//todo remove the need for picking plane!
+//todo remove the need for picking plane
 
 let scene = initializeScene();
-let Player = BABYLON.MeshBuilder.CreateCylinder("Player",{
-    diameterTop: 0.2,
-        diameterBottom: 0.2,
-    height: 0.2
-}, scene);
-Player.position = new BABYLON.Vector3(100,0,0);
+
 
 /**
  * Timeline initialization steps:
@@ -49,7 +43,7 @@ let timeControl = initializeTimeline();
  */
 
 let playerCount = 12;
-generatePlayers(playerCount, new TimelineMax(), timeControl, Player);
+//generatePlayers(playerCount, new TimelineMax(), timeControl, Player);
 
 /**
  * Motif initialization steps:
@@ -66,10 +60,9 @@ let testMotif = new CreateMotif("testMotif", scene);
  */
 
 let material = new BABYLON.StandardMaterial("guideMaterial", scene);
-material.diffuseColor = new BABYLON.Color3(1,0,0);
-material.specularColor = new BABYLON.Color3(0,0,0);
+material.emissiveColor = BABYLON.Color3.White();
 
-let testPoints = [
+/*let testPoints = [
     new BABYLON.Vector3(1,0,1),
     new BABYLON.Vector3(1,0,-1),
     new BABYLON.Vector3(-1,0,-1),
@@ -106,41 +99,37 @@ let testGuide2 = new CreateGuide({
 let testGuide4 = new CreateGuide({
     name: "testGuide4",
     type: "circle",
-    radius: 1,
+    radius: 5.5,
     scene: scene,
     material: material,
-    playerCount: 7,
+    playerCount: 8,
     motif: testMotif,
     snapShapeFunction: BABYLON.MeshBuilder.CreateCylinder,
     position: new BABYLON.Vector3(0.5,0,0)
-});
+});*/
 
 let testGuide = new CreateGuide({
     name: "testGuide",
     type: "circle",
-    radius: 1,
+    radius: 5.5,
     scene: scene,
     material: material,
-    playerCount: 7,
+    playerCount: 8,
     motif: testMotif,
     snapShapeFunction: BABYLON.MeshBuilder.CreateCylinder,
-    position: new BABYLON.Vector3(3.5,0,0)
+    position: new BABYLON.Vector3(0,0,0)
 });
 
-testGuide.updateSnaps();
 testGuide.init();
-testGuide2.init();
-testGuide3.init();
-testGuide4.init();
+//testGuide2.init();
+//testGuide3.init();
+//testGuide4.init();
 
 testGuide.show();
-testGuide2.hide();
-testGuide3.show();
-testGuide4.show();
+//testGuide2.hide();
+//testGuide3.show();
+//testGuide4.show();
 
-console.log(testGuide);
-console.log(testGuide2);
-console.log(testGuide3);
 /**
  * GUI initialization steps:
  *  Create main GUI object called "UI".

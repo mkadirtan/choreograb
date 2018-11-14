@@ -16,10 +16,11 @@ import * as BABYLON from 'babylonjs';
 export function CreateGuide(param){
     this.name = param.name;
     this._type = param.type;
-    this._points = param.points || null;
+    this._creationPoints = param.points || null;
+    this._points = null;
     this._snaps = [];
     this._motif = param.motif;
-    this._resolution = param.resolution || 64;
+    this._resolution = param.resolution || 128;
     this._playerCount = param.playerCount || 2;
     this._radius = param.radius || null;
     this._initialPosition = param.position || new BABYLON.Vector3(0,0,0);
@@ -28,17 +29,17 @@ export function CreateGuide(param){
     this._snapPoints = [];
     this._snapShapeFunction = param.snapShapeFunction;
     this._scene = param.scene;
-    this._color = param.color || new BABYLON.Color3(1,0,1);
+    this._color = param.color || new BABYLON.Color3(0.87,0.87,0.87);
     this._material = null || param.material;
     if(this._type == "closure"){
-        this._points.push(this._points[0]);
+        this._creationPoints.push(this._creationPoints[0]);
     }
     else if(this._type== "circle"){
         let temporaryPoints = [];
         for (let i = 0; i < this._resolution; i++) {
-            temporaryPoints[i] = new BABYLON.Vector3(this._radius * Math.cos(i * 2 * Math.PI / this._resolution), 0, this._radius * Math.sin(i * 2 * Math.PI / this._resolution)).addInPlace(this._initialPosition);
+            temporaryPoints[i] = new BABYLON.Vector3(this._radius * Math.cos(i * 2 * Math.PI / this._resolution), 0, this._radius * Math.sin(i * 2 * Math.PI / this._resolution))
         }
-        this._points = temporaryPoints;
+        this._creationPoints = temporaryPoints;
     }
     else if(this._type !== "linear") {
         console.log("Undefined guide type!")
@@ -77,6 +78,13 @@ export function CreateGuide(param){
 CreateGuide.prototype = {
     init: function(){
         this.generateParametricShape();
+        let temporaryPoints = [];
+        let vertexArray = this.parametricShape().getVerticesData(BABYLON.VertexBuffer.PositionKind);
+        for(let i = 0; i<this._creationPoints.length; i++){
+            temporaryPoints.push(new BABYLON.Vector3.FromArray(vertexArray,i*3));
+        }
+        console.log(temporaryPoints);
+        this.points(temporaryPoints);
         this.generateContainer();
         this.updateSnaps();
         this.motif().update();
@@ -98,9 +106,14 @@ CreateGuide.prototype = {
     generateParametricShape: function(){
         let self = this;
         let shape = BABYLON.MeshBuilder.CreateLines(this.name, {
-            points: this.points()
+            points: this._creationPoints
         }, self.scene());
         shape.color = this.color();
+        //shape.alignWithNormal(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,-1,0));
+        shape._edgesRenderer = new BABYLON.LineEdgesRenderer(shape);
+        shape.edgesWidth = -3;
+        shape.edgesColor = new BABYLON.Color4.FromColor3(shape.color);
+        shape.position = this._initialPosition;
         this.parametricShape(shape);
     },
     addPlayer: function(){
@@ -175,7 +188,7 @@ CreateGuide.prototype = {
             let shape = self.snapShapeFunction().apply(null,[snapName, {
                 diameterTop: 0.13,
                 diameterBottom: 0.13,
-                height: 0.005
+                height: 0.02
             }, self.scene()]);
             shape.material = self.material();
             shape.position = self.snapPoints()[i];
