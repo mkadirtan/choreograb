@@ -1,4 +1,6 @@
-export let initializeScene = function(){
+import * as GUI from 'babylonjs-gui';
+
+let initializeScene = function(){
     let canvas = document.getElementById("renderCanvas");
     let engine = new BABYLON.Engine(canvas,  true, {stencil: true}); //Stencil: Edge renderer
     let scene = new BABYLON.Scene(engine);
@@ -25,6 +27,7 @@ export let initializeScene = function(){
     let ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
     ground.material = groundMaterial;
     ground.receiveShadows = true;
+    ground.isVisible = false;
 
     let Trash = BABYLON.MeshBuilder.CreateBox("Trash", {depth: 2, width: 2, height: 0.2}, scene);
     Trash.position.x = ground.getBoundingInfo().minimum.x -1;
@@ -72,12 +75,6 @@ export let initializeScene = function(){
         )
     );
 
-    /*let parentMesh = BABYLON.MeshBuilder.CreateBox("parentMesh", {size: 1}, scene);
-    parentMesh.isVisible = false;
-    let pickingPlane = BABYLON.MeshBuilder.CreatePlane("pickingPlane", {size: 120}, scene);
-    pickingPlane.visibility = 0;
-    pickingPlane.id = "pickingPlane";*/
-
     engine.runRenderLoop(function(){
         scene.render();
     });
@@ -87,3 +84,6 @@ export let initializeScene = function(){
     });
     return scene;
 };
+
+export let scene = initializeScene();
+export let anchor = new BABYLON.AbstractMesh("anchor", scene);
