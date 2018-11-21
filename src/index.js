@@ -31,6 +31,7 @@ import './GUI3';
 /**
  * Timeline initialization steps:
  *  Create main timeline object: timeControl.timeline
+ *  test
  */
 
 let timeControl = initializeTimeline();
