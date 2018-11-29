@@ -2,6 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
+    mode: 'development',
     entry: './src/index.js',
     output: {
         filename: 'main.js',
@@ -10,9 +11,14 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.(mp3|babylon|manifest)$/,
+                test: /\.(png|mp3|babylon|manifest)$/,
                 use: [
-                    'file-loader'
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name].[ext]'
+                        }
+                    }
                 ]
             },
             {
@@ -29,7 +35,6 @@ module.exports = {
     },
     externals: {
         oimo: 'OIMO',
-        cannon: 'CANNON',
-        earcut: 'EARCUT'
+        cannon: 'CANNON'
     }
 };

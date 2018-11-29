@@ -1,11 +1,11 @@
 import * as BABYLON from 'babylonjs';
-//import * as GUI from 'babylonjs-gui';
+import * as GUI from 'babylonjs-gui';
 import {TimelineMax, TweenMax} from 'gsap';
 import {scene} from './scene';
-import {players, CreatePlayer, generatePlayers} from './players';
+import {players} from './players';
 import {Motifs, CreateMotif} from './motifs';
-import {CreateGuide} from './guides';
-import {initializeTimeline} from './timeline';
+import {guides, CreateGuide} from './guides';
+import {timeControl} from './timeline';
 import './GUI2';
 import './GUI3';
 /**
@@ -23,8 +23,6 @@ import './GUI3';
  *  Add environmental objects.
  */
 
-//todo remove the need for picking plane
-
 //let scene = initializeScene();
 
 
@@ -34,7 +32,7 @@ import './GUI3';
  *  test
  */
 
-let timeControl = initializeTimeline();
+//let timeControl = initializeTimeline();
 
 /**
  * Players initialization steps:
@@ -48,6 +46,12 @@ let timeControl = initializeTimeline();
  *  Create motifs control object.
  *  Load selected motif data and create motif objects.
  */
+
+let motif1 = new CreateMotif({name: "motif1", start: 0, end: 4});
+let motif2 = new CreateMotif({name: "motif2", start: 12, end: 20});
+
+Motifs.current = motif1;
+Motifs.next = motif2;
 
 /**
  * Guide initialization steps:

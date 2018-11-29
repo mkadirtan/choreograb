@@ -1,41 +1,6 @@
 import * as BABYLON from 'babylonjs';
 import {TweenLite, TimelineMax} from 'gsap/TweenMax';
 
-
-//Adjust size declarations to variables in the next version.
-function initMeshes(scene){
-	let ground = {
-		mesh: CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene)),
-		restrict: function(x,y){
-			x>this._xmax?x=this._xmax:x<this._xmin?x=this._xmin:null;
-			z>this._ymax?z=this._zmax:z<this._ymin?z=this._zmin:null;
-			return {x, z}
-		},
-		updateCoordinates: function(){
-			this._xmin = ground.getBoundingInfo().minimum.x;
-			this._xmax = ground.getBoundingInfo().maximum.x;
-			this._zmin = ground.getBoundingInfo().minimum.z;
-			this._zmax = ground.getBoundingInfo().maximum.z;
-		}
-		//_xmin: 10, _xmax: 10, _zmin: 10, _zmax: 10 //Check if this line is deletable!
-	};
-	ground.updateCoordinates();
-	let parentMesh = CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreateBox("parentMesh", {size: 1}, scene), {visible: false});
-	let pickingPlane = CreateNonAnimatableMesh(BABYLON.MeshBuilder.CreatePlane("pickingPlane", {size: 120}, scene), {visibility: 0});
-	return {ground, parentMesh, pickingPlane};
-}
-
-//Define modelUrl!
-
-let characterLoadFunction = function(modelUrl){
-    BABYLON.SceneLoader.ImportMeshAsync("", path.dirname(modelUrl), path.basename(modelUrl)).then(function(result){
-        let loadedMesh = result.meshes[0];
-        loadedMesh.name = "character";
-        loadedMesh.position = {x: 0, y: -character.getBoundingInfo().minimum.y, z: 0};
-        return character;
-    })
-};
-
 function CreateAnimatableMesh(MeshCreator, isImport){
 	if(isImport === undefined){isImport = false}
 	isImport?(this.mesh = MeshCreator):(this.mesh = new MeshCreator);
@@ -165,20 +130,3 @@ CreateAnimatableMesh.prototype = {
 		};
 	}
 };
-
-function CreateNonAnimatableMesh(MeshCreator, vars){
-	let result = new MeshCreator;
-	result.isPickable = vars.isPickable || false;
-	result.visible = vars.visible || true;
-	result.visibility = vars.visibility || 1;
-	return result;
-};
-
-export let Mesh = {
-	initMeshes,
-	characterLoadFunction,
-	CreateAnimatableMesh,
-	CreateNonAnimatableMesh
-}
-
-

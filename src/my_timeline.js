@@ -1,10 +1,10 @@
-import {TimelineMax} from 'gsap';
+import {TimelineMax, TweenMax} from 'gsap';
 
-let registerTimeline = function(mesh, mainTimeline){
-  mainTimeline.add(mesh.data.timeline, 0)
+export let registerTimeline = function(mesh, mainTimeline){
+  mainTimeline.add(mesh.timeline, 0)
 };
 
-function initTimeline (){
+export function initTimeline (){
     return {
         setVars: function(vars){
             if(vars.slider && vars.music){
@@ -34,8 +34,3 @@ function initTimeline (){
         timeline: new TimelineMax()
     };
 }
-
-export let Timeline = {
-    initTimeline,
-    registerTimeline
-};
