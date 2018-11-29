@@ -53,10 +53,12 @@ let initializeScene = function(){
     ground.material = groundMaterial;
     ground.receiveShadows = true;
     ground.isVisible = true;
+    ground.position.y -= 0.01;
 
     BABYLON.SceneLoader.ImportMeshAsync("",'./surrounding.babylon', "", scene).then(function(result){
         let surrounding = result.meshes[0];
         surrounding.position.z = ground.getBoundingInfo().minimum.z;
+        surrounding.position.y -= 0.01;
         surrounding.checkCollisions = true;
     });
 

@@ -17,8 +17,8 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./guideButton.babylon', "", scene).then(
         let guide = new CreateGuide({
             type: "circle",
             motif: Motifs.current,
-            playerCount: 6,
-            radius: 5,
+            playerCount: 12,
+            radius: 3,
             position: new BABYLON.Vector3(5,0,0)
         });
     };

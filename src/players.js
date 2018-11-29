@@ -5,6 +5,7 @@ import playerManifest from './media/model/newPlayer.babylon.manifest';
 import {scene} from "./scene";
 import {Motifs} from './motifs';
 import {timeControl} from "./timeline";
+import {movementMode, currentMode} from './GUI2';
 
 export let players = [];
 
@@ -51,6 +52,8 @@ function CreatePlayer(param){
     let self = this;
     this.mesh = param.mesh;
     this.collider = param.collider;
+    this.collider.visibility = 0.5;
+    this.collider.isVisible = true;
     this.evt = param.evt || false;
     //param.mesh.ellipsoid = new BABYLON.Vector3(0.5,0.85,0.5);
     //param.mesh.ellipsoidOffset = new BABYLON.Vector3(0,1,0);
@@ -60,11 +63,25 @@ function CreatePlayer(param){
     this.walk = param.walk;
     this.idle = param.idle;
     this.lastPosition = null;
+    this.isSnapped = false;
+    movementMode.add(mode=>{
+        if(mode === "players"){
+            self.mesh.isPickable = true;
+            self.collider.isPickable = true;
+        }
+        else if(mode === "guides"){
+            self.mesh.isPickable = false;
+            self.collider.isPickable = false;
+        }
+    });
+    movementMode.notifyObservers(currentMode);
     let pointerDragBehavior = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0,1,0)});
+    console.log("initial:",pointerDragBehavior.name);
     this.collider.addBehavior(pointerDragBehavior);
     let reference;
     pointerDragBehavior.onDragStartObservable.add(function(){
         self.lastPosition = self.collider.position.clone();
+        self.collider.position = self.collider.position.clone();
         let positionObserver = scene.onKeyboardObservable.add((event) => {
             if (event.event.code === "Space") {
                 if (self.evt) {
@@ -77,24 +94,29 @@ function CreatePlayer(param){
         }, -1, true, self);
         reference = positionObserver;
     });
-    pointerDragBehavior.onDragObservable.add(function(){
-    });
     pointerDragBehavior.onDragEndObservable.add(function(){
         scene.onKeyboardObservable.remove(reference);
         Motifs.current.guides.forEach(e=>{
-            if(e.isActive)e.snaps.forEach(s=>{
+            self.isSnapped = false;
+            if(e.isActive)e.snapColliders.forEach(s=>{
                 if(s.intersectsMesh(self.collider, false)){
-                    self.collider.position.x = s.absolutePosition.x;
-                    self.collider.position.z = s.absolutePosition.z;
+                    self.collider.position = s.absolutePosition;
+                    self.isSnapped = true;
+                    console.log("snapped");
                 }
             })
         });
+        if(self.isSnapped === false){
+            console.log("desnapped");            
+        }
         players.forEach((e,i)=>{
             if(e.mesh !== param.mesh && self.collider.intersectsMesh(e.collider, false)){
                 //todo prevent collisions
                 console.log("hit another player!");
             }
         });
+        self.collider.markAsDirty();
+        self.mesh.markAsDirty();
         if(self.collider.intersectsMesh(scene.getMeshByName("Trash"), false)){
             self.destroy();
         }
