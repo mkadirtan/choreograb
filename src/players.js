@@ -64,11 +64,11 @@ function CreatePlayer(param){
     this.lastPosition = null;
     this.isSnapped = false;
     movementMode.add(mode=>{
-        if(mode === "players"){
+        if(mode === "players" && self.mesh){
             self.mesh.isPickable = true;
             self.collider.isPickable = true;
         }
-        else if(mode === "guides"){
+        else if(mode === "guides" && self.mesh){
             self.mesh.isPickable = false;
             self.collider.isPickable = false;
         }
@@ -87,8 +87,8 @@ function CreatePlayer(param){
                     self.destroy();
                     console.log(self);
                 } else if (self.evt === false){
-                    self.collider.position = self.lastPosition;
                     pointerDragBehavior.releaseDrag();
+                    self.collider.position = self.lastPosition;
                 }
             }
         }, -1, true, self);
