@@ -56,6 +56,7 @@ export function CreateMotif(param){
     this.start = param.start;
     this.end = param.end;
     this.guides = [];
+    this.keys = [];
     Motifs.addMotif(this);
 }
 
@@ -81,11 +82,13 @@ CreateMotif.prototype = {
         })
     },
     active: function(status){
-        if(!status){
+        if(status === undefined){
+            console.log("nostatus")
             return this._isActive;
         }
         else{
             this._isActive = status;
         }
+        this.update();
     }
 };

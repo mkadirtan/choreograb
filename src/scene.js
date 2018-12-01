@@ -13,6 +13,8 @@ let initializeScene = function(){
 
     let camera3 = new BABYLON.ArcRotateCamera("pers", Math.PI/2, Math.PI/3, 16, new BABYLON.Vector3(0,0,0), scene);
     camera3.speed = 0.4;
+    camera3.angularSensibilityX = 2000;
+    camera3.angularSensibilityY = 2000;
 
     let camera = new BABYLON.UniversalCamera("fps", new BABYLON.Vector3(0,1.85,15), scene);
     camera.setTarget(new BABYLON.Vector3(0,1.70,0));
@@ -24,6 +26,7 @@ let initializeScene = function(){
     camera.fov = 0.85;
     camera.speed = 0.18;
     scene.setActiveCameraByName("fps");
+    camera.angularSensibility = 4000;
 
     let camera2 = new BABYLON.ArcRotateCamera("ortho", Math.PI/2, 0, 15, new BABYLON.Vector3(0,0,0), scene);
     camera2.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
@@ -33,6 +36,13 @@ let initializeScene = function(){
     camera2.orthoBottom = -orthoScale;
     camera2.orthoLeft = -orthoScale*ratio;
     camera2.orthoRight = orthoScale*ratio;
+    camera2.angularSensibilityX = 2000;
+    camera2.angularSensibilityY = 2000;
+
+    console.log("camera1, ", camera.angularSensibility);
+    console.log("camera2, ", camera2.angularSensibilityX, camera2.angularSensibilityY);
+    //console.log("camera3, ", camera3.angularSensibility);
+
 
     let directionalLight = new BABYLON.DirectionalLight("directionalLight", new BABYLON.Vector3(2,-3,8), scene);
     directionalLight.diffuse = new BABYLON.Color3(1,1,1);
@@ -53,10 +63,12 @@ let initializeScene = function(){
     ground.material = groundMaterial;
     ground.receiveShadows = true;
     ground.isVisible = true;
+    ground.position.y -= 0.01;
 
     BABYLON.SceneLoader.ImportMeshAsync("",'./surrounding.babylon', "", scene).then(function(result){
         let surrounding = result.meshes[0];
         surrounding.position.z = ground.getBoundingInfo().minimum.z;
+        surrounding.position.y -= 0.01;
         surrounding.checkCollisions = true;
     });
 

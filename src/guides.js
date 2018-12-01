@@ -2,7 +2,7 @@ import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
 import {scene} from './scene';
 import {Motifs} from './motifs';
-import {advancedTexture} from './GUI2';
+import {advancedTexture, currentMode, movementMode} from './GUI2';
 
 export let guides = [];
 let guideMaterial = new BABYLON.StandardMaterial("guideMaterial", scene);
@@ -44,6 +44,7 @@ export function CreateGuide(param){
 
 CreateGuide.prototype = {
     init: function(){
+        let self = this;
         this.generateParametricShape();
         this.generateContainer();
         this.updateSnaps();
@@ -55,6 +56,21 @@ CreateGuide.prototype = {
         let pointerDragBehavior = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0,1,0)});
         this.containerShape.addBehavior(pointerDragBehavior);
         this.containerShape.position.y = scene.getMeshByName("ground").getBoundingInfo().maximum.y;
+        movementMode.add(mode=>{
+            if(mode==="guides"){
+                self.containerShape.isPickable = true;
+                self.snapColliders.forEach(e=>e.isPickable=true);
+                self.snaps.forEach(e=>e.isPickable=true);
+                self.parametricShape.isPickable = true;
+            }
+            else if(mode === "players"){
+                self.containerShape.isPickable = false;
+                self.snapColliders.forEach(e=>e.isPickable=false);
+                self.snaps.forEach(e=>e.isPickable = false)
+                self.parametricShape.isPickable = false;
+            }
+        });
+        movementMode.notifyObservers(currentMode);
     },
     generateParametricShape: function(){
         let self = this;
@@ -66,15 +82,17 @@ CreateGuide.prototype = {
     },
     generateColliders: function(){
         let self = this;
-        this.snapPoints.forEach(e=>{
+        this.snapPoints.forEach((e,i)=>{
             let shape = BABYLON.MeshBuilder.CreateBox("collider", {
-                size: 0.4,
-                width: 0.4,
-                depth: 0.4,
+                size: 0.02,
+                width: 0.36,
+                depth: 0.36,
                 updatable: false
             });
-            shape.isVisible = false;
+            //shape.isVisible = false;
             shape.position = e;
+            shape.isVisible = 0;
+            //self.snaps[i].position;
             self.snapColliders.push(shape);
         });
 
@@ -90,16 +108,17 @@ CreateGuide.prototype = {
             }, scene);
             shape.material = self.material;
             shape.position = e;
+            shape.isPickable = false;
             self.snaps.push(shape);
         });
     },
     generateContainer: function(){
         let self = this;
-        let name = self.name + "Container";
         let shape;
+        let depth = 0.02;
         if(this.type==="closure" || this.type==="circle") {
-            shape = BABYLON.MeshBuilder.CreatePolygon(name, {
-                shape: self.points
+            shape = BABYLON.MeshBuilder.ExtrudePolygon("container", {
+                shape: self.points, depth: depth
             }, scene);
         }
         else if(this.type==="linear"){
@@ -113,8 +132,8 @@ CreateGuide.prototype = {
                 points2.push(e.clone().addInPlace(binormals[i].scale(-size)));
             });
             points2.reverse().concat(points1);
-            shape = BABYLON.MeshBuilder.CreatePolygon(name,{
-                shape: points2
+            shape = BABYLON.MeshBuilder.ExtrudePolygon("container",{
+                shape: points2, depth: depth
             }, scene);
         }
         shape.visibility = 0;

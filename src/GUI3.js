@@ -17,8 +17,8 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./guideButton.babylon', "", scene).then(
         let guide = new CreateGuide({
             type: "circle",
             motif: Motifs.current,
-            playerCount: 6,
-            radius: 5,
+            playerCount: 12,
+            radius: 3,
             position: new BABYLON.Vector3(5,0,0)
         });
     };
@@ -66,20 +66,19 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./guideButton.babylon', "", scene).then(
         button.isVisible = false;
         buttons.push(button);
     });
-    console.log(buttons);
 
     let parentObject = new BABYLON.TransformNode("guidesAnchor");
     parentObject.position = guideButton.position;
     guideButton.setParent(parentObject);
     buttons.forEach(e=>{e.setParent(parentObject)});
     let buttonBounding = guideButton.getBoundingInfo();
-    let scaling = 2.4;
-    let padding = 0.2;
+    let scaling = 0.85;
+    let padding = 0.6;
     parentObject.scaling = new BABYLON.Vector3(scaling,scaling,scaling);
     parentObject.position = new BABYLON.Vector3(
-        bounding.maximum.x + scaling*buttonBounding.maximum.x + padding,
+        bounding.maximum.x + scaling*buttonBounding.maximum.x + padding*scaling,
         0,
-        bounding.minimum.z + scaling*buttonBounding.maximum.z + padding);
+        bounding.maximum.z - scaling*buttonBounding.maximum.z - 4.5*scaling);
 
 
     guideButton.actionManager = new BABYLON.ActionManager(scene);
