@@ -15,17 +15,17 @@ let initializeScene = function(){
     camera3.speed = 0.4;
     camera3.angularSensibilityX = 2000;
     camera3.angularSensibilityY = 2000;
+    camera3.attachControl(canvas, true);
+    scene.setActiveCameraByName("pers");
 
     let camera = new BABYLON.UniversalCamera("fps", new BABYLON.Vector3(0,1.85,15), scene);
     camera.setTarget(new BABYLON.Vector3(0,1.70,0));
-    camera.attachControl(canvas, true);
     camera.ellipsoid = new BABYLON.Vector3(0.85,1.85/2,0.85);
     camera.applyGravity = true;
     scene.collisionsEnabled = true;
     camera.checkCollisions = true;
     camera.fov = 0.85;
     camera.speed = 0.18;
-    scene.setActiveCameraByName("fps");
     camera.angularSensibility = 4000;
 
     let camera2 = new BABYLON.ArcRotateCamera("ortho", Math.PI/2, 0, 15, new BABYLON.Vector3(0,0,0), scene);
@@ -38,11 +38,6 @@ let initializeScene = function(){
     camera2.orthoRight = orthoScale*ratio;
     camera2.angularSensibilityX = 2000;
     camera2.angularSensibilityY = 2000;
-
-    console.log("camera1, ", camera.angularSensibility);
-    console.log("camera2, ", camera2.angularSensibilityX, camera2.angularSensibilityY);
-    //console.log("camera3, ", camera3.angularSensibility);
-
 
     let directionalLight = new BABYLON.DirectionalLight("directionalLight", new BABYLON.Vector3(2,-3,8), scene);
     directionalLight.diffuse = new BABYLON.Color3(1,1,1);

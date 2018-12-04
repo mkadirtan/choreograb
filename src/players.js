@@ -63,6 +63,7 @@ function CreatePlayer(param){
     this.idle = param.idle;
     this.lastPosition = null;
     this.isSnapped = false;
+    this.feetDrag = false;
     movementMode.add(mode=>{
         if(mode === "players" && self.mesh){
             self.mesh.isPickable = true;
@@ -75,15 +76,19 @@ function CreatePlayer(param){
     });
     movementMode.notifyObservers(currentMode);
     let pointerDragBehavior = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0,1,0)});
-    console.log("initial:",pointerDragBehavior.name);
+    pointerDragBehavior.useObjectOrienationForDragging = false;
+    pointerDragBehavior.updateDragPlane = false;
+    //pointerDragBehavior.attach(this.collider);
     this.collider.addBehavior(pointerDragBehavior);
     let reference;
-    pointerDragBehavior.onDragStartObservable.add(function(){
+
+    pointerDragBehavior.onDragStartObservable.add(function(eventData, eventState){
         self.lastPosition = self.collider.position.clone();
         self.collider.position = self.collider.position.clone();
         reference = scene.onKeyboardObservable.add((event) => {
             if (event.event.code === "Space") {
                 if (self.evt) {
+                    pointerDragBehavior.releaseDrag();
                     self.destroy();
                     console.log(self);
                 } else if (self.evt === false){
@@ -92,8 +97,17 @@ function CreatePlayer(param){
                 }
             }
         }, -1, true, self);
+        if(scene.activeCamera.name === "fps" && !self.feetDrag && !self.evt) {
+            self.feetDrag = true;
+            setTimeout(function(){
+                pointerDragBehavior.startDrag(eventData.pointerId);
+                self.feetDrag = false;
+            },0);
+            pointerDragBehavior.releaseDrag();
+        }
     });
     pointerDragBehavior.onDragEndObservable.add(function(){
+        console.log("this worked, 2");
         scene.onKeyboardObservable.remove(reference);
         Motifs.current.guides.forEach(e=>{
             self.isSnapped = false;
@@ -119,12 +133,15 @@ function CreatePlayer(param){
         if(self.collider.intersectsMesh(scene.getMeshByName("Trash"), false)){
             self.destroy();
         }
+        console.log(scene.activeCamera);
+        scene.activeCamera.attachControl(scene.getEngine().getRenderingCanvas(), true);
     });
     self.collider.addBehavior(pointerDragBehavior);
     if(self.evt){
         param.mesh.visibility = 0.8;
         param.mesh.renderOutline = true;
         pointerDragBehavior.onDragEndObservable.addOnce(function(){
+            console.log("this worked, 3");
             if(self.mesh){
                 param.mesh.visibility = 1; param.mesh.renderOutline = false;
                 scene.stopAnimation(param.mesh.skeleton);
@@ -134,7 +151,8 @@ function CreatePlayer(param){
             self.evt = false;
         });
         let pick = scene.pick(self.evt.pointerX, self.evt.pointerY, function(mesh){return mesh.name === "Player"});
-        pointerDragBehavior.startDrag(self.evt.sourceEvent.pointerId, pick.ray, pick.pickedPoint);
+        if(scene.activeCamera.name === "fps") pointerDragBehavior.startDrag(self.evt.sourceEvent.pointerId);
+        else pointerDragBehavior.startDrag(self.evt.sourceEvent.pointerId, pick.ray, pick.pickedPoint);
     }
     if(!self.evt){
         self.collider.position = param.position || new BABYLON.Vector3(0, -self.collider.getBoundingInfo().minimum.y, 0);

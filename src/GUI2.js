@@ -74,14 +74,21 @@ let cameraButton = new CreateButton({name: "cameraButton", image: "./stop.png", 
 export let movementMode = new BABYLON.Observable();
 export let currentMode = "players";
 
-let guideModeButton = new CreateButton({name:"guideMode", image: "./stop.png", stack: leftPanel, onClick(){
+scene.onKeyboardObservable.add((eventData, eventState)=>{
+    if(eventData.event.altKey === true && eventData.event.code === "AltLeft" && eventData.type === 1 && eventState.mask === 1){
+        movementMode.notifyObservers("guides");
+    }
+    else{movementMode.notifyObservers("players")}
+});
+
+/*let guideModeButton = new CreateButton({name:"guideMode", image: "./stop.png", stack: leftPanel, onClick(){
     currentMode = "guides";
     movementMode.notifyObservers(currentMode);
 }});
 let playerModeButton = new CreateButton({name:"playerMode", image: "./play.png", stack: leftPanel, onClick(){
     currentMode = "players";
     movementMode.notifyObservers(currentMode);
-}});
+}});*/
 
 //let playPanel = new BABYLON.GUI.StackPanel();
 //playPanel.isVertical = false;
