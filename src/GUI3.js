@@ -47,9 +47,6 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./guideButton.babylon', "", scene).then(
                 new BABYLON.Vector3(6,0,-2),
             ]
         });
-        guide.hide();
-        setInterval(function() {
-            guide.isActive ? guide.hide() : guide.show();},2000);
     };
     let buttonActions = [circleAction, linearAction, closureAction];
     let buttons = [];
