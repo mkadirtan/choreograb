@@ -2,7 +2,7 @@ import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
 import {scene} from './scene';
 import {Motifs} from './motifs';
-import {advancedTexture, currentMode, movementMode} from './GUI2';
+import {advancedTexture, currentMode, selectionModeObservable} from './GUI2';
 
 export let guides = [];
 let guideMaterial = new BABYLON.StandardMaterial("guideMaterial", scene);
@@ -56,7 +56,7 @@ CreateGuide.prototype = {
         let pointerDragBehavior = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0,1,0)});
         this.containerShape.addBehavior(pointerDragBehavior);
         this.containerShape.position.y = scene.getMeshByName("ground").getBoundingInfo().maximum.y;
-        movementMode.add(mode=>{
+        selectionModeObservable.add(mode=>{
             if(mode==="guides"){
                 self.containerShape.isPickable = true;
                 self.snapColliders.forEach(e=>e.isPickable=true);
@@ -70,7 +70,7 @@ CreateGuide.prototype = {
                 self.parametricShape.isPickable = false;
             }
         });
-        movementMode.notifyObservers(currentMode);
+        selectionModeObservable.notifyObservers(currentMode);
     },
     generateParametricShape: function(){
         let self = this;

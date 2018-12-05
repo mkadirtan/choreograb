@@ -71,71 +71,51 @@ let cameraButton = new CreateButton({name: "cameraButton", image: "./stop.png", 
     }
 }});
 
-export let movementMode = new BABYLON.Observable();
+export let motifChangeObservable = new BABYLON.Observable();
+
+export let selectionModeObservable = new BABYLON.Observable();
 export let currentMode = "players";
 
 scene.onKeyboardObservable.add((eventData, eventState)=>{
     if(eventData.event.altKey === true && eventData.event.code === "AltLeft" && eventData.type === 1 && eventState.mask === 1){
-        movementMode.notifyObservers("guides");
+        selectionModeObservable.notifyObservers("guides");
     }
-    else{movementMode.notifyObservers("players")}
+    else{selectionModeObservable.notifyObservers("players")}
 });
 
-/*let guideModeButton = new CreateButton({name:"guideMode", image: "./stop.png", stack: leftPanel, onClick(){
-    currentMode = "guides";
-    movementMode.notifyObservers(currentMode);
-}});
-let playerModeButton = new CreateButton({name:"playerMode", image: "./play.png", stack: leftPanel, onClick(){
-    currentMode = "players";
-    movementMode.notifyObservers(currentMode);
-}});*/
-
-//let playPanel = new BABYLON.GUI.StackPanel();
-//playPanel.isVertical = false;
-
-let playButton = new CreateButton({name: "play", image: "./play.png", stack: bottomPanel, onClick(){timeControl.timeline.play()}});
+let playButton = new CreateButton({name: "play", image: "./play.png", stack: bottomPanel,  
+    onClick(){
+        players.forEach(player=>player.updateTimeline());
+        timeControl.timeline.play()
+    }
+});
 let pauseButton = new CreateButton({name: "pause", image: "./pause.png", stack: bottomPanel, onClick(){timeControl.timeline.pause()}});
-let stopButton = new CreateButton({name: "stop", image: "./stop.png", stack: bottomPanel, onClick(){timeControl.timeline.pause().seek(0)}});
+let stopButton = new CreateButton({name: "stop", image: "./stop.png", stack: bottomPanel, onClick(){timeControl.timeline.seek(0)}});
 let previousButton = new CreateButton({name: "previous", image: "./previous.png", stack: bottomPanel, onClick(){
-    Motifs.current = Motifs.motifs[0];
-    Motifs.motifs[0].active(true);
-    Motifs.previous = Motifs.motifs[1];
-    Motifs.motifs[1].active(false);
-    console.log("previous");
-    console.log(Motifs);
+    Motifs.previousMotif();
+    console.log(Motifs.previous, Motifs.current, Motifs.next)
 }});
 let nextButton = new CreateButton({name: "next", image: "./next.png", stack: bottomPanel, onClick(){
-    Motifs.current = Motifs.motifs[1];
-    Motifs.motifs[1].active(true);
-    Motifs.previous = Motifs.motifs[0];
-    Motifs.motifs[0].active(false);
-    console.log("next");
-    console.log(Motifs);
+    Motifs.nextMotif();
+    console.log(Motifs.previous, Motifs.current, Motifs.next)
 }});
 //bottomPanel.addControl(playPanel);
 
 export let slider = new BABYLON.GUI.Slider("mainSlider");
 slider.minimum = 0;
-slider.maximum = 30;
+slider.maximum = 50;
 slider.onValueChangedObservable.add(function(){
-    timeControl.timeline.seek(slider.value);
+    if(timeControl.timeline.paused()) timeControl.timeline.seek(slider.value);
 });
-//let mult = (window.innerWidth - 72*7)/window.innerWidth;
 slider.width = 1920-7*96 + "px";
 slider.height = "96px"
-//console.log("mult: ", mult);
 slider.paddingRight = "5px";
 slider.paddingLeft = "5px";
 slider.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
-console.log(slider);
 bottomPanel.addControl(slider);
 
-
-let forwardPanel = new BABYLON.GUI.StackPanel();
-forwardPanel.isVertical = false;
 let fastBackward = new CreateButton({name: "fBackward", image: "./fastBackward.png", stack: bottomPanel});
 let fastForward = new CreateButton({name: "fForward", image: "./fastForward.png", stack: bottomPanel});
-//bottomPanel.addControl(forwardPanel);
 
 /**
  * CreateButton makes it easier to create and set parameters of a button.

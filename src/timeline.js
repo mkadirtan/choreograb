@@ -14,10 +14,14 @@ let timeControl = {
     music: music
 };
 
+let startEndKeys = {
+    time: 0
+};
+
+timeControl.timeline.to(startEndKeys, 50, {time: 40}, 0);
+
 timeControl.timeline.eventCallback("onUpdate", function(){
-    if(!this.timeline.paused()){
-        this.slider.value = this.timeline.time();
-    }
+    this.slider.value = this.timeline.time();
     if(this.music.playing() && Math.abs(this.music.seek()-self.timeline.time())>this.audioSyncSensitivity){
         this.music.seek(this.timeline.time());
     }
@@ -26,5 +30,7 @@ timeControl.timeline.eventCallback("onUpdate", function(){
     this.music.pause();
     this.timeline.pause();
 }, [], timeControl);
+
+timeControl.timeline.seek(0).pause(0);
 
 export {timeControl};

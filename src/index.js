@@ -50,9 +50,6 @@ import './GUI3';
 let motif1 = new CreateMotif({name: "motif1", start: 0, end: 4});
 let motif2 = new CreateMotif({name: "motif2", start: 12, end: 20});
 
-Motifs.current = motif1;
-Motifs.next = motif2;
-
 /**
  * Guide initialization steps:
  *  Load selected guide data.
