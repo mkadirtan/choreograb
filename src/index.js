@@ -1,11 +1,11 @@
 import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
 import {TimelineMax, TweenMax} from 'gsap';
+import {timeControl} from './timeline';
 import {scene} from './scene';
 import {players} from './players';
 import {Motifs, CreateMotif} from './motifs';
 import {guides, CreateGuide} from './guides';
-import {timeControl} from './timeline';
 import './GUI2';
 import './GUI3';
 /**
@@ -47,8 +47,11 @@ import './GUI3';
  *  Load selected motif data and create motif objects.
  */
 
-let motif1 = new CreateMotif({name: "motif1", start: 0, end: 4});
-let motif2 = new CreateMotif({name: "motif2", start: 12, end: 20});
+let motif1 = new CreateMotif({name: "motif1", start: 0, end: 2});
+let motif2 = new CreateMotif({name: "motif2", start: 8, end: 10});
+let motif3 = new CreateMotif({name: "motif3", start: 16, end: 17});
+let motif4 = new CreateMotif({name: "motif4", start: 20, end: 25});
+let motif5 = new CreateMotif({name: "motif5", start: 32, end: 40});
 
 /**
  * Guide initialization steps:

@@ -1,4 +1,5 @@
 import {timeControl} from './timeline';
+import {players} from './players';
 
 export let Motifs = {
     current: null,
@@ -11,19 +12,15 @@ export let Motifs = {
     },
     sort(){
         let self = this;
-        console.log("sort", self.motifs);
-        console.log("sort Current", self.current);
         self.motifs.sort(function(a,b){
             return a.start - b.start;
         })
     },
     adjust(){
         let self = this;
-        let currentTime = timeControl.timeline.time();
-        console.log("time: ", currentTime);
+        let currentTime = timeControl.slider.value;
         self.motifs.forEach((motif, index, array)=>{
                 if (motif.start <= currentTime && currentTime <= motif.end) {
-                    console.log("found!");
                     //En az 3 motif varsa previous ve next atamasını yap.
                     if(array.length > 2){
                         if(index === array.length-1){
@@ -32,7 +29,7 @@ export let Motifs = {
                         }
                         else if(index === 0){
                             self.next = array[index+1];
-                            self.previous = array[length-1];
+                            self.previous = array[array.length-1];
                         }
                         else{
                             self.next = array[index+1];
@@ -41,7 +38,6 @@ export let Motifs = {
                     }
                     //Eğer motif sayısı 2 ise previous veya next ataması yap
                     else if(array.length === 2){
-                        console.log("MOTIFS LENGTH IS 2");
                         if(index === 1){
                             self.previous = array[0];
                         }
@@ -74,11 +70,13 @@ export let Motifs = {
         this.update();
     },
     nextMotif(){
-        timeControl.timeline.seek(Motifs.next.start+0.001);
+        timeControl.timeline.seek(Motifs.next.start);
+        timeControl.slider.value = Motifs.next.start;
         this.update();
     },
     previousMotif(){
-        timeControl.timeline.seek(Motifs.previous.start+0.001);
+        timeControl.timeline.seek(Motifs.previous.start);
+        timeControl.slider.value = Motifs.previous.start;
         this.update();
     }
 };
@@ -89,9 +87,7 @@ export function CreateMotif(param){
     this.start = param.start;
     this.end = param.end;
     this.guides = [];
-    this.keys = [];
     Motifs.addMotif(this);
-    console.log(Motifs);
 }
 
 CreateMotif.prototype = {
@@ -117,15 +113,11 @@ CreateMotif.prototype = {
     },
     active: function(status){
         if(status === undefined){
-            console.log("nostatus")
             return this._isActive;
         }
         else{
             this._isActive = status;
         }
         this.update();
-    },
-    nextMotif: function(){
-
     }
 };

@@ -8,9 +8,16 @@ import {timeControl} from "./timeline";
 import {selectionModeObservable, currentMode} from './GUI2';
 
 export let players = [];
+
 players.setKey = function(keyName, key){
     this[keyName] = key;
 }
+
+let incrementer = 0;
+let getUniqueID = function(){
+    incrementer++;
+    return "Player" + incrementer;
+};
 
 BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(function(result){
     let ground = scene.getMeshByName("ground");
@@ -53,11 +60,11 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(fu
     );
 });
 
-export let keyChangeObservable = new BABYLON.Observable();
-
 function CreatePlayer(param){
     let self = this;
-    this.init(param);
+    this.initParameters(param);
+    this.initBehaviors(param);
+    console.log(self);
     /**
      * mesh, collider, mesh.skeleton
      * keys[] = {motif, guide, snap, position, rotation}
@@ -68,12 +75,38 @@ function CreatePlayer(param){
 }
 
 CreatePlayer.prototype = {
-    init: function(param){
+    initBehaviors: function(param){
+        let self = this;
+        //Register to players
+        players.push(self);
+        //Register to timeControl
+        timeControl.timeline.add(self.timeline);
+        //Initialize selectionModeObservable
+        selectionModeObservable.add(mode=>{
+            if(mode === "players" && self.alive){
+                self.mesh.isPickable = true;
+                self.collider.isPickable = true;
+            }
+            else if(mode === "guides" && self.alive){
+                self.mesh.isPickable = false;
+                self.collider.isPickable = false;
+            }
+        });
+        selectionModeObservable.notifyObservers(currentMode);
+        //Initialize dragBehavior
+        self.addDragBehavior();
+        //Check whether object was created by user interaction or loaded from data.
+        if(param.position) self.checkEventData(param.position);
+        else self.checkEventData();
+    },
+    initParameters: function(param){
         let self = this;
         //Initialize variables and generic properties
+        self.alive = true;
+        self.keys = [];
         self.mesh = param.mesh;
+        self.uniqueID = getUniqueID();
         self.collider = param.collider;
-        console.log("realone", self.collider);
         self.collider.isVisible = false;
         self.evt = param.evt || false;
         self.mesh.ID = "Player";
@@ -81,45 +114,63 @@ CreatePlayer.prototype = {
         self.lastPosition = null;
         self.isSnapped = false;
         self.feetDrag = false;
-        self.keys = [];
         self.timeline = new TimelineMax();
-        timeControl.timeline.add(self.timeline, 0);
         self.personalInformation = {
             name: param.name || "New Player",
             height: param.height || 170,
             order: param.order || 0
         };
-        //Register to players
-        players.push(self);
-        //Initialize keys
-        Motifs.motifs.forEach(motif=>self.addMotifKey(motif, false));
-        //Initialize selectionModeObservable
-        //todo remove need for && self.mesh
-        selectionModeObservable.add(mode=>{
-            if(mode === "players" && self.mesh){
-                self.mesh.isPickable = true;
-                self.collider.isPickable = true;
+    },
+    key: function(){
+        let self = this;
+        if(timeControl.slider.value <= Motifs.current.end+0.01 && timeControl.slider.value+0.01 >= Motifs.current.start && timeControl.timeline.paused()){
+            let exists = false;
+            let index = 0;
+            let key = {
+                motif: Motifs.current,
+                position: {
+                    x: self.collider.position.x,
+                    y: self.collider.position.y,
+                    z: self.collider.position.z
+                },
+                rotation: self.collider.rotation.clone()
+            };
+            self.keys.forEach((e,i)=>{
+                if(e.motif.name === Motifs.current.name){
+                    exists = true;
+                    index = i;
+                }
+            });
+            if(exists){
+                self.keys[index] = key;
             }
-            else if(mode === "guides" && self.mesh){
-                self.mesh.isPickable = false;
-                self.collider.isPickable = false;
+            else{
+                self.keys.push(key);
+            }
+        }
+    },
+    updateTimeline: function(){
+        let self = this;
+        let position = self.collider.position;
+        let rotation = self.collider.rotation;
+
+        self.timeline.kill({x: true, y: true, z: true}, position);
+
+        self.keys.sort((a,b)=>{
+            return a.motif.start - b.motif.start;
+        });
+        self.keys.forEach((key, i, keys)=>{
+            if(i>0){
+                self.timeline.fromTo(
+                    position,
+                    key.motif.start-keys[i-1].motif.end,
+                    keys[i-1].position,
+                    key.position,
+                    keys[i-1].motif.end
+                );
             }
         });
-        selectionModeObservable.notifyObservers(currentMode);
-        //Initialize keyChangeObservable
-        //todo Unique ID please...
-        keyChangeObservable.add(data=>{
-            console.log("I'm notified!");
-            if(self.mesh === data.mesh){
-                self.updateKey(data.newKey);
-                console.log(self.mesh, "is Updated with", data.newKey);
-            }
-        });
-        //Initialize dragBehavior
-        self.addDragBehavior();
-        //Check whether object was created by user interaction or loaded from data.
-        if(param.position) self.checkEventData(param.position);
-        else self.checkEventData();
+        console.log(self.timeline.duration());
     },
     addDragBehavior: function(){
         //todo rename all eventData, eventState's for clarity
@@ -164,16 +215,9 @@ CreatePlayer.prototype = {
             self.checkSnap();
             //Player collision mechanics
             self.checkPlayerCollisions();
-            //Update key
             if(!self.dragCancelled){
-                console.log("notify!");
-                keyChangeObservable.notifyObservers({mesh: self.mesh, newKey:{
-                motif: Motifs.current,
-                guide: self.snappedGuide,
-                snap: self.snappedSnap,
-                position: self.collider.position,
-                rotation: self.collider.rotation
-                }});
+                self.key();
+                self.updateTimeline();
             }
             self.dragCancelled = false;
             //Removal by trash can
@@ -188,13 +232,11 @@ CreatePlayer.prototype = {
         self.isSnapped = true;
         self.snappedGuide = guide;
         self.snappedSnap = snap;
-        console.log("snapped");
     },
     desnap: function(){
         let self = this;
         self.snappedGuide = false;
         self.snappedSnap = false;
-        console.log("desnapped");   
     },
     checkEventData: function(position){
         let self = this;
@@ -235,144 +277,34 @@ CreatePlayer.prototype = {
     checkPlayerCollisions: function(){
         let self = this;
         players.forEach((player,i)=>{
-            //todo instead of comparing meshes, compare unique IDs.
-            if(player.mesh !== self.mesh && self.collider.intersectsMesh(player.collider, false)){
+            if(player.uniqueID !== self.uniqueID && self.collider.intersectsMesh(player.collider, false)){
                 //todo prevent collisions
-                console.log("hit another player!");
             }
         });
     },
     checkTrash: function(){
         let self = this;
         if(self.collider.intersectsMesh(scene.getMeshByName("Trash"), false)){
-            console.log(self);
-            //self.destroy();
+            self.destroy();
         }
-    },
-    addMotifKey: function(newMotif, isNew){
-        let self = this;
-        let pos = false;
-        let rot = false;
-        if(isNew){
-            pos = self.keys[self.keys.length-1].position;
-            rot = self.keys[self.keys.length-1].rotation
-        }
-        self.keys.push({
-            motif: newMotif,
-            guide: false,
-            snap: false,
-            position: pos,
-            rotation: rot
-        });
-    },
-    removeMotifKey: function(oldMotif){
-        let self = this;
-        self.keys.forEach((key, index, array)=>{
-            if(key.motif === oldMotif){
-                array.splice(index,1);
-                updateTimeline();
-            }
-        });
-    },
-    updateKey: function(newKey){
-        let self = this;
-        self.keys.forEach(key=>{
-            if(key.motif.name === newKey.motif.name){
-                key.guide = newKey.guide;
-                key.snap = newKey.snap;
-                key.position = newKey.position;
-                key.rotation = newKey.rotation;
-            }
-        });
-        console.log(self.keys);
-    },
-    updateTimeline: function(){
-        let self = this;
-        //Sorting        
-        self.keys.sort((a,b)=>{
-            return a.motif.start - b.motif.start;
-        })
-        //Referencing
-        let pos = self.collider.position;
-        let rot = self.collider.rotation;
-        //Cleaning existing keys
-        console.log("OK1");
-        self.timeline.kill({x: true, y: true, z: true}, pos);
-        self.timeline.kill({x: true, y: true, z: true}, rot);
-        console.log("OK2");
-        //Adding new keys
-        self.keys.forEach((key, index, array)=>{
-            if(index > 1){
-                console.log("OK4");
-                //Transition
-                self.timeline.to(
-                    pos,
-                    key.motif.start-array[index-1].motif.end,
-                    {x: key.position.x,
-                     y: key.position.y,
-                     z: key.position.z},
-                    array[index-1].motif.end);
-                //Immobilization
-                self.timeline.to(
-                    pos,
-                    key.motif.end-key.motif.start,
-                    {
-                        x: key.position.x,
-                        y: key.position.y,
-                        z: key.position.z
-                    },
-                    key.motif.start);
-            }
-            //Initialization
-            else{
-                console.log("OK3");
-                if(key.motif.start !== 0){
-                    self.timeline.to(
-                        pos,
-                        key.motif.start,
-                        {
-                            x: key.position.x,
-                            y: key.position.y,
-                            z: key.position.z
-                        },
-                        0);
-                }
-                self.timeline.to(
-                    pos,
-                    key.motif.end-key.motif.start,
-                    {
-                        x: key.position.x,
-                        y: key.position.y,
-                        z: key.position.z
-                    },
-                    key.motif.start)
-            }
-            console.log("OK5");
-        })
     },
     destroy: function(){
         let self = this;
-        if(self.mesh){
-            players.forEach((p,i,a)=>{
-                if(p.mesh===self.mesh){
-                    a.splice(i,1);
-                }
-            });
-            self.mesh.dispose();
-            delete self.mesh;
-
-            delete self.personalInformation;
-            delete self.keys;
-
-            timeControl.timeline.remove(self.timeline);
-            delete self.timeline;
-            delete self.walk;
-            delete self.idle;
-            self.collider.dispose();
-            delete self.collider;
-            delete self.lastPosition;
-            //delete self.evt;
-            console.log("Player destroyed: ", self);
-        }
+        self.alive = false;
+        players.forEach((p,i,a)=>{
+            if(p.uniqueID === self.uniqueID){
+                a.splice(i,1);
+            }
+        });
+        self.mesh.dispose();
+        delete self.mesh;
+        delete self.personalInformation;
+        timeControl.timeline.remove(self.timeline);
+        delete self.timeline;
+        delete self.walk;
+        delete self.idle;
+        self.collider.dispose();
+        delete self.collider;
+        delete self.lastPosition;
     }
 };

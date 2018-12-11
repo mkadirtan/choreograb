@@ -1,4 +1,4 @@
-import {scene} from './scene';
+import {scene, switchCamera} from './scene';
 import * as GUI from 'babylonjs-gui';
 import {timeControl} from './timeline';
 import * as BABYLON from "babylonjs";
@@ -13,16 +13,16 @@ import button8 from './media/textures/camera.png';
 import {players} from './players';
 import {guides} from './guides';
 import {Motifs} from './motifs';
+
 /**
  * advancedTexture is the GUI object of BABYLON.
+ * Sizes are determined relative to idealWidth.
  * There are 3 panels; leftPanel, rightPanel, bottomPanel.
  * All of which's size are determined via pixels and percentages, below.
- * CreateButton constructor
  */
 
 export let advancedTexture = new BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI', true, scene);
 advancedTexture.idealWidth = 1920;
-//new BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", scene);
 
 let leftPanel = new BABYLON.GUI.StackPanel("leftPanel");
 leftPanel.width = "96px";
@@ -50,69 +50,58 @@ advancedTexture.addControl(rightPanel);
 advancedTexture.addControl(bottomPanel);
 
 let cameraButton = new CreateButton({name: "cameraButton", image: "./stop.png", stack: rightPanel, onClick(){
-    let canvas = scene.getEngine().getRenderingCanvas();
-    let pers = scene.getCameraByName("pers");
-    let ortho = scene.getCameraByName("ortho");
-    let fps = scene.getCameraByName("fps");
-    if(scene.activeCamera === pers) {
-        pers.detachControl(canvas);
-        scene.setActiveCameraByName("ortho");
-        ortho.attachControl(canvas,true);
-    }
-    else if(scene.activeCamera === scene.getCameraByName("ortho")){
-        ortho.detachControl(canvas);
-        scene.setActiveCameraByName("fps");
-        fps.attachControl(canvas, true);
-    }
-    else{
-        fps.detachControl(canvas);
-        scene.setActiveCameraByName("pers");
-        pers.attachControl(canvas,true);
-    }
-}});
-
-export let motifChangeObservable = new BABYLON.Observable();
-
-export let selectionModeObservable = new BABYLON.Observable();
-export let currentMode = "players";
-
-scene.onKeyboardObservable.add((eventData, eventState)=>{
-    if(eventData.event.altKey === true && eventData.event.code === "AltLeft" && eventData.type === 1 && eventState.mask === 1){
-        selectionModeObservable.notifyObservers("guides");
-    }
-    else{selectionModeObservable.notifyObservers("players")}
-});
-
-let playButton = new CreateButton({name: "play", image: "./play.png", stack: bottomPanel,  
-    onClick(){
-        players.forEach(player=>player.updateTimeline());
-        timeControl.timeline.play()
+        switchCamera();
     }
 });
-let pauseButton = new CreateButton({name: "pause", image: "./pause.png", stack: bottomPanel, onClick(){timeControl.timeline.pause()}});
-let stopButton = new CreateButton({name: "stop", image: "./stop.png", stack: bottomPanel, onClick(){timeControl.timeline.seek(0)}});
+
+let playButton = new CreateButton({name: "play", image: "./play.png", stack: bottomPanel,  onClick(){
+        timeControl.play();
+    }
+});
+let pauseButton = new CreateButton({name: "pause", image: "./pause.png", stack: bottomPanel, onClick(){
+        timeControl.timeline.pause();
+    }
+});
+let stopButton = new CreateButton({name: "stop", image: "./stop.png", stack: bottomPanel, onClick(){
+        timeControl.stop();
+    }
+});
 let previousButton = new CreateButton({name: "previous", image: "./previous.png", stack: bottomPanel, onClick(){
-    Motifs.previousMotif();
-    console.log(Motifs.previous, Motifs.current, Motifs.next)
-}});
+        Motifs.previousMotif();
+    }
+});
 let nextButton = new CreateButton({name: "next", image: "./next.png", stack: bottomPanel, onClick(){
-    Motifs.nextMotif();
-    console.log(Motifs.previous, Motifs.current, Motifs.next)
-}});
+        Motifs.nextMotif();
+    }
+});
 //bottomPanel.addControl(playPanel);
 
 export let slider = new BABYLON.GUI.Slider("mainSlider");
 slider.minimum = 0;
 slider.maximum = 50;
-slider.onValueChangedObservable.add(function(){
-    if(timeControl.timeline.paused()) timeControl.timeline.seek(slider.value);
+slider.onPointerDownObservable.add(function(){
+    slider.onValueChangedObservable.add(value => {
+        timePrint.text = value.toFixed(2) + " sn";
+        if(value <= timeControl.timeline.totalDuration()){
+            timeControl.timeline.seek(value, false);
+        }
+    });
+});
+slider.onPointerUpObservable.add(function(){
+    slider.onValueChangedObservable.clear();
 });
 slider.width = 1920-7*96 + "px";
 slider.height = "96px"
 slider.paddingRight = "5px";
 slider.paddingLeft = "5px";
 slider.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+slider.value = 0;
 bottomPanel.addControl(slider);
+
+export let timePrint = new BABYLON.GUI.TextBlock();
+timePrint.color = "white";
+timePrint.text = "0.00 sn";
+leftPanel.addControl(timePrint);
 
 let fastBackward = new CreateButton({name: "fBackward", image: "./fastBackward.png", stack: bottomPanel});
 let fastForward = new CreateButton({name: "fForward", image: "./fastForward.png", stack: bottomPanel});
@@ -143,3 +132,13 @@ export function CreateButton(param){
 /**
  * Default properties of generic buttons for undefined properties.
  */
+
+export let selectionModeObservable = new BABYLON.Observable();
+export let currentMode = "players";
+
+scene.onKeyboardObservable.add((eventData, eventState)=>{
+    if(eventData.event.altKey === true && eventData.event.code === "AltLeft" && eventData.type === 1 && eventState.mask === 1){
+        selectionModeObservable.notifyObservers("guides");
+    }
+    else{selectionModeObservable.notifyObservers("players")}
+});
