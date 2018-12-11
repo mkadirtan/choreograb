@@ -13,6 +13,11 @@ let timeControl = {
     audioSyncSensitivity: 0.05,
     slider: slider,
     music: music,
+    shake: function(motif){
+        this.timeline.progress(1).progress(0);
+        this.timeline.seek(motif.start, false);
+        this.slider.value = motif.start;
+    },
     stop: function(){
         this.timeline.pause();
         this.timeline.seek(0);
@@ -23,10 +28,15 @@ let timeControl = {
         this.timeline.play();
     },
     updateTimeline: function(){
-        let time = this.timeline.time();
-        this.timeline.seek(0).seek(time);
+        let time = this.slider.value
+        this.timeline.seek(0,false).seek(time,false);
     }
 };
+
+/*let fuckthisshit = {
+    time: 0
+};
+timeControl.timeline.to(fuckthisshit, 50, {time: 50}, 0);*/
 
 timeControl.timeline.eventCallback("onUpdate", function(){
     timePrint.text = this.timeline.time().toFixed(2) + " sn";

@@ -6,6 +6,7 @@ import {scene} from "./scene";
 import {Motifs} from './motifs';
 import {timeControl} from "./timeline";
 import {selectionModeObservable, currentMode} from './GUI2';
+import {selection} from './selection';
 
 export let players = [];
 
@@ -80,7 +81,7 @@ CreatePlayer.prototype = {
         //Register to players
         players.push(self);
         //Register to timeControl
-        timeControl.timeline.add(self.timeline);
+        timeControl.timeline.add(self.timeline,0);
         //Initialize selectionModeObservable
         selectionModeObservable.add(mode=>{
             if(mode === "players" && self.alive){
@@ -107,6 +108,7 @@ CreatePlayer.prototype = {
         self.mesh = param.mesh;
         self.uniqueID = getUniqueID();
         self.collider = param.collider;
+        self.collider.ID = "PlayerCollider";
         self.collider.isVisible = false;
         self.evt = param.evt || false;
         self.mesh.ID = "Player";
@@ -133,7 +135,11 @@ CreatePlayer.prototype = {
                     y: self.collider.position.y,
                     z: self.collider.position.z
                 },
-                rotation: self.collider.rotation.clone()
+                rotation: {
+                    x: self.collider.rotation.x,
+                    y: self.collider.rotation.y,
+                    z: self.collider.rotation.z
+                }
             };
             self.keys.forEach((e,i)=>{
                 if(e.motif.name === Motifs.current.name){
@@ -147,7 +153,9 @@ CreatePlayer.prototype = {
             else{
                 self.keys.push(key);
             }
+            return key;
         }
+        return false;
     },
     updateTimeline: function(){
         let self = this;
@@ -166,6 +174,17 @@ CreatePlayer.prototype = {
                     key.motif.start-keys[i-1].motif.end,
                     keys[i-1].position,
                     key.position,
+                    keys[i-1].motif.end
+                );
+            }
+        });
+        self.keys.forEach((key, i, keys)=>{
+            if(i>0){
+                self.timeline.fromTo(
+                    rotation,
+                    key.motif.start-keys[i-1].motif.end,
+                    keys[i-1].rotation,
+                    key.rotation,
                     keys[i-1].motif.end
                 );
             }
@@ -215,9 +234,13 @@ CreatePlayer.prototype = {
             self.checkSnap();
             //Player collision mechanics
             self.checkPlayerCollisions();
+            //Keyframing algorithm
             if(!self.dragCancelled){
-                self.key();
+                self.collider.rotation.y += Math.PI/2;
+                let newKey = self.key();
                 self.updateTimeline();
+                if(newKey) timeControl.shake(newKey.motif);
+                else{timeControl.updateTimeline()}
             }
             self.dragCancelled = false;
             //Removal by trash can

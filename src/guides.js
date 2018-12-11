@@ -9,53 +9,65 @@ let guideMaterial = new BABYLON.StandardMaterial("guideMaterial", scene);
 guideMaterial.diffuseColor = new BABYLON.Color3.Yellow();
 
 export function CreateGuide(param){
-    this.type = param.type;
-    this.name = param.type + "_guide";
-    this.playerCount = param.playerCount || 2;
-    this.position = param.position || BABYLON.Vector3.Zero();
-    this.motif = param.motif || Motifs.current;
-    this.points = param.points || null;
-    this.radius = param.radius || null;
-    this.color = param.color || new BABYLON.Color3(0.87,0.87,0.87);
-    this.material = param.material || guideMaterial;
-    this.resolution = 128; //todo dynamic resolution adjustment
-    this.snaps = [];
-    this.snapPoints = [];
-    this.snapColliders = [];
-    this.parametricShape = null;
-    this.containerShape = null;
-    this.isActive = true;
-    if(this.type === "closure"){
-        this.points.push(this.points[0]);
-    }
-    else if(this.type === "circle") {
-        let temporaryPoints = [];
-        for (let i = 0; i < this.resolution; i++) {
-            temporaryPoints[i] = new BABYLON.Vector3(this.radius * Math.cos(i * 2 * Math.PI / this.resolution), 0, this.radius * Math.sin(i * 2 * Math.PI / this.resolution))
-        }
-        temporaryPoints.push(temporaryPoints[0]);
-        this.points = temporaryPoints;
-    }
-    guides.push(this);
-    this.motif.addGuide(this);
-    this.init();
+    this.initParameters(param);
+    this.initShapes();
+    this.initBehaviors();
 }
-//todo limit minimum players to 2
 
 CreateGuide.prototype = {
-    init: function(){
-        let self = this;
+    initParameters: function(param){
+        this.type = param.type;
+        guides.push(this);
+        //this.name = param.type + "_guide";
+        this.playerCount = param.playerCount || 2;
+        this.position = param.position || BABYLON.Vector3.Zero();
+        this.motif = param.motif || Motifs.current;
+        this.motif.addGuide(this);
+        this.points = param.points || null;
+        this.radius = param.radius || null;
+        this.color = param.color || new BABYLON.Color3(0.87,0.87,0.87);
+        this.material = param.material || guideMaterial;
+        this.resolution = 128; //todo dynamic resolution adjustment
+        this.snaps = [];
+        this.snapPoints = [];
+        this.snapColliders = [];
+        this.parametricShape = null;
+        this.containerShape = null;
+        this.isActive = true;
+        if(this.type === "closure"){
+            this.points.push(this.points[0]);
+        }
+        else if(this.type === "circle") {
+            let temporaryPoints = [];
+            for (let i = 0; i < this.resolution; i++) {
+                temporaryPoints[i] = new BABYLON.Vector3(this.radius * Math.cos(i * 2 * Math.PI / this.resolution), 0, this.radius * Math.sin(i * 2 * Math.PI / this.resolution))
+            }
+            temporaryPoints.push(temporaryPoints[0]);
+            this.points = temporaryPoints;
+        }
+    },
+    initShapes: function(){
         this.generateParametricShape();
         this.generateContainer();
         this.updateSnaps();
         this.generateColliders();
+
         this.parametricShape.setParent(this.containerShape);
         this.snaps.forEach(e=>{e.setParent(this.containerShape)});
         this.snapColliders.forEach(e=>{e.setParent(this.containerShape)});
+
         this.containerShape.position = this.position;
+        this.containerShape.position.y = scene.getMeshByName("ground").getBoundingInfo().maximum.y;
+
+        this.containerShape.id = "guide";
+        this.snapColliders.forEach(e=>{e.id = "guide"});
+        this.snaps.forEach(e=>{e.id = "guide"});
+        this.parametricShape.id = "guide";
+    },
+    initBehaviors: function(){
+        let self = this;
         let pointerDragBehavior = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0,1,0)});
         this.containerShape.addBehavior(pointerDragBehavior);
-        this.containerShape.position.y = scene.getMeshByName("ground").getBoundingInfo().maximum.y;
         selectionModeObservable.add(mode=>{
             if(mode==="guides"){
                 self.containerShape.isPickable = true;
@@ -72,9 +84,80 @@ CreateGuide.prototype = {
         });
         selectionModeObservable.notifyObservers(currentMode);
     },
+    show: function(){
+        this.parametricShape.isVisible = true;
+        this.snaps.forEach(function(snap){
+            snap.isVisible = true;
+        });
+        this.isActive = true;
+    },
+    hide: function() {
+        this.isActive = false;
+        this.parametricShape.isVisible = false;
+        this.snaps.forEach(function(snap){
+            snap.isVisible = false;
+        })
+    },
+    updateSnaps: function(){
+        this.snapPoints = [];
+        this.snaps = [];
+        this.generateSnapPoints();
+        this.generateSnaps();
+    },
+    getLength: function(pointArray){
+        if(pointArray.length<2){
+            return 0;
+        }
+        let length = 0;
+        for(let i = 1; i<pointArray.length; i++){
+            length += pointArray[i].subtract(pointArray[i-1]).length();
+        }
+        return length;
+    },
+    getPoint: function(length, pointA, pointB){
+        let differenceVector = pointB.subtract(pointA);
+        let ratio = length/differenceVector.length();
+        if(ratio>1.001){
+            return -1;
+        }
+        else if(ratio-1>0.001){
+            return pointB
+        }
+        return pointA.add(differenceVector.scale(ratio));
+    },
+    generateSnapPoints: function() {
+        let self = this;
+        let divisionLength;
+        if (self.type === "linear") {
+            divisionLength = self.getLength(self.points) / (self.playerCount - 1);
+        }
+        else if (self.type === "closure" || self.type === "circle") {
+            divisionLength = self.getLength(self.points) / self.playerCount;
+        }
+        // First point is always a snapPoint.
+        self.snapPoints[0] = self.points[0];
+        let j = 1;
+        let totalLength = 0;
+        let lastPoint = self.points[0];
+        let tailLength = 0;
+        for(let i = 1; i<self.points.length; i++){
+            tailLength = totalLength;
+            lastPoint = self.points[i-1];
+            totalLength += self.getLength([lastPoint, self.points[i]]);
+            while(totalLength >= divisionLength){
+                self.snapPoints[j] = self.getPoint(divisionLength-tailLength, lastPoint, self.points[i]);
+                totalLength -= divisionLength;
+                tailLength = 0;
+                lastPoint = self.snapPoints[j];
+                j++;
+            }
+        }
+        let extra = self.snapPoints.length - self.playerCount;
+        if(extra > 0)self.snapPoints.splice(self.snapPoints.length-extra, extra);
+    },
     generateParametricShape: function(){
         let self = this;
-        let shape = BABYLON.MeshBuilder.CreateLines(this.name, {
+        let shape = BABYLON.MeshBuilder.CreateLines("parametricShape", {
             points: this.points
         }, scene);
         shape.color = this.color;
@@ -83,7 +166,7 @@ CreateGuide.prototype = {
     generateColliders: function(){
         let self = this;
         this.snapPoints.forEach((e,i)=>{
-            let shape = BABYLON.MeshBuilder.CreateBox("collider", {
+            let shape = BABYLON.MeshBuilder.CreateBox("snapCollider", {
                 size: 0.02,
                 width: 0.36,
                 depth: 0.36,
@@ -138,82 +221,5 @@ CreateGuide.prototype = {
         }
         shape.visibility = 0;
         this.containerShape = shape;
-    },
-    updateSnaps: function(){
-        this.snapPoints = [];
-        this.snaps = [];
-        this.generateSnapPoints();
-        this.generateSnaps();
-    },
-    addPlayer: function(){
-        this.playerCount++;
-    },
-    removePlayer: function(){
-        this.playerCount--;
-    },
-    getLength: function(pointArray){
-        if(pointArray.length<2){
-            return 0;
-        }
-        let length = 0;
-        for(let i = 1; i<pointArray.length; i++){
-            length += pointArray[i].subtract(pointArray[i-1]).length();
-        }
-        return length;
-    },
-    getPoint: function(length, pointA, pointB){
-        let differenceVector = pointB.subtract(pointA);
-        let ratio = length/differenceVector.length();
-        if(ratio>1.001){
-            return -1;
-        }
-        else if(ratio-1>0.001){
-            return pointB
-        }
-        return pointA.add(differenceVector.scale(ratio));
-    },
-    generateSnapPoints: function() {
-        let self = this;
-        let divisionLength;
-        if (self.type === "linear") {
-            divisionLength = self.getLength(self.points) / (self.playerCount - 1);
-        }
-        else if (self.type === "closure" || self.type === "circle") {
-            divisionLength = self.getLength(self.points) / self.playerCount;
-        }
-        // First point is always a snapPoint.
-        self.snapPoints[0] = self.points[0];
-        let j = 1;
-        let totalLength = 0;
-        let lastPoint = self.points[0];
-        let tailLength = 0;
-        for(let i = 1; i<self.points.length; i++){
-            tailLength = totalLength;
-            lastPoint = self.points[i-1];
-            totalLength += self.getLength([lastPoint, self.points[i]]);
-            while(totalLength >= divisionLength){
-                self.snapPoints[j] = self.getPoint(divisionLength-tailLength, lastPoint, self.points[i]);
-                totalLength -= divisionLength;
-                tailLength = 0;
-                lastPoint = self.snapPoints[j];
-                j++;
-            }
-        }
-        let extra = self.snapPoints.length - self.playerCount;
-        if(extra > 0)self.snapPoints.splice(self.snapPoints.length-extra, extra);
-    },
-    show: function(){
-        this.parametricShape.isVisible = true;
-        this.snaps.forEach(function(snap){
-            snap.isVisible = true;
-        });
-        this.isActive = true;
-    },
-    hide: function() {
-        this.isActive = false;
-        this.parametricShape.isVisible = false;
-        this.snaps.forEach(function(snap){
-            snap.isVisible = false;
-        })
-    },
+    }
 };

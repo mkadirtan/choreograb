@@ -1,4 +1,5 @@
 import {timeControl} from './timeline';
+import {timePrint} from './GUI2';
 import {players} from './players';
 
 export let Motifs = {
@@ -70,13 +71,15 @@ export let Motifs = {
         this.update();
     },
     nextMotif(){
-        timeControl.timeline.seek(Motifs.next.start);
+        if(timeControl.timeline.duration()>=Motifs.next.start) timeControl.timeline.seek(Motifs.next.start);
         timeControl.slider.value = Motifs.next.start;
+        timePrint.text = Motifs.next.start.toFixed(2) + " sn";
         this.update();
     },
     previousMotif(){
-        timeControl.timeline.seek(Motifs.previous.start);
+        if(timeControl.timeline.duration()>=Motifs.previous.start) timeControl.timeline.seek(Motifs.previous.start);
         timeControl.slider.value = Motifs.previous.start;
+        timePrint.text = Motifs.previous.start.toFixed(2) + " sn";
         this.update();
     }
 };

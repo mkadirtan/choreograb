@@ -60,41 +60,41 @@ let initializeScene = function(){
 let scene = initializeScene();
 let canvas = scene.getEngine().getRenderingCanvas();
 
-let camera = new BABYLON.UniversalCamera("fps", new BABYLON.Vector3(0,1.85,15), scene);
-    camera.setTarget(new BABYLON.Vector3(0,1.70,0));
-    camera.ellipsoid = new BABYLON.Vector3(0.85,1.85/2,0.85);
-    camera.applyGravity = true;
+let fps = new BABYLON.UniversalCamera("fps", new BABYLON.Vector3(0,1.85,15), scene);
+    fps.setTarget(new BABYLON.Vector3(0,1.70,0));
+    fps.ellipsoid = new BABYLON.Vector3(0.85,1.85/2,0.85);
+    fps.applyGravity = true;
     scene.collisionsEnabled = true;
-    camera.checkCollisions = true;
-    camera.fov = 0.85;
-    camera.speed = 0.18;
-    camera.angularSensibility = 4000;
+    fps.checkCollisions = true;
+    fps.fov = 0.85;
+    fps.speed = 0.18;
+    fps.angularSensibility = 4000;
 
-let camera2 = new BABYLON.ArcRotateCamera("ortho", Math.PI/2, 0, 15, new BABYLON.Vector3(0,0,0), scene);
-    camera2.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
+let ortho = new BABYLON.ArcRotateCamera("ortho", Math.PI/2, 0, 15, new BABYLON.Vector3(0,0,0), scene);
+    ortho.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
     let orthoScale = 12;
     let ratio = window.innerWidth/window.innerHeight;
-    camera2.orthoTop = orthoScale;
-    camera2.orthoBottom = -orthoScale;
-    camera2.orthoLeft = -orthoScale*ratio;
-    camera2.orthoRight = orthoScale*ratio;
-    camera2.angularSensibilityX = 2000;
-    camera2.angularSensibilityY = 2000;
+    ortho.orthoTop = orthoScale;
+    ortho.orthoBottom = -orthoScale;
+    ortho.orthoLeft = -orthoScale*ratio;
+    ortho.orthoRight = orthoScale*ratio;
+    ortho.angularSensibilityX = 2000;
+    ortho.angularSensibilityY = 2000;
 
-let camera3 = new BABYLON.ArcRotateCamera("pers", Math.PI/2, Math.PI/3, 16, new BABYLON.Vector3(0,0,0), scene);
-    camera3.speed = 0.4;
-    camera3.angularSensibilityX = 2000;
-    camera3.angularSensibilityY = 2000;
-    camera3.attachControl(canvas, true);
+let pers = new BABYLON.ArcRotateCamera("pers", Math.PI/2, Math.PI/3, 16, new BABYLON.Vector3(0,0,0), scene);
+    pers.speed = 0.4;
+    pers.angularSensibilityX = 2000;
+    pers.angularSensibilityY = 2000;
+    pers.attachControl(canvas, true);
     scene.setActiveCameraByName("pers");
 
 let switchCamera = function(){
-    if(scene.activeCamera === scene.getCameraByName("pers")) {
+    if(scene.activeCamera === pers) {
         pers.detachControl(canvas);
         scene.setActiveCameraByName("ortho");
         ortho.attachControl(canvas,true);
     }
-    else if(scene.activeCamera === scene.getCameraByName("ortho")){
+    else if(scene.activeCamera === ortho){
         ortho.detachControl(canvas);
         scene.setActiveCameraByName("fps");
         fps.attachControl(canvas, true);
