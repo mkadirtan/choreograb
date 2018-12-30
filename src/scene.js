@@ -2,7 +2,6 @@ import * as BABYLON from "babylonjs";
 import surroundingModel from './media/model/surrounding.babylon';
 import surroundingManifest from './media/model/surrounding.babylon.manifest';
 
-
 let initializeScene = function(){
     let canvas = document.getElementById("renderCanvas");
     let engine = new BABYLON.Engine(canvas,  true, {stencil: true}); //Stencil: Edge renderer

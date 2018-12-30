@@ -1,6 +1,7 @@
 import {TimelineMax, TweenMax} from 'gsap';
 import {slider, timePrint} from './GUI2';
 import {music} from './music';
+import {Motifs} from './motifs';
 
 /*
  * initializeTimeline returns an object with setParams method and timeline.
@@ -17,19 +18,23 @@ let timeControl = {
         this.timeline.progress(1).progress(0);
         this.timeline.seek(motif.start, false);
         this.slider.value = motif.start;
+        timePrint.text = this.slider.value.toFixed(2) + " sn";
+        Motifs.update();
     },
     stop: function(){
+        this.slider.value = 0;
         this.timeline.pause();
         this.timeline.seek(0);
-        this.slider.value = 0;
         timePrint.text = "0.00 sn";
+        Motifs.update();
     },
     play: function(){
         this.timeline.play();
     },
     updateTimeline: function(){
-        let time = this.slider.value
+        let time = this.slider.value;
         this.timeline.seek(0,false).seek(time,false);
+        Motifs.update();
     }
 };
 
@@ -44,6 +49,7 @@ timeControl.timeline.eventCallback("onUpdate", function(){
     if(this.music.playing() && Math.abs(this.music.seek()-self.timeline.time())>this.audioSyncSensitivity){
         this.music.seek(this.timeline.time());
     }
+    Motifs.update();
 }, [], timeControl)
 .eventCallback("onComplete", function(){
     this.music.pause();

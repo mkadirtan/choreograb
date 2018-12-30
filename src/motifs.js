@@ -71,15 +71,11 @@ export let Motifs = {
         this.update();
     },
     nextMotif(){
-        if(timeControl.timeline.duration()>=Motifs.next.start) timeControl.timeline.seek(Motifs.next.start);
-        timeControl.slider.value = Motifs.next.start;
-        timePrint.text = Motifs.next.start.toFixed(2) + " sn";
+        timeControl.shake(this.next);
         this.update();
     },
     previousMotif(){
-        if(timeControl.timeline.duration()>=Motifs.previous.start) timeControl.timeline.seek(Motifs.previous.start);
-        timeControl.slider.value = Motifs.previous.start;
-        timePrint.text = Motifs.previous.start.toFixed(2) + " sn";
+        timeControl.shake(this.previous);
         this.update();
     }
 };

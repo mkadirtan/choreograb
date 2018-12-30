@@ -10,7 +10,7 @@ import button5 from './media/textures/previous.png';
 import button6 from './media/textures/fastForward.png';
 import button7 from './media/textures/fastBackward.png';
 import button8 from './media/textures/camera.png';
-import {players} from './players';
+import {players, selectedPlayer} from './players';
 import {guides} from './guides';
 import {Motifs} from './motifs';
 
@@ -21,8 +21,45 @@ import {Motifs} from './motifs';
  * All of which's size are determined via pixels and percentages, below.
  */
 
+
+
 export let advancedTexture = new BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI', true, scene);
 advancedTexture.idealWidth = 1920;
+
+//Gizmo creation
+export let gizmo;
+/*let utilLayer = new BABYLON.UtilityLayerRenderer(scene);
+export let gizmo = new BABYLON.PlaneRotationGizmo(new BABYLON.Vector3(0,1,0), BABYLON.Color3.White(), utilLayer);
+gizmo.snapDistance = 1;
+gizmo.updateGizmoRotationToMatchAttachedMesh = false;
+let customGizmo;
+{
+    let gizmoPoints = [];
+    for (let i = 0; i <= 48; i++) {
+        gizmoPoints[i] = new BABYLON.Vector3(0.6 * Math.cos(i * 2 * Math.PI / 48), 0, 0.6 * Math.sin(i * 2 * Math.PI / 48));
+    }
+    let gizmoCircle = new BABYLON.Path3D(gizmoPoints, new BABYLON.Vector3(0,1,0));
+    let binormals = gizmoCircle.getBinormals();
+    let points1 = [];
+    let points2 = [];
+    let size = 0.05;
+    gizmoCircle.getCurve().forEach(function(e,i){
+        points1.push(e.clone().addInPlace(binormals[i].scale(size)));
+        points2.push(e.clone().addInPlace(binormals[i].scale(-size)));
+    });
+    customGizmo = BABYLON.MeshBuilder.ExtrudePolygon("container",{
+        shape: points2, holes: [points1], depth: 0.03
+    }, gizmo.gizmoLayer.utilityLayerScene);
+    let gizmoMaterial = new BABYLON.StandardMaterial("gizmoMaterial", gizmo.gizmoLayer.utilityLayerScene);
+    gizmoMaterial.emissiveColor = BABYLON.Color3.Green();
+    customGizmo.material = gizmoMaterial;
+    customGizmo.position.y = 0.9;
+}
+gizmo.setCustomMesh(customGizmo);
+gizmo.onSnapObservable.add((evt)=>{
+    console.log(evt);
+});
+gizmo._updateScale = false;*/
 
 let leftPanel = new BABYLON.GUI.StackPanel("leftPanel");
 leftPanel.width = "96px";
@@ -64,6 +101,7 @@ let pauseButton = new CreateButton({name: "pause", image: "./pause.png", stack: 
 });
 let stopButton = new CreateButton({name: "stop", image: "./stop.png", stack: bottomPanel, onClick(){
         timeControl.stop();
+        Motifs.update();
     }
 });
 let previousButton = new CreateButton({name: "previous", image: "./previous.png", stack: bottomPanel, onClick(){
@@ -82,16 +120,17 @@ slider.maximum = 50;
 slider.onPointerDownObservable.add(function(){
     slider.onValueChangedObservable.add(value => {
         timePrint.text = value.toFixed(2) + " sn";
-        if(value <= timeControl.timeline.totalDuration()){
+        timeControl.updateTimeline();
+        /*if(value <= timeControl.timeline.totalDuration()){
             timeControl.timeline.seek(value, false);
-        }
+        }*/
     });
 });
 slider.onPointerUpObservable.add(function(){
     slider.onValueChangedObservable.clear();
 });
 slider.width = 1920-7*96 + "px";
-slider.height = "96px"
+slider.height = "96px";
 slider.paddingRight = "5px";
 slider.paddingLeft = "5px";
 slider.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
@@ -104,7 +143,10 @@ timePrint.text = "0.00 sn";
 leftPanel.addControl(timePrint);
 
 let fastBackward = new CreateButton({name: "fBackward", image: "./fastBackward.png", stack: bottomPanel});
-let fastForward = new CreateButton({name: "fForward", image: "./fastForward.png", stack: bottomPanel});
+let fastForward = new CreateButton({name: "fForward", image: "./fastForward.png", stack: bottomPanel, onClick(){
+        console.log(players);
+    }
+});
 
 /**
  * CreateButton makes it easier to create and set parameters of a button.

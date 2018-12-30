@@ -5,14 +5,15 @@ import playerManifest from './media/model/newPlayer.babylon.manifest';
 import {scene} from "./scene";
 import {Motifs} from './motifs';
 import {timeControl} from "./timeline";
-import {selectionModeObservable, currentMode} from './GUI2';
+import {selectionModeObservable, currentMode, gizmo} from './GUI2';
 import {selection} from './selection';
 
 export let players = [];
+export let selectedPlayer = null;
 
 players.setKey = function(keyName, key){
     this[keyName] = key;
-}
+};
 
 let incrementer = 0;
 let getUniqueID = function(){
@@ -65,7 +66,6 @@ function CreatePlayer(param){
     let self = this;
     this.initParameters(param);
     this.initBehaviors(param);
-    console.log(self);
     /**
      * mesh, collider, mesh.skeleton
      * keys[] = {motif, guide, snap, position, rotation}
@@ -96,6 +96,10 @@ CreatePlayer.prototype = {
         selectionModeObservable.notifyObservers(currentMode);
         //Initialize dragBehavior
         self.addDragBehavior();
+        //Initialize rotation gizmo
+        //self.attachGizmoBehavior();
+        //gizmo.attachedMesh = self.collider;
+        selectedPlayer = self;
         //Check whether object was created by user interaction or loaded from data.
         if(param.position) self.checkEventData(param.position);
         else self.checkEventData();
@@ -142,7 +146,7 @@ CreatePlayer.prototype = {
                 }
             };
             self.keys.forEach((e,i)=>{
-                if(e.motif.name === Motifs.current.name){
+                if(e.motif.name === Motifs.current.name) {
                     exists = true;
                     index = i;
                 }
@@ -153,6 +157,7 @@ CreatePlayer.prototype = {
             else{
                 self.keys.push(key);
             }
+            console.log(key);
             return key;
         }
         return false;
@@ -163,6 +168,7 @@ CreatePlayer.prototype = {
         let rotation = self.collider.rotation;
 
         self.timeline.kill({x: true, y: true, z: true}, position);
+        self.timeline.kill({x: true, y: true, z: true}, rotation);
 
         self.keys.sort((a,b)=>{
             return a.motif.start - b.motif.start;
@@ -189,16 +195,29 @@ CreatePlayer.prototype = {
                 );
             }
         });
-        console.log(self.timeline.duration());
+    },
+    attachGizmoBehavior: function(){
+        let self = this;
+        self.mesh.actionManager = new BABYLON.ActionManager(scene);
+        self.mesh.actionManager.registerAction(
+            new BABYLON.ExecuteCodeAction({
+                    trigger: BABYLON.ActionManager.OnLeftPickTrigger
+                }, (evt) => {
+                        selectedPlayer = self;
+                        gizmo.attachedMesh = self.mesh;
+                },
+            )
+        )
     },
     addDragBehavior: function(){
         //todo rename all eventData, eventState's for clarity
         let self = this;
         self.pointerDragBehavior = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0,1,0)});
+        self.pointerDragBehavior.dragDeltaRatio = 1;
         self.pointerDragBehavior.useObjectOrienationForDragging = false;
         self.pointerDragBehavior.updateDragPlane = false;
         self.collider.addBehavior(self.pointerDragBehavior);
-        
+
         let reference; //Required for deletion of keyboard observable
         self.dragCancelled = false;
         self.pointerDragBehavior.onDragStartObservable.add(function(eventData, eventState){
@@ -236,7 +255,6 @@ CreatePlayer.prototype = {
             self.checkPlayerCollisions();
             //Keyframing algorithm
             if(!self.dragCancelled){
-                self.collider.rotation.y += Math.PI/2;
                 let newKey = self.key();
                 self.updateTimeline();
                 if(newKey) timeControl.shake(newKey.motif);
@@ -294,7 +312,7 @@ CreatePlayer.prototype = {
                 })
             });
         if(self.isSnapped === false){
-            self.desnap();         
+            self.desnap();
         }
     },
     checkPlayerCollisions: function(){

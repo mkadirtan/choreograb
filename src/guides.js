@@ -69,7 +69,7 @@ CreateGuide.prototype = {
         let pointerDragBehavior = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0,1,0)});
         this.containerShape.addBehavior(pointerDragBehavior);
         selectionModeObservable.add(mode=>{
-            if(mode==="guides"){
+            if(mode === "guides" && self.isActive){
                 self.containerShape.isPickable = true;
                 self.snapColliders.forEach(e=>e.isPickable=true);
                 self.snaps.forEach(e=>e.isPickable=true);
@@ -78,7 +78,7 @@ CreateGuide.prototype = {
             else if(mode === "players"){
                 self.containerShape.isPickable = false;
                 self.snapColliders.forEach(e=>e.isPickable=false);
-                self.snaps.forEach(e=>e.isPickable = false)
+                self.snaps.forEach(e=>e.isPickable = false);
                 self.parametricShape.isPickable = false;
             }
         });
@@ -92,11 +92,11 @@ CreateGuide.prototype = {
         this.isActive = true;
     },
     hide: function() {
-        this.isActive = false;
         this.parametricShape.isVisible = false;
         this.snaps.forEach(function(snap){
             snap.isVisible = false;
-        })
+        });
+        this.isActive = false;
     },
     updateSnaps: function(){
         this.snapPoints = [];
