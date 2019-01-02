@@ -97,8 +97,7 @@ CreatePlayer.prototype = {
         //Initialize dragBehavior
         self.addDragBehavior();
         //Initialize rotation gizmo
-        //self.attachGizmoBehavior();
-        //gizmo.attachedMesh = self.collider;
+        self.attachGizmoBehavior();
         selectedPlayer = self;
         //Check whether object was created by user interaction or loaded from data.
         if(param.position) self.checkEventData(param.position);
@@ -108,6 +107,10 @@ CreatePlayer.prototype = {
         let self = this;
         //Initialize variables and generic properties
         self.alive = true;
+        self.currentKey = 0;
+        self.dummyRotator = new BABYLON.MeshBuilder.CreatePlane("dummy", {size: 1}, scene);
+        self.dummyRotator.isVisible = false;
+        self.dummyRotator.ownerPlayer = self;
         self.keys = [];
         self.mesh = param.mesh;
         self.uniqueID = getUniqueID();
@@ -132,18 +135,22 @@ CreatePlayer.prototype = {
         if(timeControl.slider.value <= Motifs.current.end+0.01 && timeControl.slider.value+0.01 >= Motifs.current.start && timeControl.timeline.paused()){
             let exists = false;
             let index = 0;
+            let ease = Linear.easeNone;
             let key = {
                 motif: Motifs.current,
                 position: {
                     x: self.collider.position.x,
                     y: self.collider.position.y,
-                    z: self.collider.position.z
+                    z: self.collider.position.z,
+                    ease: ease
                 },
                 rotation: {
                     x: self.collider.rotation.x,
                     y: self.collider.rotation.y,
-                    z: self.collider.rotation.z
-                }
+                    z: self.collider.rotation.z,
+                    ease: ease
+                },
+                stepCount: 2
             };
             self.keys.forEach((e,i)=>{
                 if(e.motif.name === Motifs.current.name) {
@@ -158,17 +165,30 @@ CreatePlayer.prototype = {
                 self.keys.push(key);
             }
             console.log(key);
-            return key;
+            self.updateTimeline();
+            timeControl.shake(key.motif);
+            return;
         }
-        return false;
+        timeControl.updateTimeline();
+    },
+    updateAnimation: function(){
+        let self = this;
+        let key = Math.round(self.currentKey);
+        scene.beginAnimation(
+            self.mesh.skeleton,
+            self.currentKey,
+            self.currentKey
+        );
     },
     updateTimeline: function(){
         let self = this;
+        let ease = Linear.easeNone;
         let position = self.collider.position;
         let rotation = self.collider.rotation;
 
         self.timeline.kill({x: true, y: true, z: true}, position);
         self.timeline.kill({x: true, y: true, z: true}, rotation);
+        self.timeline.kill({currentKey: true}, self);
 
         self.keys.sort((a,b)=>{
             return a.motif.start - b.motif.start;
@@ -195,16 +215,34 @@ CreatePlayer.prototype = {
                 );
             }
         });
+        self.keys.forEach((key, i, keys)=>{
+            if(i>0){
+                for(let step = 0; step<keys[i-1].stepCount; step++){
+                    let singleStepDuration = (key.motif.start-keys[i-1].motif.end)/keys[i-1].stepCount;
+                    self.timeline.fromTo(
+                        self,
+                        singleStepDuration,
+                        {currentKey: players.walk.from+2, ease: ease},
+                        {currentKey: players.walk.to-1, ease: ease},
+                        keys[i-1].motif.end+singleStepDuration*step
+                    );
+                }
+            }
+        })
     },
     attachGizmoBehavior: function(){
         let self = this;
+        self.dummyRotator.position = self.collider.position.clone();
+        self.dummyRotator.setParent(self.collider);
+        console.log(self.dummyRotator.parent);
+        gizmo.attachedMesh = self.dummyRotator;
         self.mesh.actionManager = new BABYLON.ActionManager(scene);
         self.mesh.actionManager.registerAction(
             new BABYLON.ExecuteCodeAction({
                     trigger: BABYLON.ActionManager.OnLeftPickTrigger
                 }, (evt) => {
                         selectedPlayer = self;
-                        gizmo.attachedMesh = self.mesh;
+                        gizmo.attachedMesh = self.dummyRotator;
                 },
             )
         )
@@ -255,10 +293,7 @@ CreatePlayer.prototype = {
             self.checkPlayerCollisions();
             //Keyframing algorithm
             if(!self.dragCancelled){
-                let newKey = self.key();
-                self.updateTimeline();
-                if(newKey) timeControl.shake(newKey.motif);
-                else{timeControl.updateTimeline()}
+                self.key();
             }
             self.dragCancelled = false;
             //Removal by trash can

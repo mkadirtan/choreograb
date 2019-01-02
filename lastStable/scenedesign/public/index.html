@@ -494,7 +494,7 @@
                     walk.data = {"aniObject": aniObject};
 
                     walk.eventCallback("onUpdate", 
-                        function(aniObject){
+                        function(){
                             this.data.aniObject.animations["walkLikeMan"].animGroup.play();
                             this.data.aniObject.animations["walkLikeMan"].animGroup
                             .goToFrame(Math.round(this.data.aniObject.animations["walkLikeMan"].current));

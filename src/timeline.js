@@ -2,7 +2,7 @@ import {TimelineMax, TweenMax} from 'gsap';
 import {slider, timePrint} from './GUI2';
 import {music} from './music';
 import {Motifs} from './motifs';
-
+import {players} from './players';
 /*
  * initializeTimeline returns an object with setParams method and timeline.
  * setParams assigns some routines to timeline object.
@@ -49,6 +49,7 @@ timeControl.timeline.eventCallback("onUpdate", function(){
     if(this.music.playing() && Math.abs(this.music.seek()-self.timeline.time())>this.audioSyncSensitivity){
         this.music.seek(this.timeline.time());
     }
+    players.forEach(e=>e.updateAnimation());
     Motifs.update();
 }, [], timeControl)
 .eventCallback("onComplete", function(){

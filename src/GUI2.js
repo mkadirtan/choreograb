@@ -21,16 +21,13 @@ import {Motifs} from './motifs';
  * All of which's size are determined via pixels and percentages, below.
  */
 
-
-
 export let advancedTexture = new BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI', true, scene);
 advancedTexture.idealWidth = 1920;
 
 //Gizmo creation
-export let gizmo;
-/*let utilLayer = new BABYLON.UtilityLayerRenderer(scene);
+let utilLayer = new BABYLON.UtilityLayerRenderer(scene);
 export let gizmo = new BABYLON.PlaneRotationGizmo(new BABYLON.Vector3(0,1,0), BABYLON.Color3.White(), utilLayer);
-gizmo.snapDistance = 1;
+gizmo.snapDistance = Math.PI/4;
 gizmo.updateGizmoRotationToMatchAttachedMesh = false;
 let customGizmo;
 {
@@ -42,13 +39,13 @@ let customGizmo;
     let binormals = gizmoCircle.getBinormals();
     let points1 = [];
     let points2 = [];
-    let size = 0.05;
+    let size = 0.08;
     gizmoCircle.getCurve().forEach(function(e,i){
         points1.push(e.clone().addInPlace(binormals[i].scale(size)));
         points2.push(e.clone().addInPlace(binormals[i].scale(-size)));
     });
     customGizmo = BABYLON.MeshBuilder.ExtrudePolygon("container",{
-        shape: points2, holes: [points1], depth: 0.03
+        shape: points2, holes: [points1], depth: 0.06
     }, gizmo.gizmoLayer.utilityLayerScene);
     let gizmoMaterial = new BABYLON.StandardMaterial("gizmoMaterial", gizmo.gizmoLayer.utilityLayerScene);
     gizmoMaterial.emissiveColor = BABYLON.Color3.Green();
@@ -57,9 +54,10 @@ let customGizmo;
 }
 gizmo.setCustomMesh(customGizmo);
 gizmo.onSnapObservable.add((evt)=>{
-    console.log(evt);
+    gizmo.attachedMesh.parent.rotation = gizmo.attachedMesh.rotationQuaternion.toEulerAngles().clone();
+    gizmo.attachedMesh.ownerPlayer.key();
 });
-gizmo._updateScale = false;*/
+gizmo._updateScale = false;
 
 let leftPanel = new BABYLON.GUI.StackPanel("leftPanel");
 leftPanel.width = "96px";
