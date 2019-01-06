@@ -3,8 +3,12 @@ import * as GUI from 'babylonjs-gui';
 import {scene} from './scene';
 import {Motifs} from './motifs';
 import {advancedTexture, currentMode, selectionModeObservable} from './GUI2';
+import {settingsObservable} from "./utility";
+import {selectedPlayer} from "./players";
 
 export let guides = [];
+export let selectedGuide = null;
+
 let guideMaterial = new BABYLON.StandardMaterial("guideMaterial", scene);
 guideMaterial.diffuseColor = new BABYLON.Color3.Yellow();
 
@@ -68,6 +72,16 @@ CreateGuide.prototype = {
         let self = this;
         let pointerDragBehavior = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0,1,0)});
         this.containerShape.addBehavior(pointerDragBehavior);
+        self.containerShape.actionManager = new BABYLON.ActionManager(scene);
+        self.containerShape.actionManager.registerAction(
+            new BABYLON.ExecuteCodeAction({
+                    trigger: BABYLON.ActionManager.OnLeftPickTrigger
+                }, () => {
+                    selectedGuide = self;
+                    settingsObservable.notifyObservers({type: "guide", attachedMesh: self.containerShape});
+                },
+            )
+        );
         selectionModeObservable.add(mode=>{
             if(mode === "guides" && self.isActive){
                 self.containerShape.isPickable = true;

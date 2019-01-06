@@ -5,8 +5,9 @@ import playerManifest from './media/model/newPlayer.babylon.manifest';
 import {scene} from "./scene";
 import {Motifs} from './motifs';
 import {timeControl} from "./timeline";
-import {selectionModeObservable, currentMode, gizmo} from './GUI2';
+import {selectionModeObservable, currentMode} from './GUI2';
 import {selection} from './selection';
+import {settingsObservable} from "./utility";
 
 export let players = [];
 export let selectedPlayer = null;
@@ -30,8 +31,6 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(fu
     collider.bakeCurrentTransformIntoVertices();
     collider.isVisible = false;
     Player.setParent(collider);
-    let material = new BABYLON.StandardMaterial("playerMaterial", scene);
-    material.diffuseColor = BABYLON.Color3.Blue();
     Player.name = "Player";
     let arm = result.skeletons[0];
     let idle = arm.getAnimationRange("Idle");
@@ -80,6 +79,7 @@ CreatePlayer.prototype = {
         let self = this;
         //Register to players
         players.push(self);
+        selectedPlayer = self;
         //Register to timeControl
         timeControl.timeline.add(self.timeline,0);
         //Initialize selectionModeObservable
@@ -94,11 +94,11 @@ CreatePlayer.prototype = {
             }
         });
         selectionModeObservable.notifyObservers(currentMode);
+        //Initialize menu settings
+        self.attachMenu();
+        settingsObservable.notifyObservers({type: "player", attachedMesh: self.mesh});
         //Initialize dragBehavior
         self.addDragBehavior();
-        //Initialize rotation gizmo
-        self.attachGizmoBehavior();
-        selectedPlayer = self;
         //Check whether object was created by user interaction or loaded from data.
         if(param.position) self.checkEventData(param.position);
         else self.checkEventData();
@@ -230,19 +230,17 @@ CreatePlayer.prototype = {
             }
         })
     },
-    attachGizmoBehavior: function(){
+    attachMenu: function(){
         let self = this;
         self.dummyRotator.position = self.collider.position.clone();
         self.dummyRotator.setParent(self.collider);
-        console.log(self.dummyRotator.parent);
-        gizmo.attachedMesh = self.dummyRotator;
         self.mesh.actionManager = new BABYLON.ActionManager(scene);
         self.mesh.actionManager.registerAction(
             new BABYLON.ExecuteCodeAction({
                     trigger: BABYLON.ActionManager.OnLeftPickTrigger
-                }, (evt) => {
+                }, () => {
                         selectedPlayer = self;
-                        gizmo.attachedMesh = self.dummyRotator;
+                        settingsObservable.notifyObservers({type: "player", attachedMesh: self.mesh});
                 },
             )
         )
