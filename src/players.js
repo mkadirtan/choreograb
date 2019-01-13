@@ -22,6 +22,8 @@ let getUniqueID = function(){
     return "Player" + incrementer;
 };
 
+BABYLON.Animation.AllowMatricesInterpolation = true;
+
 BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(function(result){
     let ground = scene.getMeshByName("ground");
     let Player = result.meshes[0];

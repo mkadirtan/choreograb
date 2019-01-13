@@ -3,12 +3,14 @@ import {scene} from './scene';
 import {players, selectedPlayer} from "./players";
 import {buttonModels} from './media/model/buttons.babylon';
 import {guideButtonModels} from './media/model/guideButtons.babylon';
+import {texture1} from './media/textures/rotate.png';
+import {texture2} from './media/textures/translate.png';
 
 //Settings observable
 export let settingsObservable = new BABYLON.Observable();
 
 //Utility layer
-let utilLayer = new BABYLON.UtilityLayerRenderer(scene);
+export let utilLayer = new BABYLON.UtilityLayerRenderer(scene);
 let utilityLight = new BABYLON.DirectionalLight("utilityLight", new BABYLON.Vector3(-0.5, -0.5, -0.5), utilLayer.utilityLayerScene);
 
 //Gizmo creation
@@ -56,17 +58,50 @@ let settings = new BABYLON.TransformNode("settings", utilLayer.utilityLayerScene
 let playerButtons = [];
 let guideButtons = [];
 
-BABYLON.SceneLoader.ImportMesh("",'./buttons.babylon', "", utilLayer.utilityLayerScene, function(meshes){
-    meshes.forEach(e=>{
-        e.convertToFlatShadedMesh();
-        e.position.y = 0;
-        e.isVisible = false;
-        e.isPickable = false;
-        e.parent = settings;
-        e.material.specularColor = BABYLON.Color3.Black();
-    });
-    playerButtons = [...meshes];
+let buttonSize = 0.9;
+let buttonPadding = 0.1;
+
+let meshes = [
+    BABYLON.MeshBuilder.CreatePlane("translate", {width: buttonSize, height: buttonSize}, utilLayer.utilityLayerScene),
+    BABYLON.MeshBuilder.CreatePlane("rotate", {width: buttonSize, height: buttonSize}, utilLayer.utilityLayerScene),
+    BABYLON.MeshBuilder.CreatePlane("nameTag", {width: buttonSize*3+buttonPadding, height: buttonSize/2}, utilLayer.utilityLayerScene)
+    ];
+
+meshes[0].position.x -= buttonSize/2 + buttonPadding/2;
+meshes[1].position.x += buttonSize/2 + buttonPadding/2;
+
+meshes.forEach(e=>{
+    e.material = new BABYLON.StandardMaterial("", utilLayer.utilityLayerScene);
+    e.material.specularColor = BABYLON.Color3.Black();
 });
+
+meshes[0].material.diffuseTexture = new BABYLON.Texture("./translate.png", utilLayer.utilityLayerScene);
+meshes[0].material.diffuseTexture.hasAlpha = true;
+meshes[1].material.diffuseTexture = new BABYLON.Texture("./rotate.png", utilLayer.utilityLayerScene);
+meshes[1].material.diffuseTexture.hasAlpha = true;
+let playerName = new BABYLON.DynamicTexture("nameTag", {width: 512, height: Math.round(512*(buttonSize/2)/(buttonSize*3+buttonPadding))}, utilLayer.utilityLayerScene);
+let content = playerName.getContext();
+playerName.hasAlpha = true;
+content.fillStyle = "transparent";
+
+meshes[2].material.diffuseTexture = playerName;
+meshes[2].material.opacityTexture = playerName;
+
+playerName.drawText(17 + " - " + "Y. ŞAHİN", null, Math.round(512*(buttonSize/2)/(buttonSize*3+buttonPadding))-12, "bold 80px georgia", "white", null, true, true);
+
+meshes.forEach(e=>{
+    e.convertToFlatShadedMesh();
+    e.position.y = 0.6;
+    e.isVisible = false;
+    e.isPickable = false;
+    e.parent = settings;
+});
+
+meshes[2].position.y += buttonSize + buttonPadding;
+//meshes[1].position.y += buttonSize + buttonPadding;
+
+playerButtons = [...meshes];
+
 BABYLON.SceneLoader.ImportMesh("",'./guideButtons.babylon', "", utilLayer.utilityLayerScene, function(meshes){
     meshes.forEach(e=>{
         e.convertToFlatShadedMesh();
