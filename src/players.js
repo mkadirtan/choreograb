@@ -7,6 +7,7 @@ import {Motifs} from './motifs';
 import {timeControl} from "./timeline";
 import {selectionModeObservable, currentMode, gizmo} from './GUI2';
 import {selection} from './selection';
+import sceneInfo from './sceneInfo.json';
 
 export let players = [];
 export let selectedPlayer = null;
@@ -20,6 +21,8 @@ let getUniqueID = function(){
     incrementer++;
     return "Player" + incrementer;
 };
+
+export let collider;
 
 BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(function(result){
     let ground = scene.getMeshByName("ground");
@@ -45,6 +48,23 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(fu
     collider.position = new BABYLON.Vector3(ground.getBoundingInfo().maximum.x + 1,-Player.getBoundingInfo().minimum.y,ground.getBoundingInfo().maximum.z - 2);
     collider.rotation.y += Math.PI;
     //todo Loaded data should appear here to create predefined players.
+    sceneInfo.players.forEach(p=>{
+        let newCollider = collider.clone("collider", null);
+        newCollider.isVisible = true;
+        newCollider.visibility = 0;
+        let newPlayer = new CreatePlayer({
+            "collider": newCollider,
+            "mesh": newCollider.getChildren()[0],
+            "arm": arm,
+            "evt": false,
+            "keys": p.keys,
+            "uniqueID": p.uniqueID,
+            "personalInformation": p.personalInformation,
+
+        });
+        newPlayer.updateTimeline();
+        timeControl.updateTimeline();
+    });
     //new CreatePlayer({mesh: Player.clone("NewPlayer",null)});
     Player.actionManager = new BABYLON.ActionManager(scene);
     Player.actionManager.registerAction(
@@ -61,6 +81,8 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(fu
         )
     );
 });
+
+
 
 function CreatePlayer(param){
     let self = this;
@@ -100,7 +122,7 @@ CreatePlayer.prototype = {
         self.attachGizmoBehavior();
         selectedPlayer = self;
         //Check whether object was created by user interaction or loaded from data.
-        if(param.position) self.checkEventData(param.position);
+        if(param.keys) self.checkEventData(param.keys[0]);
         else self.checkEventData();
     },
     initParameters: function(param){
@@ -111,9 +133,9 @@ CreatePlayer.prototype = {
         self.dummyRotator = new BABYLON.MeshBuilder.CreatePlane("dummy", {size: 1}, scene);
         self.dummyRotator.isVisible = false;
         self.dummyRotator.ownerPlayer = self;
-        self.keys = [];
+        self.keys = param.keys || [];
         self.mesh = param.mesh;
-        self.uniqueID = getUniqueID();
+        self.uniqueID = param.uniqueID || getUniqueID();
         self.collider = param.collider;
         self.collider.ID = "PlayerCollider";
         self.collider.isVisible = false;
@@ -125,9 +147,10 @@ CreatePlayer.prototype = {
         self.feetDrag = false;
         self.timeline = new TimelineMax();
         self.personalInformation = {
-            name: param.name || "New Player",
-            height: param.height || 170,
-            order: param.order || 0
+            name: param.personalInformation.name || "Unnamed Player",
+            height: param.personalInformation.height || 170,
+            no: param.personalInformation.no || 0,
+            gender: param.personalInformation.gender || "male"
         };
     },
     key: function(){
@@ -137,7 +160,7 @@ CreatePlayer.prototype = {
             let index = 0;
             let ease = Linear.easeNone;
             let key = {
-                motif: Motifs.current,
+                motif: Motifs.current.name,
                 position: {
                     x: self.collider.position.x,
                     y: self.collider.position.y,
@@ -185,6 +208,7 @@ CreatePlayer.prototype = {
         let ease = Linear.easeNone;
         let position = self.collider.position;
         let rotation = self.collider.rotation;
+        console.log(self.keys);
 
         self.timeline.kill({x: true, y: true, z: true}, position);
         self.timeline.kill({x: true, y: true, z: true}, rotation);
@@ -270,7 +294,6 @@ CreatePlayer.prototype = {
                     } else if (self.evt === false){
                         self.dragCancelled = true;
                         self.pointerDragBehavior.releaseDrag();
-                        self.collider.position = self.lastPosition;
                     }
                 }
             }, -1, true, self);
@@ -314,7 +337,7 @@ CreatePlayer.prototype = {
         self.snappedGuide = false;
         self.snappedSnap = false;
     },
-    checkEventData: function(position){
+    checkEventData: function(info){
         let self = this;
         if(self.evt){
             self.mesh.visibility = 0.8;
@@ -333,7 +356,8 @@ CreatePlayer.prototype = {
             else self.pointerDragBehavior.startDrag(self.evt.sourceEvent.pointerId, pick.ray, pick.pickedPoint);
         }
         if(!self.evt){
-            self.collider.position = position || new BABYLON.Vector3(0, -self.collider.getBoundingInfo().minimum.y, 0);
+            self.collider.position = info.position || new BABYLON.Vector3(0, -self.collider.getBoundingInfo().minimum.y, 0);
+            self.collider.rotation = info.rotation || new BABYLON.Vector3(0, 0, 0); //check
         }
     },
     checkSnap: function(){
