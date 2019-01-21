@@ -8,6 +8,7 @@ import {Motifs, CreateMotif} from './motifs';
 import {guides, CreateGuide} from './guides';
 import './GUI2';
 import './GUI3';
+import axios from 'axios';
 /**
  * Initialization step for;
  * scene, timeline, players, music, motif, guide, GUI objects.
@@ -46,12 +47,20 @@ import './GUI3';
  *  Create motifs control object.
  *  Load selected motif data and create motif objects.
  */
-
+/*
 let motif1 = new CreateMotif({name: "motif1", start: 0, end: 2});
 let motif2 = new CreateMotif({name: "motif2", start: 8, end: 10});
 let motif3 = new CreateMotif({name: "motif3", start: 16, end: 17});
 let motif4 = new CreateMotif({name: "motif4", start: 20, end: 25});
 let motif5 = new CreateMotif({name: "motif5", start: 32, end: 40});
+*/
+
+export let getSceneDataToConsole = function(){
+    axios.post('/sceneInfo', {
+    }).then(response=>{
+        console.log(response);
+    })
+};
 
 /**
  * Guide initialization steps:

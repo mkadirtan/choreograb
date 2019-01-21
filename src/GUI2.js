@@ -13,6 +13,7 @@ import button8 from './media/textures/camera.png';
 import {players, selectedPlayer} from './players';
 import {guides} from './guides';
 import {Motifs} from './motifs';
+import {getSceneDataToConsole} from "./index";
 
 /**
  * advancedTexture is the GUI object of BABYLON.
@@ -107,7 +108,7 @@ leftPanel.addControl(timePrint);
 
 let fastBackward = new CreateButton({name: "fBackward", image: "./fastBackward.png", stack: bottomPanel});
 let fastForward = new CreateButton({name: "fForward", image: "./fastForward.png", stack: bottomPanel, onClick(){
-        console.log(players);
+        getSceneDataToConsole();
     }
 });
 

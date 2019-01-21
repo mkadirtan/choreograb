@@ -7,7 +7,7 @@
     "start": "npm run build && npm run dev && npm run open",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "dev": "webpack-dev-server"
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -18,16 +18,20 @@
     "babel-loader": "^8.0.5",
     "file-loader": "^2.0.0",
     "http-server": "^0.11.1",
+    "nodemon": "^1.18.9",
     "webpack": "^4.28.4",
     "webpack-cli": "^3.2.1",
     "webpack-dev-server": "^3.1.14"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "babylonjs": "^3.3.0",
     "babylonjs-gui": "^3.3.0",
     "babylonjs-loaders": "^3.3.0",
     "earcut": "^2.1.4",
+    "express": "^4.16.4",
     "gsap": "^2.0.2",
-    "howler": "^2.1.1"
+    "howler": "^2.1.1",
+    "mongodb": "^3.1.11"
   }
 }

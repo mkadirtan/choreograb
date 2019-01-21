@@ -105,5 +105,7 @@ let switchCamera = function(){
     }
 };
 
+let sceneInformation = {};
+
 export {scene, switchCamera};
 
