@@ -37,7 +37,7 @@ CreateGuide.prototype = {
         this.snapColliders = [];
         this.parametricShape = null;
         this.containerShape = null;
-        this.isActive = true;
+        this.isActive = param.isActive || true;
         if(this.type === "closure"){
             this.points.push(this.points[0]);
         }

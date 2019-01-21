@@ -1,0 +1,92 @@
+{
+  "background": "default",
+  "players":
+  [
+    {
+      "uniqueID": "player1",
+      "personalInformation": {
+        "name": "Şahin YALDIZ",
+        "no": 17,
+        "gender": "male",
+        "height": 170
+      },
+      "keys": [
+        {
+          "motif": "motif1",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "snapTarget": false,
+          "stepCount": 3
+        },
+        {
+          "motif": "motif2",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 3
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "snapTarget": false,
+          "stepCount": 3
+        }
+      ]
+    }
+  ],
+  "motifs": [
+    {
+      "motifID": "motif1",
+      "start": 0,
+      "end": 2,
+      "guides": [
+        {
+          "guideID": "closureGuide1",
+          "type": "closure",
+          "points": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },{
+              "x": 1,
+              "y": 0,
+              "z": 0
+            },{
+              "x": 1,
+              "y": 0,
+              "z": 1
+            },{
+              "x": 0,
+              "y": 0,
+              "z": 1
+            },{
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          ],
+          "isActive": true,
+          "playerCount": 4,
+          "motif": "motif1"
+        }
+      ]
+    },
+    {
+      "motifID": "motif2",
+      "start": 6,
+      "end": 10,
+      "guides": []
+    }
+  ]
+}
