@@ -54,7 +54,7 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(fu
                 let newCollider = collider.clone("collider", null);
                 newCollider.isVisible = true;
                 newCollider.visibility = 0;
-                let newPlayer = new CreatePlayer({collider: newCollider, mesh: newCollider.getChildren()[0], arm: arm, evt: evt});
+                let newPlayer = new Player({collider: newCollider, mesh: newCollider.getChildren()[0], arm: arm, evt: evt});
                 scene.stopAnimation(newPlayer.skeleton);
                 newPlayer.mesh.skeleton.returnToRest();
                 scene.beginAnimation(newPlayer.mesh.skeleton, walk.from+1, walk.to-1, true);
@@ -63,7 +63,7 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(fu
     );
 });
 
-function CreatePlayer(param){
+function Player(param){
     let self = this;
     this.initParameters(param);
     this.initBehaviors(param);
@@ -76,7 +76,7 @@ function CreatePlayer(param){
      */
 }
 
-CreatePlayer.prototype = {
+Player.prototype = {
     initBehaviors: function(param){
         let self = this;
         //Register to players

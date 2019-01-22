@@ -80,7 +80,7 @@ export let Motifs = {
     }
 };
 
-export function CreateMotif(param){
+export function Motif(param){
     this.name = param.name;
     this._isActive = true;
     this.start = param.start;
@@ -89,7 +89,7 @@ export function CreateMotif(param){
     Motifs.addMotif(this);
 }
 
-CreateMotif.prototype = {
+Motif.prototype = {
     show: function(){
         this.guides.forEach(e=>e.show());
     },

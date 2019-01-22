@@ -36,7 +36,7 @@ advancedTexture.addControl(bottomPanel);
  * It assigns name, image, width, size, onClick function of the button,
  * then returns the created BABYLON.GUI.Button object.
  */
-export function CreateButton(param){
+export function Button(param){
     let result = new BABYLON.GUI.Button.CreateImageOnlyButton(param.name, param.image);
     result.width = param.width || "60px";
     result.height = param.height || "60px";

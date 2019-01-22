@@ -33,7 +33,8 @@ app.post('/sceneInfo', (req, res)=>{
         const collection = db.collection("Generic");
         collection.find({}).toArray((err, documents)=>{
             if (err) throw err;
-            res.send(documents[0].backgroundName);
+            res.send(documents[0].test);
         });
     });
 });
+

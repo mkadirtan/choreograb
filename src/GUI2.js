@@ -50,29 +50,29 @@ advancedTexture.addControl(leftPanel);
 advancedTexture.addControl(rightPanel);
 advancedTexture.addControl(bottomPanel);
 
-let cameraButton = new CreateButton({name: "cameraButton", image: "./stop.png", stack: rightPanel, onClick(){
+let cameraButton = new Button({name: "cameraButton", image: "./stop.png", stack: rightPanel, onClick(){
         switchCamera();
     }
 });
 
-let playButton = new CreateButton({name: "play", image: "./play.png", stack: bottomPanel,  onClick(){
+let playButton = new Button({name: "play", image: "./play.png", stack: bottomPanel,  onClick(){
         timeControl.play();
     }
 });
-let pauseButton = new CreateButton({name: "pause", image: "./pause.png", stack: bottomPanel, onClick(){
+let pauseButton = new Button({name: "pause", image: "./pause.png", stack: bottomPanel, onClick(){
         timeControl.timeline.pause();
     }
 });
-let stopButton = new CreateButton({name: "stop", image: "./stop.png", stack: bottomPanel, onClick(){
+let stopButton = new Button({name: "stop", image: "./stop.png", stack: bottomPanel, onClick(){
         timeControl.stop();
         Motifs.update();
     }
 });
-let previousButton = new CreateButton({name: "previous", image: "./previous.png", stack: bottomPanel, onClick(){
+let previousButton = new Button({name: "previous", image: "./previous.png", stack: bottomPanel, onClick(){
         Motifs.previousMotif();
     }
 });
-let nextButton = new CreateButton({name: "next", image: "./next.png", stack: bottomPanel, onClick(){
+let nextButton = new Button({name: "next", image: "./next.png", stack: bottomPanel, onClick(){
         Motifs.nextMotif();
     }
 });
@@ -106,8 +106,8 @@ timePrint.color = "white";
 timePrint.text = "0.00 sn";
 leftPanel.addControl(timePrint);
 
-let fastBackward = new CreateButton({name: "fBackward", image: "./fastBackward.png", stack: bottomPanel});
-let fastForward = new CreateButton({name: "fForward", image: "./fastForward.png", stack: bottomPanel, onClick(){
+let fastBackward = new Button({name: "fBackward", image: "./fastBackward.png", stack: bottomPanel});
+let fastForward = new Button({name: "fForward", image: "./fastForward.png", stack: bottomPanel, onClick(){
         getSceneDataToConsole();
     }
 });
@@ -117,7 +117,7 @@ let fastForward = new CreateButton({name: "fForward", image: "./fastForward.png"
  * It assigns name, image, width, size, onClick function of the button,
  * then returns the created BABYLON.GUI.Button object.
  */
-export function CreateButton(param){
+export function Button(param){
     let result = new BABYLON.GUI.Button.CreateImageOnlyButton(param.name, param.image);
     result.width = param.width || "96px";
     result.height = param.height || "96px";

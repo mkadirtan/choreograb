@@ -12,13 +12,13 @@ export let selectedGuide = null;
 let guideMaterial = new BABYLON.StandardMaterial("guideMaterial", scene);
 guideMaterial.diffuseColor = new BABYLON.Color3.Yellow();
 
-export function CreateGuide(param){
+export function Guide(param){
     this.initParameters(param);
     this.initShapes();
     this.initBehaviors();
 }
 
-CreateGuide.prototype = {
+Guide.prototype = {
     initParameters: function(param){
         this.type = param.type;
         guides.push(this);

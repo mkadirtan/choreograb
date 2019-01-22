@@ -1,7 +1,7 @@
 import * as GUI from 'babylonjs-gui';
 import {scene} from './scene';
 import * as BABYLON from 'babylonjs';
-import {guides, CreateGuide} from './guides';
+import {guides, Guide} from './guides';
 import {Motifs} from './motifs';
 import guideButtonModel from './media/model/guideButton.babylon';
 import guideButtonManifest from './media/model/guideButton.babylon.manifest';
@@ -14,7 +14,7 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./guideButton.babylon', "", scene).then(
     guideButton.name = "guideButton";
     let buttonNames = ["circleButton", "linearButton", "closureButton"];
     let circleAction = function(){
-        let guide = new CreateGuide({
+        let guide = new Guide({
             type: "circle",
             motif: Motifs.current,
             playerCount: 12,
@@ -23,7 +23,7 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./guideButton.babylon', "", scene).then(
         });
     };
     let linearAction = function(){
-        let guide = new CreateGuide({
+        let guide = new Guide({
             type: "linear",
             motif: Motifs.current,
             playerCount: 8,
@@ -36,7 +36,7 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./guideButton.babylon', "", scene).then(
         });
     };
     let closureAction = function(){
-        let guide = new CreateGuide({
+        let guide = new Guide({
             type: "closure",
             motif: Motifs.current,
             playerCount: 6,
