@@ -9,52 +9,58 @@ import {selectionModeObservable, currentMode} from './GUI2';
 import {selection} from './selection';
 import {settingsObservable} from "./utility";
 
-export let players = [];
+export let Players = [];
 export let selectedPlayer = null;
 
-players.setKey = function(keyName, key){
-    this[keyName] = key;
-};
+export let AbstractPlayer = {};
+export let isPlayerLoaded = false;
 
-let incrementer = 0;
-let getUniqueID = function(){
-    incrementer++;
-    return "Player" + incrementer;
-};
+BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(result => {
+    let PlayerMesh = result.meshes[0];
+    let PlayerSkeleton = result.skeletons[0];
 
-BABYLON.Animation.AllowMatricesInterpolation = true;
-
-BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(function(result){
     let ground = scene.getMeshByName("ground");
-    let Player = result.meshes[0];
-    let playerBounding = Player.getBoundingInfo();
-    let collider = BABYLON.MeshBuilder.CreateCylinder("collider",{height: (playerBounding.maximum.y-playerBounding.minimum.y), diameterTop: 0.45, diameterBottom: 0.6}, scene);
-    collider.position.y += (playerBounding.maximum.y-playerBounding.minimum.y)/2;
-    collider.bakeCurrentTransformIntoVertices();
-    collider.isVisible = false;
-    Player.setParent(collider);
-    Player.name = "Player";
-    let arm = result.skeletons[0];
-    let idle = arm.getAnimationRange("Idle");
-    let walk = arm.getAnimationRange("WalkCycle");
-    players.setKey("idle", idle);
-    players.setKey("walk", walk);
-    scene.beginAnimation(arm, idle.from, idle.to, true);
+    let playerBounding = PlayerMesh.getBoundingInfo();
+    let PlayerCollider = BABYLON.MeshBuilder.CreateCylinder(
+        "PlayerCollider",
+        {
+            height: (playerBounding.maximum.y-playerBounding.minimum.y),
+            diameterTop: 0.45,
+            diameterBottom: 0.6
+        },
+        scene);
+
     let height = 1.70;
     let ratio = height/(playerBounding.maximum.y-playerBounding.minimum.y);
-    collider.scaling = new BABYLON.Vector3(ratio, ratio, ratio);
-    collider.position = new BABYLON.Vector3(ground.getBoundingInfo().maximum.x + 1,-Player.getBoundingInfo().minimum.y,ground.getBoundingInfo().maximum.z - 2);
-    collider.rotation.y += Math.PI;
-    //todo Loaded data should appear here to create predefined players.
-    //new CreatePlayer({mesh: Player.clone("NewPlayer",null)});
-    Player.actionManager = new BABYLON.ActionManager(scene);
-    Player.actionManager.registerAction(
+
+    PlayerCollider.position.y += (playerBounding.maximum.y-playerBounding.minimum.y)/2;
+    PlayerCollider.bakeCurrentTransformIntoVertices();
+    PlayerCollider.isVisible = false;
+    PlayerCollider.scaling = new BABYLON.Vector3(ratio, ratio, ratio);
+    PlayerCollider.position = new BABYLON.Vector3
+    (
+        ground.getBoundingInfo().maximum.x + 1,
+        -PlayerMesh.getBoundingInfo().minimum.y,
+        ground.getBoundingInfo().maximum.z - 2
+    );
+    PlayerCollider.rotation.y += Math.PI;
+
+    PlayerMesh.setParent(PlayerCollider);
+    PlayerMesh.name = "AbstractPlayer";
+
+    let idle = PlayerSkeleton.getAnimationRange("Idle");
+    let walk = PlayerSkeleton.getAnimationRange("WalkCycle");
+
+    Object.assign(AbstractPlayer, {PlayerMesh, PlayerSkeleton, PlayerCollider, ranges: {idle, walk}});
+    isPlayerLoaded = true;
+
+    scene.beginAnimation(PlayerSkeleton, AbstractPlayer.keys.idle.from, AbstractPlayer.keys.idle.to, true);
+
+    PlayerMesh.actionManager = new BABYLON.ActionManager(scene);
+    PlayerMesh.actionManager.registerAction(
         new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger,
             function(evt){
-                let newCollider = collider.clone("collider", null);
-                newCollider.isVisible = true;
-                newCollider.visibility = 0;
-                let newPlayer = new Player({collider: newCollider, mesh: newCollider.getChildren()[0], arm: arm, evt: evt});
+                let newPlayer = CreateNewPlayer({evt: evt});
                 scene.stopAnimation(newPlayer.skeleton);
                 newPlayer.mesh.skeleton.returnToRest();
                 scene.beginAnimation(newPlayer.mesh.skeleton, walk.from+1, walk.to-1, true);
@@ -64,7 +70,6 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(fu
 });
 
 function Player(param){
-    let self = this;
     this.initParameters(param);
     this.initBehaviors(param);
     /**
@@ -80,7 +85,7 @@ Player.prototype = {
     initBehaviors: function(param){
         let self = this;
         //Register to players
-        players.push(self);
+        Players.push(self);
         selectedPlayer = self;
         //Register to timeControl
         timeControl.timeline.add(self.timeline,0);
@@ -224,8 +229,8 @@ Player.prototype = {
                     self.timeline.fromTo(
                         self,
                         singleStepDuration,
-                        {currentKey: players.walk.from+2, ease: ease},
-                        {currentKey: players.walk.to-1, ease: ease},
+                        {currentKey: AbstractPlayer.keys.walk.from+2, ease: ease},
+                        {currentKey: AbstractPlayer.keys.walk.to-1, ease: ease},
                         keys[i-1].motif.end+singleStepDuration*step
                     );
                 }
@@ -324,7 +329,7 @@ Player.prototype = {
                     self.mesh.visibility = 1; self.mesh.renderOutline = false;
                     scene.stopAnimation(self.mesh.skeleton);
                     self.mesh.skeleton.returnToRest();
-                    scene.beginAnimation(self.mesh.skeleton, players.idle.from, players.idle.to, true, 0.72);
+                    scene.beginAnimation(self.mesh.skeleton, AbstractPlayer.keys.idle.from, AbstractPlayer.keys.idle.to, true, 0.72);
                 }
                 self.evt = false;
             });
@@ -352,7 +357,7 @@ Player.prototype = {
     },
     checkPlayerCollisions: function(){
         let self = this;
-        players.forEach((player,i)=>{
+        Players.forEach((player,i)=>{
             if(player.uniqueID !== self.uniqueID && self.collider.intersectsMesh(player.collider, false)){
                 //todo prevent collisions
             }
@@ -364,23 +369,43 @@ Player.prototype = {
             self.destroy();
         }
     },
-    destroy: function(){
+    destroy: RemovePlayer(self)function(){
         let self = this;
         self.alive = false;
-        players.forEach((p,i,a)=>{
-            if(p.uniqueID === self.uniqueID){
-                a.splice(i,1);
-            }
-        });
-        self.mesh.dispose();
-        delete self.mesh;
-        delete self.personalInformation;
-        timeControl.timeline.remove(self.timeline);
-        delete self.timeline;
-        delete self.walk;
-        delete self.idle;
-        self.collider.dispose();
-        delete self.collider;
-        delete self.lastPosition;
+
     }
 };
+
+function getPlayerCollider(){
+    let newCollider = AbstractPlayer.PlayerCollider.clone("PlayerCollider", null);
+    newCollider.isVisible = true;
+    newCollider.visibility = 0;
+}
+
+export function CreateNewPlayer(param){
+    Object.assign(param, {
+        collider: getPlayerCollider(),
+        mesh: AbstractPlayer.PlayerMesh,
+        arm: AbstractPlayer.PlayerSkeleton
+    });
+    return new Player(param);
+}
+
+export function RemovePlayer(player){
+    self.alive = false;
+    Players.forEach((p,i,a)=>{
+        if(p.uniqueID === self.uniqueID){
+            a.splice(i,1);
+        }
+    });
+    self.mesh.dispose();
+    delete self.mesh;
+    delete self.personalInformation;
+    timeControl.timeline.remove(self.timeline);
+    delete self.timeline;
+    delete self.walk;
+    delete self.idle;
+    self.collider.dispose();
+    delete self.collider;
+    delete self.lastPosition;
+}

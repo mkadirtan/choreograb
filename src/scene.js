@@ -1,6 +1,7 @@
 import * as BABYLON from "babylonjs";
 import surroundingModel from './media/model/surrounding.babylon';
 import surroundingManifest from './media/model/surrounding.babylon.manifest';
+BABYLON.Animation.AllowMatricesInterpolation = true;
 
 let initializeScene = function(){
     let canvas = document.getElementById("renderCanvas");
@@ -107,5 +108,9 @@ let switchCamera = function(){
 
 let sceneInformation = {};
 
-export {scene, switchCamera};
+function updateScene(){
+
+}
+
+export {scene, updateScene, switchCamera};
 

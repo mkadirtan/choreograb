@@ -9,6 +9,7 @@ import {guides, Guide} from './guides';
 import './GUI2';
 import './GUI3';
 import axios from 'axios';
+import {Map, List} from 'immutable';
 /**
  * Initialization step for;
  * scene, timeline, players, music, motif, guide, GUI objects.
@@ -47,13 +48,13 @@ import axios from 'axios';
  *  Create motifs control object.
  *  Load selected motif data and create motif objects.
  */
-/*
-let motif1 = new CreateMotif({name: "motif1", start: 0, end: 2});
-let motif2 = new CreateMotif({name: "motif2", start: 8, end: 10});
-let motif3 = new CreateMotif({name: "motif3", start: 16, end: 17});
-let motif4 = new CreateMotif({name: "motif4", start: 20, end: 25});
-let motif5 = new CreateMotif({name: "motif5", start: 32, end: 40});
-*/
+
+let motif1 = new Motif({name: "motif1", start: 0, end: 2});
+let motif2 = new Motif({name: "motif2", start: 8, end: 10});
+let motif3 = new Motif({name: "motif3", start: 16, end: 17});
+let motif4 = new Motif({name: "motif4", start: 20, end: 25});
+let motif5 = new Motif({name: "motif5", start: 32, end: 40});
+
 
 export let getSceneDataToConsole = function(){
     axios.post('/sceneInfo', {
@@ -61,6 +62,29 @@ export let getSceneDataToConsole = function(){
         console.log(response);
     })
 };
+
+let mymap = Map(
+    {
+        test: "mkt"
+    }
+);
+
+axios.post('/updateSceneInformation', mymap.toJS()).then(response=>{
+    console.log(response.data);
+}).catch(error=>{
+    console.log(error);
+});
+
+axios.post('/retrieveSceneInformation', {
+    dbName: "SceneInformation",
+    collection: "Generic",
+    find: {}
+}).then(response=>{
+    console.log(response.data);
+}).catch(error=>{
+    console.log(error);
+    throw error;
+});
 
 /**
  * Guide initialization steps:
