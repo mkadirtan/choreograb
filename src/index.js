@@ -56,7 +56,7 @@ let motif4 = new Motif({name: "motif4", start: 20, end: 25});
 let motif5 = new Motif({name: "motif5", start: 32, end: 40});
 
 
-export let getSceneDataToConsole = function(){
+/*export let getSceneDataToConsole = function(){
     axios.post('/sceneInfo', {
     }).then(response=>{
         console.log(response);
@@ -84,7 +84,7 @@ axios.post('/retrieveSceneInformation', {
 }).catch(error=>{
     console.log(error);
     throw error;
-});
+});*/
 
 /**
  * Guide initialization steps:

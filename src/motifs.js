@@ -1,6 +1,7 @@
 import {timeControl} from './timeline';
 import {timePrint} from './GUI2';
 import {players} from './players';
+import {CreateID} from "./Action";
 
 export let Motifs = {
     current: null,
@@ -81,6 +82,7 @@ export let Motifs = {
 };
 
 export function Motif(param){
+    this.MotifID = param.MotifID || CreateID('Motif');
     this.name = param.name;
     this._isActive = true;
     this.start = param.start;

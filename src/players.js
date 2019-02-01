@@ -8,6 +8,7 @@ import {timeControl} from "./timeline";
 import {selectionModeObservable, currentMode} from './GUI2';
 import {selection} from './selection';
 import {settingsObservable} from "./utility";
+import {Action, CreateID} from './Action';
 
 export let Players = [];
 export let selectedPlayer = null;
@@ -87,6 +88,7 @@ Player.prototype = {
         //Register to players
         Players.push(self);
         selectedPlayer = self;
+        self.keyAction = new Action(key('execute'), key('undo'), key('redo'), self);
         //Register to timeControl
         timeControl.timeline.add(self.timeline,0);
         //Initialize selectionModeObservable
@@ -112,6 +114,7 @@ Player.prototype = {
     },
     initParameters: function(param){
         let self = this;
+        self.playerID = param.playerID || CreateID('Player');
         //Initialize variables and generic properties
         self.alive = true;
         self.currentKey = 0;
@@ -120,7 +123,6 @@ Player.prototype = {
         self.dummyRotator.ownerPlayer = self;
         self.keys = [];
         self.mesh = param.mesh;
-        self.uniqueID = getUniqueID();
         self.collider = param.collider;
         self.collider.ID = "PlayerCollider";
         self.collider.isVisible = false;
@@ -137,50 +139,44 @@ Player.prototype = {
             order: param.order || 0
         };
     },
-    key: function(){
-        let self = this;
-        if(timeControl.slider.value <= Motifs.current.end+0.01 && timeControl.slider.value+0.01 >= Motifs.current.start && timeControl.timeline.paused()){
-            let exists = false;
-            let index = 0;
-            let ease = Linear.easeNone;
-            let key = {
-                motif: Motifs.current,
-                position: {
-                    x: self.collider.position.x,
-                    y: self.collider.position.y,
-                    z: self.collider.position.z,
-                    ease: ease
-                },
-                rotation: {
-                    x: self.collider.rotation.x,
-                    y: self.collider.rotation.y,
-                    z: self.collider.rotation.z,
-                    ease: ease
-                },
-                stepCount: 2
-            };
-            self.keys.forEach((e,i)=>{
-                if(e.motif.name === Motifs.current.name) {
-                    exists = true;
-                    index = i;
-                }
-            });
-            if(exists){
-                self.keys[index] = key;
-            }
-            else{
-                self.keys.push(key);
-            }
-            console.log(key);
-            self.updateTimeline();
-            timeControl.shake(key.motif);
-            return;
+    key: function(type){
+        switch(type){
+            case 'execute':
+                return function(self){
+                    if(timeControl.checkOnMotif()){
+                        let motifName = Motifs.current.name;
+                        let path = ['Players', self.playerID, keys, motifName];
+
+                        let ease = Linear.easeNone;
+                        let key = {
+                            motif: Motifs.current,
+                            position: {
+                                x: self.collider.position.x,
+                                y: self.collider.position.y,
+                                z: self.collider.position.z,
+                                ease: ease
+                            },
+                            rotation: {
+                                x: self.collider.rotation.x,
+                                y: self.collider.rotation.y,
+                                z: self.collider.rotation.z,
+                                ease: ease
+                            },
+                            stepCount: 2
+                        };
+                        self.keys.motifName = key;
+                        return {path, data: key};
+                    }
+                };
+            case 'undo':
+            case 'redo':
+                return function(self, data, path){
+                    self.keys.path[path.length-1] = data;
+                };
         }
-        timeControl.updateTimeline();
     },
     updateAnimation: function(){
         let self = this;
-        let key = Math.round(self.currentKey);
         scene.beginAnimation(
             self.mesh.skeleton,
             self.currentKey,
@@ -200,6 +196,7 @@ Player.prototype = {
         self.keys.sort((a,b)=>{
             return a.motif.start - b.motif.start;
         });
+
         self.keys.forEach((key, i, keys)=>{
             if(i>0){
                 self.timeline.fromTo(

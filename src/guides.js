@@ -5,6 +5,7 @@ import {Motifs} from './motifs';
 import {advancedTexture, currentMode, selectionModeObservable} from './GUI2';
 import {settingsObservable} from "./utility";
 import {selectedPlayer} from "./players";
+import {CreateID} from "./Action";
 
 export let guides = [];
 export let selectedGuide = null;
@@ -21,6 +22,7 @@ export function Guide(param){
 Guide.prototype = {
     initParameters: function(param){
         this.type = param.type;
+        this.GuideID = param.GuideID || CreateID('Guide');
         guides.push(this);
         //this.name = param.type + "_guide";
         this.playerCount = param.playerCount || 2;

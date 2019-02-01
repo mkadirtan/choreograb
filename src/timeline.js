@@ -35,6 +35,13 @@ let timeControl = {
         let time = this.slider.value;
         this.timeline.seek(0,false).seek(time,false);
         Motifs.update();
+    },
+    checkOnMotif: function(){
+        let margin = 0.01;
+        Motifs.update();
+        return ((this.slider.value - margin) <= Motifs.current.end)
+            &&
+            ((this.slider.value + margin) >= Motifs.current.start);
     }
 };
 
