@@ -70,6 +70,8 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(re
     );
 });
 
+let PlayerAction = new Action(Player, RemovePlayer, Player, null);
+
 function Player(param){
     this.initParameters(param);
     this.initBehaviors(param);
@@ -88,7 +90,6 @@ Player.prototype = {
         //Register to players
         Players.push(self);
         selectedPlayer = self;
-        self.keyAction = new Action(key('execute'), key('undo'), key('redo'), self);
         //Register to timeControl
         timeControl.timeline.add(self.timeline,0);
         //Initialize selectionModeObservable
@@ -111,10 +112,12 @@ Player.prototype = {
         //Check whether object was created by user interaction or loaded from data.
         if(param.position) self.checkEventData(param.position);
         else self.checkEventData();
+        //Actions
+        self.keyAction = new Action(self.keyExecute, self.keyUndoRedo, self.keyUndoRedo, self);
     },
     initParameters: function(param){
         let self = this;
-        self.playerID = param.playerID || CreateID('Player');
+        self.PlayerID = param.PlayerID || CreateID('Player');
         //Initialize variables and generic properties
         self.alive = true;
         self.currentKey = 0;
@@ -139,40 +142,55 @@ Player.prototype = {
             order: param.order || 0
         };
     },
-    key: function(type){
-        switch(type){
-            case 'execute':
-                return function(self){
-                    if(timeControl.checkOnMotif()){
-                        let motifName = Motifs.current.name;
-                        let path = ['Players', self.playerID, keys, motifName];
+    keyExecute: function(self, state){
+        if(timeControl.checkOnMotif()){
+            let key = self.generateKey();
+            self.addKey(key);
 
-                        let ease = Linear.easeNone;
-                        let key = {
-                            motif: Motifs.current,
-                            position: {
-                                x: self.collider.position.x,
-                                y: self.collider.position.y,
-                                z: self.collider.position.z,
-                                ease: ease
-                            },
-                            rotation: {
-                                x: self.collider.rotation.x,
-                                y: self.collider.rotation.y,
-                                z: self.collider.rotation.z,
-                                ease: ease
-                            },
-                            stepCount: 2
-                        };
-                        self.keys.motifName = key;
-                        return {path, data: key};
-                    }
-                };
-            case 'undo':
-            case 'redo':
-                return function(self, data, path){
-                    self.keys.path[path.length-1] = data;
-                };
+            let playerIndex = state.get('Players').findIndex(player=>{
+                return player.PlayerID === self.PlayerID;
+            });
+
+            return {
+                path:['Players', playerIndex, 'keys'],
+                value:self.keys
+            };
+        }
+    },
+    keyUndoRedo: function(self, value){
+        self.keys = value;
+    },
+    generateKey: function(){
+        let self = this;
+        let ease = Linear.easeNone;
+        return {
+            MotifID: Motifs.current.MotifID,
+            position: {
+                x: self.collider.position.x,
+                y: self.collider.position.y,
+                z: self.collider.position.z,
+                ease: ease
+            },
+            rotation: {
+                x: self.collider.rotation.x,
+                y: self.collider.rotation.y,
+                z: self.collider.rotation.z,
+                ease: ease
+            },
+            stepCount: 2
+        };
+    },
+    addKey: function(key){
+        let self = this;
+        let exists;
+        self.keys.forEach((_key, i)=>{
+            if(_key.MotifID === key.MotifID){
+                exists = true;
+                self.keys[i] = key;
+            }
+        });
+        if(!exists){
+            self.keys.push(key);
         }
     },
     updateAnimation: function(){
@@ -295,7 +313,7 @@ Player.prototype = {
             self.checkPlayerCollisions();
             //Keyframing algorithm
             if(!self.dragCancelled){
-                self.key();
+                self.keyAction.execute();
             }
             self.dragCancelled = false;
             //Removal by trash can

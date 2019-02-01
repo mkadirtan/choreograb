@@ -14,20 +14,21 @@ export function CreateID(type){
 
 export function Action(execute, undo, redo, that){
     this.execute = function(){
-        let returned = execute(that);
-        let newEntry = history[historyIndex].withMutations(map=>{
+        let currentState = history[historyIndex];
+        let returned = execute(that, currentState);
+        let newEntry = currentState.withMutations(map=>{
             map.
-            setIn(returned.path, returned.data).
-            set('actionPath', returned.path).
-            set('action', this);
+            set('action', this).
+            set('returned', returned).
+            setIn(returned.path, returned.value);
         });
         ActionManager.process(newEntry);
     };
-    this.redo = function(data, path){
-        redo(that, data, path);
+    this.redo = function(value){
+        redo(that, value);
     };
-    this.undo = function(data, path){
-        undo(that, data, path);
+    this.undo = function(value){
+        undo(that, value);
     };
 }
 
@@ -38,23 +39,23 @@ let ActionManager = {
     },
     undo: function(){
         let previous = history[historyIndex-1];
+        let current = history[historyIndex];
 
-        let path = previous.get('actionPath');
-        let data = previous.getIn(path);
+        let path = current.get('returned').path;
+        let value = previous.getIn(path);
 
-        let action = previous.get('action');
-        action.undo(data, path);
+        let action = current.get('action');
+        action.undo(value);
 
         historyIndex--;
     },
     redo: function(){
         let next = history[historyIndex+1];
 
-        let path = next.get('actionPath');
-        let data = next.getIn(path);
+        let value = next.get('returned').value;
 
         let action = next.get('action');
-        action.redo(data, path);
+        action.redo(value);
 
         historyIndex++;
     }
