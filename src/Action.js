@@ -1,19 +1,34 @@
-import {timeControl} from "./timeline";
-import {Motifs} from "./motifs";
-import {uuidv4} from 'uuid/v4'
+import {List, Map} from 'immutable';
+import {Players} from './players';
+import {Motifs} from './motifs';
+import {Guides} from './guides';
+
 
 let history = [];
-let historyIndex = 0;
+let historyIndex = -1;
 
 /**
  * @return {string}
  */
 export function CreateID(type){
-    return type.substr(0,3) + Date.now().toString(36) + Math.random().toString(36).substr(2,5);
+    return type + '_' + Date.now().toString(36) + Math.random().toString(36).substr(2,5);
+}
+
+function initState(){
+    historyIndex = 0;
+    let newItem = Map({
+        Players : List(Players),
+        Motifs  : List(Motifs.motifs),
+        Guides  : List(Guides),
+        action  : null,
+        returned: null
+    });
+    history.push(newItem);
 }
 
 export function Action(execute, undo, redo, that){
     this.execute = function(){
+        if(historyIndex === -1) initState();
         let currentState = history[historyIndex];
         let returned = execute(that, currentState);
         let newEntry = currentState.withMutations(map=>{
@@ -32,16 +47,18 @@ export function Action(execute, undo, redo, that){
     };
 }
 
-let ActionManager = {
+export let ActionManager = {
     process: function(newEntry){
         history.push(newEntry);
         historyIndex++;
     },
     undo: function(){
         let previous = history[historyIndex-1];
+        console.log(previous);
         let current = history[historyIndex];
-
+        console.log(current);
         let path = current.get('returned').path;
+        console.log(path);
         let value = previous.getIn(path);
 
         let action = current.get('action');

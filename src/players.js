@@ -30,6 +30,7 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(re
             diameterBottom: 0.6
         },
         scene);
+    PlayerMesh.setParent(PlayerCollider);
 
     let height = 1.70;
     let ratio = height/(playerBounding.maximum.y-playerBounding.minimum.y);
@@ -46,31 +47,38 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(re
     );
     PlayerCollider.rotation.y += Math.PI;
 
-    PlayerMesh.setParent(PlayerCollider);
+
     PlayerMesh.name = "AbstractPlayer";
 
     let idle = PlayerSkeleton.getAnimationRange("Idle");
     let walk = PlayerSkeleton.getAnimationRange("WalkCycle");
 
     Object.assign(AbstractPlayer, {PlayerMesh, PlayerSkeleton, PlayerCollider, ranges: {idle, walk}});
+    /*AbstractPlayer.PlayerMesh = PlayerMesh;
+    AbstractPlayer.PlayerSkeleton = PlayerSkeleton;
+    AbstractPlayer.PlayerCollider = PlayerCollider;
+    AbstractPlayer.ranges = {idle, walk};*/
     isPlayerLoaded = true;
 
-    scene.beginAnimation(PlayerSkeleton, AbstractPlayer.keys.idle.from, AbstractPlayer.keys.idle.to, true);
+    scene.beginAnimation(PlayerSkeleton, AbstractPlayer.ranges.idle.from, AbstractPlayer.ranges.idle.to, true);
 
     PlayerMesh.actionManager = new BABYLON.ActionManager(scene);
     PlayerMesh.actionManager.registerAction(
         new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger,
             function(evt){
-                let newPlayer = CreateNewPlayer({evt: evt});
-                scene.stopAnimation(newPlayer.skeleton);
-                newPlayer.mesh.skeleton.returnToRest();
-                scene.beginAnimation(newPlayer.mesh.skeleton, walk.from+1, walk.to-1, true);
+            let collider = AbstractPlayer.PlayerCollider.clone();
+            let mesh = collider.getChildren()[0];
+            mesh.skeleton = AbstractPlayer.PlayerSkeleton.clone();
+            let newPlayer = new Player({evt, collider, mesh});
+
+            scene.stopAnimation(newPlayer.mesh.skeleton);
+            newPlayer.mesh.skeleton.returnToRest();
+            scene.beginAnimation(newPlayer.mesh.skeleton, walk.from+1, walk.to-1, true);
+
             }
         )
     );
 });
-
-let PlayerAction = new Action(Player, RemovePlayer, Player, null);
 
 function Player(param){
     this.initParameters(param);
@@ -87,6 +95,8 @@ function Player(param){
 Player.prototype = {
     initBehaviors: function(param){
         let self = this;
+        self.collider.isVisible = true;
+        self.collider.visibility = 0;
         //Register to players
         Players.push(self);
         selectedPlayer = self;
@@ -130,8 +140,8 @@ Player.prototype = {
         self.collider.ID = "PlayerCollider";
         self.collider.isVisible = false;
         self.evt = param.evt || false;
+        self.mesh.name = "Player";
         self.mesh.ID = "Player";
-        self.mesh.skeleton = param.arm.clone();
         self.lastPosition = null;
         self.isSnapped = false;
         self.feetDrag = false;
@@ -146,10 +156,10 @@ Player.prototype = {
         if(timeControl.checkOnMotif()){
             let key = self.generateKey();
             self.addKey(key);
-
             let playerIndex = state.get('Players').findIndex(player=>{
                 return player.PlayerID === self.PlayerID;
             });
+            console.log('getted');
 
             return {
                 path:['Players', playerIndex, 'keys'],
@@ -159,11 +169,14 @@ Player.prototype = {
     },
     keyUndoRedo: function(self, value){
         self.keys = value;
+        self.updateTimeline();
+        self.updateAnimation();
     },
     generateKey: function(){
         let self = this;
         let ease = Linear.easeNone;
         return {
+            motif: Motifs.current,
             MotifID: Motifs.current.MotifID,
             position: {
                 x: self.collider.position.x,
@@ -212,7 +225,7 @@ Player.prototype = {
         self.timeline.kill({currentKey: true}, self);
 
         self.keys.sort((a,b)=>{
-            return a.motif.start - b.motif.start;
+            return a.motif.start - b.motif.start
         });
 
         self.keys.forEach((key, i, keys)=>{
@@ -244,8 +257,8 @@ Player.prototype = {
                     self.timeline.fromTo(
                         self,
                         singleStepDuration,
-                        {currentKey: AbstractPlayer.keys.walk.from+2, ease: ease},
-                        {currentKey: AbstractPlayer.keys.walk.to-1, ease: ease},
+                        {currentKey: AbstractPlayer.ranges.walk.from+2, ease: ease},
+                        {currentKey: AbstractPlayer.ranges.walk.to-1, ease: ease},
                         keys[i-1].motif.end+singleStepDuration*step
                     );
                 }
@@ -314,6 +327,8 @@ Player.prototype = {
             //Keyframing algorithm
             if(!self.dragCancelled){
                 self.keyAction.execute();
+                self.updateAnimation();
+                self.updateTimeline();
             }
             self.dragCancelled = false;
             //Removal by trash can
@@ -340,15 +355,15 @@ Player.prototype = {
             self.mesh.visibility = 0.8;
             self.mesh.renderOutline = true;
             self.pointerDragBehavior.onDragEndObservable.addOnce(function(){
-                if(self.mesh){
+                if(self.alive){
                     self.mesh.visibility = 1; self.mesh.renderOutline = false;
                     scene.stopAnimation(self.mesh.skeleton);
                     self.mesh.skeleton.returnToRest();
-                    scene.beginAnimation(self.mesh.skeleton, AbstractPlayer.keys.idle.from, AbstractPlayer.keys.idle.to, true, 0.72);
+                    scene.beginAnimation(self.mesh.skeleton, AbstractPlayer.ranges.idle.from, AbstractPlayer.ranges.idle.to, true, 0.72);
                 }
                 self.evt = false;
             });
-            let pick = scene.pick(self.evt.pointerX, self.evt.pointerY, function(mesh){return mesh.name === "Player"});
+            let pick = scene.pick(self.evt.pointerX, self.evt.pointerY, function(mesh){return mesh.name === "AbstractPlayer"});
             if(scene.activeCamera.name === "fps") self.pointerDragBehavior.startDrag(self.evt.sourceEvent.pointerId);
             else self.pointerDragBehavior.startDrag(self.evt.sourceEvent.pointerId, pick.ray, pick.pickedPoint);
         }
@@ -373,7 +388,7 @@ Player.prototype = {
     checkPlayerCollisions: function(){
         let self = this;
         Players.forEach((player,i)=>{
-            if(player.uniqueID !== self.uniqueID && self.collider.intersectsMesh(player.collider, false)){
+            if(player.PlayerID !== self.PlayerID && self.collider.intersectsMesh(player.collider, false)){
                 //todo prevent collisions
             }
         });
@@ -384,10 +399,9 @@ Player.prototype = {
             self.destroy();
         }
     },
-    destroy: RemovePlayer(self)function(){
+    destroy: function(){
         let self = this;
-        self.alive = false;
-
+        RemovePlayer(self)
     }
 };
 
@@ -395,32 +409,12 @@ function getPlayerCollider(){
     let newCollider = AbstractPlayer.PlayerCollider.clone("PlayerCollider", null);
     newCollider.isVisible = true;
     newCollider.visibility = 0;
-}
-
-export function CreateNewPlayer(param){
-    Object.assign(param, {
-        collider: getPlayerCollider(),
-        mesh: AbstractPlayer.PlayerMesh,
-        arm: AbstractPlayer.PlayerSkeleton
-    });
-    return new Player(param);
+    return newCollider;
 }
 
 export function RemovePlayer(player){
     self.alive = false;
-    Players.forEach((p,i,a)=>{
-        if(p.uniqueID === self.uniqueID){
-            a.splice(i,1);
-        }
-    });
     self.mesh.dispose();
-    delete self.mesh;
-    delete self.personalInformation;
-    timeControl.timeline.remove(self.timeline);
-    delete self.timeline;
-    delete self.walk;
-    delete self.idle;
     self.collider.dispose();
-    delete self.collider;
-    delete self.lastPosition;
+    timeControl.timeline.remove(self.timeline);
 }

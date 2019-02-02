@@ -4,6 +4,14 @@ import {players} from './players';
 import {CreateID} from "./Action";
 
 export let Motifs = {
+    getMotifByMotifID: function(MotifID){
+        let self = this;
+        self.motifs.forEach(motif=>{
+            if(motif.MotifID === MotifID){
+                return motif;
+            }
+        });
+    },
     current: null,
     next: null,
     previous: null,

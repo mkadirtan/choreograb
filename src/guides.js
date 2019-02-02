@@ -7,7 +7,7 @@ import {settingsObservable} from "./utility";
 import {selectedPlayer} from "./players";
 import {CreateID} from "./Action";
 
-export let guides = [];
+export let Guides = [];
 export let selectedGuide = null;
 
 let guideMaterial = new BABYLON.StandardMaterial("guideMaterial", scene);
@@ -23,7 +23,7 @@ Guide.prototype = {
     initParameters: function(param){
         this.type = param.type;
         this.GuideID = param.GuideID || CreateID('Guide');
-        guides.push(this);
+        Guides.push(this);
         //this.name = param.type + "_guide";
         this.playerCount = param.playerCount || 2;
         this.position = param.position || BABYLON.Vector3.Zero();

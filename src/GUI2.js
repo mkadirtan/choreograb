@@ -14,6 +14,7 @@ import {players, selectedPlayer} from './players';
 import {guides} from './guides';
 import {Motifs} from './motifs';
 import {getSceneDataToConsole} from "./index";
+import {ActionManager} from './Action';
 
 /**
  * advancedTexture is the GUI object of BABYLON.
@@ -106,9 +107,12 @@ timePrint.color = "white";
 timePrint.text = "0.00 sn";
 leftPanel.addControl(timePrint);
 
-let fastBackward = new Button({name: "fBackward", image: "./fastBackward.png", stack: bottomPanel});
+let fastBackward = new Button({name: "fBackward", image: "./fastBackward.png", stack: bottomPanel, onClick(){
+        ActionManager.undo();
+    }
+});
 let fastForward = new Button({name: "fForward", image: "./fastForward.png", stack: bottomPanel, onClick(){
-        getSceneDataToConsole();
+        ActionManager.redo();
     }
 });
 
