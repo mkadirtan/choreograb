@@ -9,6 +9,7 @@ import {selectionModeObservable, currentMode} from './GUI2';
 import {selection} from './selection';
 import {settingsObservable} from "./utility";
 import {Action, CreateID} from './Action';
+import {List} from "immutable";
 
 export let Players = [];
 export let selectedPlayer = null;
@@ -156,21 +157,22 @@ Player.prototype = {
         if(timeControl.checkOnMotif()){
             let key = self.generateKey();
             self.addKey(key);
+            console.log('state', state);
             let playerIndex = state.get('Players').findIndex(player=>{
-                return player.PlayerID === self.PlayerID;
+                return player.get('PlayerID') === self.PlayerID;
             });
-            console.log('getted');
-
+            self.updateAnimation();
+            self.updateTimeline();
             return {
                 path:['Players', playerIndex, 'keys'],
-                value:self.keys
+                value: List(self.keys)
             };
         }
     },
     keyUndoRedo: function(self, value){
-        self.keys = value;
-        self.updateTimeline();
+        self.keys = value.toArray();
         self.updateAnimation();
+        self.updateTimeline();
     },
     generateKey: function(){
         let self = this;
@@ -263,7 +265,8 @@ Player.prototype = {
                     );
                 }
             }
-        })
+        });
+        timeControl.updateTimeline();
     },
     attachMenu: function(){
         let self = this;

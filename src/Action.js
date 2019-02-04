@@ -16,8 +16,19 @@ export function CreateID(type){
 
 function initState(){
     historyIndex = 0;
+    let _Players = List([]).withMutations(_Players=>{
+        Players.forEach(p=>{
+            let newPlayer = Map({
+                keys: List(p.keys),
+            });
+            let newNewPlayer = newPlayer.set('PlayerID', p.PlayerID);
+            console.log(newNewPlayer);
+            _Players.push(newNewPlayer);
+        });
+    });
+
     let newItem = Map({
-        Players : List(Players),
+        Players : _Players,
         Motifs  : List(Motifs.motifs),
         Guides  : List(Guides),
         action  : null,
