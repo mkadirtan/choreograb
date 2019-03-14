@@ -1,8 +1,11 @@
+/**
+ * LOCAL IMPORTS
+ */
 import {timeControl} from './timeline';
-import {timePrint} from './GUI2';
-import {players} from './players';
-import {CreateID} from "./Action";
-
+import {CreateID} from "./history";
+/**
+ * LOCAL IMPORTS
+ */
 export let Motifs = {
     getMotifByMotifID: function(MotifID){
         let self = this;

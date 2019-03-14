@@ -1,14 +1,30 @@
-import * as GUI from 'babylonjs-gui';
-import {scene} from './scene';
-import * as BABYLON from 'babylonjs';
-import {guides, Guide} from './guides';
-import {Motifs} from './motifs';
+/**
+ * ASSETS
+ */
 import guideButtonModel from './media/model/guideButton.babylon';
 import guideButtonManifest from './media/model/guideButton.babylon.manifest';
+/**
+ * ASSETS
+ */
+/**
+ * BABYLON IMPORTS
+ */
 
+/**
+ * BABYLON IMPORTS
+ */
+/**
+ * LOCAL IMPORTS
+ */
+import {scene} from './scene';
+import {Guides, Guide} from './guides';
+import {Motifs} from './motifs';
+/**
+ * LOCAL IMPORTS
+ */
 let bounding = scene.getMeshByName("ground").getBoundingInfo();
 
-BABYLON.SceneLoader.ImportMeshAsync("",'./guideButton.babylon', "", scene).then(function(result){
+/*BABYLON.SceneLoader.ImportMeshAsync("",'./guideButton.babylon', "", scene).then(function(result){
     let ground = scene.getMeshByName("ground");
     let guideButton = result.meshes[0];
     guideButton.name = "guideButton";
@@ -87,4 +103,4 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./guideButton.babylon', "", scene).then(
             })}
         )
     );
-});
+});*/

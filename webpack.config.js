@@ -3,6 +3,12 @@ var webpack = require('webpack');
 
 module.exports = {
     mode: 'development',
+    context: __dirname,
+    plugins: [
+        new webpack.ProvidePlugin({
+            'earcut': 'earcut'
+        })
+    ],
     entry: './src/index.js',
     output: {
         filename: 'main.js',
@@ -32,9 +38,5 @@ module.exports = {
                 }
             }
         ],
-    },
-    externals: {
-        oimo: 'OIMO',
-        cannon: 'CANNON'
     }
 };

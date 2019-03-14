@@ -1,17 +1,32 @@
-import * as BABYLON from 'babylonjs';
-import * as GUI from 'babylonjs-gui';
+/**
+ * BABYLON IMPORTS
+ */
+import {Color3, Vector3,
+    PointerDragBehavior,
+    ActionManager, ExecuteCodeAction,
+    StandardMaterial,
+    MeshBuilder,
+    Path3D} from "@babylonjs/core";
+/**
+ * BABYLON IMPORTS
+ */
+/**
+ * LOCAL IMPORTS
+ */
 import {scene} from './scene';
 import {Motifs} from './motifs';
-import {advancedTexture, currentMode, selectionModeObservable} from './GUI2';
+import {currentMode, selectionModeObservable} from './GUI2';
 import {settingsObservable} from "./utility";
-import {selectedPlayer} from "./players";
-import {CreateID} from "./Action";
+import {CreateID} from "./history";
+/**
+ * LOCAL IMPORTS
+ */
 
 export let Guides = [];
 export let selectedGuide = null;
 
-let guideMaterial = new BABYLON.StandardMaterial("guideMaterial", scene);
-guideMaterial.diffuseColor = new BABYLON.Color3.Yellow();
+let guideMaterial = new StandardMaterial("guideMaterial", scene);
+guideMaterial.diffuseColor = new Color3.Yellow();
 
 export function Guide(param){
     this.initParameters(param);
@@ -26,12 +41,12 @@ Guide.prototype = {
         Guides.push(this);
         //this.name = param.type + "_guide";
         this.playerCount = param.playerCount || 2;
-        this.position = param.position || BABYLON.Vector3.Zero();
+        this.position = param.position || Vector3.Zero();
         this.motif = param.motif || Motifs.current;
         this.motif.addGuide(this);
         this.points = param.points || null;
         this.radius = param.radius || null;
-        this.color = param.color || new BABYLON.Color3(0.87,0.87,0.87);
+        this.color = param.color || new Color3(0.87,0.87,0.87);
         this.material = param.material || guideMaterial;
         this.resolution = 128; //todo dynamic resolution adjustment
         this.snaps = [];
@@ -46,7 +61,7 @@ Guide.prototype = {
         else if(this.type === "circle") {
             let temporaryPoints = [];
             for (let i = 0; i < this.resolution; i++) {
-                temporaryPoints[i] = new BABYLON.Vector3(this.radius * Math.cos(i * 2 * Math.PI / this.resolution), 0, this.radius * Math.sin(i * 2 * Math.PI / this.resolution))
+                temporaryPoints[i] = new Vector3(this.radius * Math.cos(i * 2 * Math.PI / this.resolution), 0, this.radius * Math.sin(i * 2 * Math.PI / this.resolution))
             }
             temporaryPoints.push(temporaryPoints[0]);
             this.points = temporaryPoints;
@@ -72,12 +87,12 @@ Guide.prototype = {
     },
     initBehaviors: function(){
         let self = this;
-        let pointerDragBehavior = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0,1,0)});
+        let pointerDragBehavior = new PointerDragBehavior({dragPlaneNormal: new Vector3(0,1,0)});
         this.containerShape.addBehavior(pointerDragBehavior);
-        self.containerShape.actionManager = new BABYLON.ActionManager(scene);
+        self.containerShape.actionManager = new ActionManager(scene);
         self.containerShape.actionManager.registerAction(
-            new BABYLON.ExecuteCodeAction({
-                    trigger: BABYLON.ActionManager.OnLeftPickTrigger
+            new ExecuteCodeAction({
+                    trigger: ActionManager.OnLeftPickTrigger
                 }, () => {
                     selectedGuide = self;
                     settingsObservable.notifyObservers({type: "guide", attachedMesh: self.containerShape});
@@ -173,7 +188,7 @@ Guide.prototype = {
     },
     generateParametricShape: function(){
         let self = this;
-        let shape = BABYLON.MeshBuilder.CreateLines("parametricShape", {
+        let shape = MeshBuilder.CreateLines("parametricShape", {
             points: this.points
         }, scene);
         shape.color = this.color;
@@ -182,7 +197,7 @@ Guide.prototype = {
     generateColliders: function(){
         let self = this;
         this.snapPoints.forEach((e,i)=>{
-            let shape = BABYLON.MeshBuilder.CreateBox("snapCollider", {
+            let shape = MeshBuilder.CreateBox("snapCollider", {
                 size: 0.02,
                 width: 0.36,
                 depth: 0.36,
@@ -199,7 +214,7 @@ Guide.prototype = {
     generateSnaps: function(){
         let self = this;
         this.snapPoints.forEach(e=>{
-            let shape = BABYLON.MeshBuilder.CreateCylinder("snap", {
+            let shape = MeshBuilder.CreateCylinder("snap", {
                 diameterTop: 0.2,
                 diameterBottom: 0.2,
                 height: 0.02,
@@ -216,12 +231,12 @@ Guide.prototype = {
         let shape;
         let depth = 0.02;
         if(this.type==="closure" || this.type==="circle") {
-            shape = BABYLON.MeshBuilder.ExtrudePolygon("container", {
+            shape = MeshBuilder.ExtrudePolygon("container", {
                 shape: self.points, depth: depth
             }, scene);
         }
         else if(this.type==="linear"){
-            let curve = new BABYLON.Path3D(self.points, new BABYLON.Vector3(0,1,0));
+            let curve = new Path3D(self.points, new Vector3(0,1,0));
             let binormals = curve.getBinormals();
             let points1 = [];
             let points2 = [];
@@ -231,7 +246,7 @@ Guide.prototype = {
                 points2.push(e.clone().addInPlace(binormals[i].scale(-size)));
             });
             points2.reverse().concat(points1);
-            shape = BABYLON.MeshBuilder.ExtrudePolygon("container",{
+            shape = MeshBuilder.ExtrudePolygon("container",{
                 shape: points2, depth: depth
             }, scene);
         }

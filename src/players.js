@@ -1,29 +1,48 @@
-import {TimelineMax, TweenMax} from 'gsap';
-import * as BABYLON from "babylonjs";
+/**
+ * ASSETS
+ */
 import playerModel from './media/model/newPlayer.babylon';
 import playerManifest from './media/model/newPlayer.babylon.manifest';
+/**
+ * ASSETS
+ */
+/**
+ * LIBRARY IMPORTS
+ */
+import { Map } from 'immutable';
+import { TimelineMax, TweenMax } from 'gsap';
+import { SceneLoader, MeshBuilder,
+    ActionManager, ExecuteCodeAction, PointerDragBehavior,
+    Vector3 } from "@babylonjs/core";
+import * as cloneDeep from 'clone-deep';
+/**
+ * LIBRARY IMPORTS
+ */
+/**
+ * LOCAL IMPORTS
+ */
 import {scene} from "./scene";
 import {Motifs} from './motifs';
 import {timeControl} from "./timeline";
 import {selectionModeObservable, currentMode} from './GUI2';
-import {selection} from './selection';
 import {settingsObservable} from "./utility";
-import {Action, CreateID} from './Action';
-import {List} from "immutable";
-
+import {HistoryAction, CreateID} from './history';
+/**
+ * LOCAL IMPORTS
+ */
 export let Players = [];
 export let selectedPlayer = null;
 
 export let AbstractPlayer = {};
 export let isPlayerLoaded = false;
 
-BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(result => {
+SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(result => {
     let PlayerMesh = result.meshes[0];
     let PlayerSkeleton = result.skeletons[0];
 
     let ground = scene.getMeshByName("ground");
     let playerBounding = PlayerMesh.getBoundingInfo();
-    let PlayerCollider = BABYLON.MeshBuilder.CreateCylinder(
+    let PlayerCollider = MeshBuilder.CreateCylinder(
         "PlayerCollider",
         {
             height: (playerBounding.maximum.y-playerBounding.minimum.y),
@@ -39,8 +58,8 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(re
     PlayerCollider.position.y += (playerBounding.maximum.y-playerBounding.minimum.y)/2;
     PlayerCollider.bakeCurrentTransformIntoVertices();
     PlayerCollider.isVisible = false;
-    PlayerCollider.scaling = new BABYLON.Vector3(ratio, ratio, ratio);
-    PlayerCollider.position = new BABYLON.Vector3
+    PlayerCollider.scaling = new Vector3(ratio, ratio, ratio);
+    PlayerCollider.position = new Vector3
     (
         ground.getBoundingInfo().maximum.x + 1,
         -PlayerMesh.getBoundingInfo().minimum.y,
@@ -63,9 +82,9 @@ BABYLON.SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(re
 
     scene.beginAnimation(PlayerSkeleton, AbstractPlayer.ranges.idle.from, AbstractPlayer.ranges.idle.to, true);
 
-    PlayerMesh.actionManager = new BABYLON.ActionManager(scene);
+    PlayerMesh.actionManager = new ActionManager(scene);
     PlayerMesh.actionManager.registerAction(
-        new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger,
+        new ExecuteCodeAction(ActionManager.OnLeftPickTrigger,
             function(evt){
             let collider = AbstractPlayer.PlayerCollider.clone();
             let mesh = collider.getChildren()[0];
@@ -124,7 +143,7 @@ Player.prototype = {
         if(param.position) self.checkEventData(param.position);
         else self.checkEventData();
         //Actions
-        self.keyAction = new Action(self.keyExecute, self.keyUndoRedo, self.keyUndoRedo, self);
+        self.attachActions();
     },
     initParameters: function(param){
         let self = this;
@@ -132,7 +151,7 @@ Player.prototype = {
         //Initialize variables and generic properties
         self.alive = true;
         self.currentKey = 0;
-        self.dummyRotator = new BABYLON.MeshBuilder.CreatePlane("dummy", {size: 1}, scene);
+        self.dummyRotator = new MeshBuilder.CreatePlane("dummy", {size: 1}, scene);
         self.dummyRotator.isVisible = false;
         self.dummyRotator.ownerPlayer = self;
         self.keys = [];
@@ -153,26 +172,32 @@ Player.prototype = {
             order: param.order || 0
         };
     },
-    keyExecute: function(self, state){
-        if(timeControl.checkOnMotif()){
-            let key = self.generateKey();
-            self.addKey(key);
-            console.log('state', state);
-            let playerIndex = state.get('Players').findIndex(player=>{
-                return player.get('PlayerID') === self.PlayerID;
-            });
+    attachActions: function(){
+        let self = this;
+        let keyExecute = function(){
+            if(timeControl.checkOnMotif()){
+                let key = self.generateKey();
+                let storedKey = null;
+                self.keys.forEach(current=>{
+                    if(current.MotifID === Motifs.current.MotifID){
+                        storedKey = cloneDeep(current);
+                    }
+                });
+                self.addKey(key);
+                self.updateAnimation();
+                self.updateTimeline();
+                return storedKey
+            }
+            else {
+                console.log("Can't assign key. No active motif found!")
+            }
+        };
+        let keyUndoRedo = function(storedKey){
+            self.addKey(storedKey);
             self.updateAnimation();
             self.updateTimeline();
-            return {
-                path:['Players', playerIndex, 'keys'],
-                value: List(self.keys)
-            };
-        }
-    },
-    keyUndoRedo: function(self, value){
-        self.keys = value.toArray();
-        self.updateAnimation();
-        self.updateTimeline();
+        };
+        self.key = new HistoryAction(keyExecute, keyUndoRedo, keyUndoRedo, self);
     },
     generateKey: function(){
         let self = this;
@@ -192,10 +217,12 @@ Player.prototype = {
                 z: self.collider.rotation.z,
                 ease: ease
             },
-            stepCount: 2
+            stepCount: 3
         };
     },
     addKey: function(key){
+        console.log("adding key...");
+        console.log(key);
         let self = this;
         let exists;
         self.keys.forEach((_key, i)=>{
@@ -272,10 +299,10 @@ Player.prototype = {
         let self = this;
         self.dummyRotator.position = self.collider.position.clone();
         self.dummyRotator.setParent(self.collider);
-        self.mesh.actionManager = new BABYLON.ActionManager(scene);
+        self.mesh.actionManager = new ActionManager(scene);
         self.mesh.actionManager.registerAction(
-            new BABYLON.ExecuteCodeAction({
-                    trigger: BABYLON.ActionManager.OnLeftPickTrigger
+            new ExecuteCodeAction({
+                    trigger: ActionManager.OnLeftPickTrigger
                 }, () => {
                         selectedPlayer = self;
                         settingsObservable.notifyObservers({type: "player", attachedMesh: self.mesh});
@@ -286,7 +313,7 @@ Player.prototype = {
     addDragBehavior: function(){
         //todo rename all eventData, eventState's for clarity
         let self = this;
-        self.pointerDragBehavior = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0,1,0)});
+        self.pointerDragBehavior = new PointerDragBehavior({dragPlaneNormal: new Vector3(0,1,0)});
         self.pointerDragBehavior.dragDeltaRatio = 1;
         self.pointerDragBehavior.useObjectOrienationForDragging = false;
         self.pointerDragBehavior.updateDragPlane = false;
@@ -324,12 +351,12 @@ Player.prototype = {
             //Remove keyboard observable
             scene.onKeyboardObservable.remove(reference);
             //Apply snapping
-            self.checkSnap();
+            //self.checkSnap();
             //Player collision mechanics
             self.checkPlayerCollisions();
             //Keyframing algorithm
             if(!self.dragCancelled){
-                self.keyAction.execute();
+                self.key.execute();
                 self.updateAnimation();
                 self.updateTimeline();
             }
@@ -340,7 +367,7 @@ Player.prototype = {
             scene.activeCamera.attachControl(scene.getEngine().getRenderingCanvas(), true);
         });
     },
-    snap: function(guide, snap){
+    /*snap: function(guide, snap){
         let self = this;
         self.collider.position = snap.absolutePosition;
         self.isSnapped = true;
@@ -351,7 +378,7 @@ Player.prototype = {
         let self = this;
         self.snappedGuide = false;
         self.snappedSnap = false;
-    },
+    },*/
     checkEventData: function(position){
         let self = this;
         if(self.evt){
@@ -371,10 +398,10 @@ Player.prototype = {
             else self.pointerDragBehavior.startDrag(self.evt.sourceEvent.pointerId, pick.ray, pick.pickedPoint);
         }
         if(!self.evt){
-            self.collider.position = position || new BABYLON.Vector3(0, -self.collider.getBoundingInfo().minimum.y, 0);
+            self.collider.position = position || new Vector3(0, -self.collider.getBoundingInfo().minimum.y, 0);
         }
     },
-    checkSnap: function(){
+    /*checkSnap: function(){
         let self = this;
         Motifs.current.guides.forEach(guide=>{
                 self.isSnapped = false;
@@ -387,10 +414,10 @@ Player.prototype = {
         if(self.isSnapped === false){
             self.desnap();
         }
-    },
+    },*/
     checkPlayerCollisions: function(){
         let self = this;
-        Players.forEach((player,i)=>{
+        Players.forEach((player)=>{
             if(player.PlayerID !== self.PlayerID && self.collider.intersectsMesh(player.collider, false)){
                 //todo prevent collisions
             }
@@ -404,20 +431,9 @@ Player.prototype = {
     },
     destroy: function(){
         let self = this;
-        RemovePlayer(self)
+        self.alive = false;
+        self.mesh.dispose();
+        self.collider.dispose();
+        timeControl.timeline.remove(self.timeline);
     }
 };
-
-function getPlayerCollider(){
-    let newCollider = AbstractPlayer.PlayerCollider.clone("PlayerCollider", null);
-    newCollider.isVisible = true;
-    newCollider.visibility = 0;
-    return newCollider;
-}
-
-export function RemovePlayer(player){
-    self.alive = false;
-    self.mesh.dispose();
-    self.collider.dispose();
-    timeControl.timeline.remove(self.timeline);
-}

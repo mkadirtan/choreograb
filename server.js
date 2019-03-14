@@ -1,8 +1,8 @@
 const express = require('express');
-const Mongo = require('mongodb');
+/*const Mongo = require('mongodb');
 const MongoClient = Mongo.MongoClient;
 
-const MUUID = require('uuid-mongodb');
+const MUUID = require('uuid-mongodb');*/
 
 const app = express();
 const port = 3000;
@@ -13,7 +13,7 @@ app.use(express.json());
 app.listen(port, ()=>{
     console.log("Listening on :", port);
 });
-
+/*
 console.log("v1", MUUID.v1().toString());
 console.log("v4", MUUID.v4());
 console.log("Mongo", Mongo.ObjectID());
@@ -30,7 +30,7 @@ const config =
     },
     authMechanism: "SCRAM-SHA-1"
 };
-
+*/
 /*MongoClient.connect(url,config, (err, client)=>{
     if(err) throw err;
     const db = client.db("testDB").collection("testCollection").insertOne({_id: Mongo.ObjectID(uuid()), test2: "new uuid"});

@@ -1,9 +1,28 @@
+/**
+ * ASSETS
+ */
+
+/**
+ * ASSETS
+ */
+/**
+ * BABYLON IMPORTS
+ */
 import {TimelineMax, TweenMax} from 'gsap';
+/**
+ * BABYLON IMPORTS
+ */
+/**
+ * LOCAL IMPORTS
+ */
 import {slider, timePrint} from './GUI2';
 import {music} from './music';
 import {Motifs} from './motifs';
 import {Players} from './players';
-/*
+/**
+ * LOCAL IMPORTS
+ */
+/**
  * initializeTimeline returns an object with setParams method and timeline.
  * setParams assigns some routines to timeline object.
  * This approach is useful to adjust timeline according to changes.

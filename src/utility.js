@@ -1,29 +1,54 @@
-import * as BABYLON from 'babylonjs';
+/**
+ * ASSETS
+ */
+import buttonModels from './media/model/buttons.babylon';
+import guideButtonModels from './media/model/guideButtons.babylon';
+import texture1 from './media/textures/rotate.png';
+import texture2 from './media/textures/translate.png';
+/**
+ * ASSETS
+ */
+/**
+ * BABYLON IMPORTS
+ */
+
+/**
+ * BABYLON IMPORTS
+ */
+/**
+ * LOCAL IMPORTS
+ */
 import {scene} from './scene';
-import {players, selectedPlayer} from "./players";
-import {buttonModels} from './media/model/buttons.babylon';
-import {guideButtonModels} from './media/model/guideButtons.babylon';
-import {texture1} from './media/textures/rotate.png';
-import {texture2} from './media/textures/translate.png';
+import {selectedPlayer} from "./players";
+/**
+ * LOCAL IMPORTS
+ */
+
+import {UtilityLayerRenderer, SceneLoader,
+    DirectionalLight, StandardMaterial,
+    PlaneRotationGizmo, Mesh, MeshBuilder,
+    Vector3, Path3D, Color3,
+    TransformNode, Observable,
+    Texture, DynamicTexture,} from "@babylonjs/core";
 
 //Settings observable
-export let settingsObservable = new BABYLON.Observable();
+export let settingsObservable = new Observable();
 
 //Utility layer
-export let utilLayer = new BABYLON.UtilityLayerRenderer(scene);
-let utilityLight = new BABYLON.DirectionalLight("utilityLight", new BABYLON.Vector3(-0.5, -0.5, -0.5), utilLayer.utilityLayerScene);
+export let utilLayer = new UtilityLayerRenderer(scene);
+new DirectionalLight("utilityLight", new Vector3(-0.5, -0.5, -0.5), utilLayer.utilityLayerScene);
 
 //Gizmo creation
-export let gizmo = new BABYLON.PlaneRotationGizmo(new BABYLON.Vector3(0,1,0), BABYLON.Color3.Green(), utilLayer);
+export let gizmo = new PlaneRotationGizmo(new Vector3(0,1,0), Color3.Green(), utilLayer);
 {
     gizmo.snapDistance = Math.PI / 4;
     gizmo.scaleRatio = 1;
     gizmo.updateGizmoRotationToMatchAttachedMesh = false;
     let gizmoPoints = [];
     for (let i = 0; i <= 48; i++) {
-        gizmoPoints[i] = new BABYLON.Vector3(0.6 * Math.cos(i * 2 * Math.PI / 48), 0, 0.6 * Math.sin(i * 2 * Math.PI / 48));
+        gizmoPoints[i] = new Vector3(0.6 * Math.cos(i * 2 * Math.PI / 48), 0, 0.6 * Math.sin(i * 2 * Math.PI / 48));
     }
-    let gizmoCircle = new BABYLON.Path3D(gizmoPoints, new BABYLON.Vector3(0, 1, 0));
+    let gizmoCircle = new Path3D(gizmoPoints, new Vector3(0, 1, 0));
     let binormals = gizmoCircle.getBinormals();
     let points1 = [];
     let points2 = [];
@@ -32,16 +57,16 @@ export let gizmo = new BABYLON.PlaneRotationGizmo(new BABYLON.Vector3(0,1,0), BA
         points1.push(e.clone().addInPlace(binormals[i].scale(size)));
         points2.push(e.clone().addInPlace(binormals[i].scale(-size)));
     });
-    let customGizmo = BABYLON.MeshBuilder.CreatePolygon("container", {
+    let customGizmo = MeshBuilder.CreatePolygon("container", {
         shape: points2, holes: [points1]
     }, gizmo.gizmoLayer.utilityLayerScene);
     customGizmo.position.y = 0.9;
     customGizmo.visibility = 0;
-    let circularGizmo = BABYLON.MeshBuilder.CreateLines("gizmoCircle", {
+    let circularGizmo = MeshBuilder.CreateLines("gizmoCircle", {
         points: gizmoPoints,
         updatable: false
     }, gizmo.gizmoLayer.utilityLayerScene);
-    circularGizmo.color = BABYLON.Color3.Green();
+    circularGizmo.color = Color3.Green();
     circularGizmo.parent = customGizmo;
     gizmo.setCustomMesh(customGizmo);
     gizmo.onSnapObservable.add((evt) => {
@@ -54,7 +79,7 @@ export let gizmo = new BABYLON.PlaneRotationGizmo(new BABYLON.Vector3(0,1,0), BA
 }
 
 //Player options
-let settings = new BABYLON.TransformNode("settings", utilLayer.utilityLayerScene);
+let settings = new TransformNode("settings", utilLayer.utilityLayerScene);
 let playerButtons = [];
 let guideButtons = [];
 
@@ -62,24 +87,24 @@ let buttonSize = 0.9;
 let buttonPadding = 0.1;
 
 let meshes = [
-    BABYLON.MeshBuilder.CreatePlane("translate", {width: buttonSize, height: buttonSize}, utilLayer.utilityLayerScene),
-    BABYLON.MeshBuilder.CreatePlane("rotate", {width: buttonSize, height: buttonSize}, utilLayer.utilityLayerScene),
-    BABYLON.MeshBuilder.CreatePlane("nameTag", {width: buttonSize*3+buttonPadding, height: buttonSize/2}, utilLayer.utilityLayerScene)
+    MeshBuilder.CreatePlane("translate", {width: buttonSize, height: buttonSize}, utilLayer.utilityLayerScene),
+    MeshBuilder.CreatePlane("rotate", {width: buttonSize, height: buttonSize}, utilLayer.utilityLayerScene),
+    MeshBuilder.CreatePlane("nameTag", {width: buttonSize*3+buttonPadding, height: buttonSize/2}, utilLayer.utilityLayerScene)
     ];
 
 meshes[0].position.x -= buttonSize/2 + buttonPadding/2;
 meshes[1].position.x += buttonSize/2 + buttonPadding/2;
 
 meshes.forEach(e=>{
-    e.material = new BABYLON.StandardMaterial("", utilLayer.utilityLayerScene);
-    e.material.specularColor = BABYLON.Color3.Black();
+    e.material = new StandardMaterial("", utilLayer.utilityLayerScene);
+    e.material.specularColor = Color3.Black();
 });
 
-meshes[0].material.diffuseTexture = new BABYLON.Texture("./translate.png", utilLayer.utilityLayerScene);
+meshes[0].material.diffuseTexture = new Texture("./translate.png", utilLayer.utilityLayerScene);
 meshes[0].material.diffuseTexture.hasAlpha = true;
-meshes[1].material.diffuseTexture = new BABYLON.Texture("./rotate.png", utilLayer.utilityLayerScene);
+meshes[1].material.diffuseTexture = new Texture("./rotate.png", utilLayer.utilityLayerScene);
 meshes[1].material.diffuseTexture.hasAlpha = true;
-let playerName = new BABYLON.DynamicTexture("nameTag", {width: 512, height: Math.round(512*(buttonSize/2)/(buttonSize*3+buttonPadding))}, utilLayer.utilityLayerScene);
+let playerName = new DynamicTexture("nameTag", {width: 512, height: Math.round(512*(buttonSize/2)/(buttonSize*3+buttonPadding))}, utilLayer.utilityLayerScene);
 let content = playerName.getContext();
 playerName.hasAlpha = true;
 content.fillStyle = "transparent";
@@ -102,14 +127,14 @@ meshes[2].position.y += buttonSize + buttonPadding;
 
 playerButtons = [...meshes];
 
-BABYLON.SceneLoader.ImportMesh("",'./guideButtons.babylon', "", utilLayer.utilityLayerScene, function(meshes){
+SceneLoader.ImportMesh("",'./guideButtons.babylon', "", utilLayer.utilityLayerScene, function(meshes){
     meshes.forEach(e=>{
         e.convertToFlatShadedMesh();
         e.position.y = 0;
         e.isVisible = false;
         e.isPickable = false;
         e.parent = settings;
-        e.material.specularColor = BABYLON.Color3.Black();
+        e.material.specularColor = Color3.Black();
     });
     guideButtons = [...meshes];
 });
@@ -118,7 +143,7 @@ settings.position.y = 2.2;
 settingsObservable.add(info=>{
     if(info.type === "player"){
         settings.parent = info.attachedMesh;
-        settings.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+        settings.billboardMode = Mesh.BILLBOARDMODE_ALL;
         gizmo.attachedMesh?gizmo.attachedMesh=selectedPlayer.dummyRotator:gizmo.attachedMesh=null;
         playerButtons.forEach(e=>{
             e.isVisible = true;
@@ -131,7 +156,7 @@ settingsObservable.add(info=>{
     }
     else if(info.type === "guide"){
         settings.parent = info.attachedMesh;
-        settings.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+        settings.billboardMode = Mesh.BILLBOARDMODE_ALL;
         gizmo.attachedMesh=null;
         guideButtons.forEach(e=>{
             e.isVisible = true;
