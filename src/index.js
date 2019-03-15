@@ -24,6 +24,12 @@ new Motif({
     end: 2
 });
 
+new Motif({
+    name: "motif2",
+    start: 6,
+    end: 8
+});
+
 /**
  * LOCAL IMPORTS
  */

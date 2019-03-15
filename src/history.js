@@ -56,7 +56,10 @@ export let HistoryManager = {
 export function HistoryAction(execute, undo, redo, that){
     let self = this;
     self.execute = function(){
-        HistoryManager.process(execute(that), self);
+        let returned = execute(that);
+        if(returned){
+            HistoryManager.process(execute(that), self);
+        }
     };
     self.redo = function(value){
         redo(value, that);

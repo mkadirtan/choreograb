@@ -9,8 +9,8 @@ import playerManifest from './media/model/newPlayer.babylon.manifest';
 /**
  * LIBRARY IMPORTS
  */
-import { Map } from 'immutable';
-import { TimelineMax, TweenMax } from 'gsap';
+import { TimelineMax } from 'gsap';
+import { Power0 } from "gsap";
 import { SceneLoader, MeshBuilder,
     ActionManager, ExecuteCodeAction, PointerDragBehavior,
     Vector3 } from "@babylonjs/core";
@@ -37,7 +37,6 @@ Players.updatePositionRotation = function(){
         self.forEach(player=>{
             player.keys.forEach(key=>{
                 if(key.MotifID === Motifs.current.MotifID){
-                    console.log("key - motif match!");
                     player.collider.position.x = key.position.x;
                     player.collider.position.y = key.position.y;
                     player.collider.position.z = key.position.z;
@@ -49,7 +48,7 @@ Players.updatePositionRotation = function(){
             })
         })
     }
-}
+};
 export let selectedPlayer = null;
 
 export let AbstractPlayer = {};
@@ -212,7 +211,8 @@ Player.prototype = {
                 }
             }
             else {
-                console.log("Can't assign key. No active motif found!")
+                console.log("Can't assign key. No active motif found!");
+                return false;
             }
         };
         let keyUndo = function(stored){
@@ -229,7 +229,7 @@ Player.prototype = {
     },
     generateKey: function(){
         let self = this;
-        let ease = Linear.easeNone;
+        let ease = Power0.easeNone;
         return {
             motif: Motifs.current,
             MotifID: Motifs.current.MotifID,
@@ -249,8 +249,6 @@ Player.prototype = {
         };
     },
     addKey: function(key){
-        console.log("adding key...");
-        console.log(key);
         let self = this;
         let exists;
         self.keys.forEach((_key, i)=>{
@@ -273,7 +271,7 @@ Player.prototype = {
     },
     updateTimeline: function(){
         let self = this;
-        let ease = Linear.easeNone;
+        let ease = Power0.easeNone;
         let position = self.collider.position;
         let rotation = self.collider.rotation;
 
@@ -385,8 +383,6 @@ Player.prototype = {
             //Keyframing algorithm
             if(!self.dragCancelled){
                 self.key.execute();
-                self.updateAnimation();
-                self.updateTimeline();
             }
             self.dragCancelled = false;
             //Removal by trash can
