@@ -53,6 +53,7 @@ let timeControl = {
     updateTimeline: function(){
         let time = this.slider.value;
         this.timeline.seek(0,false).seek(time,false);
+        Players.updatePositionRotation();
         Motifs.update();
     },
     checkOnMotif: function(){

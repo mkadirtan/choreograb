@@ -31,6 +31,25 @@ import {HistoryAction, CreateID} from './history';
  * LOCAL IMPORTS
  */
 export let Players = [];
+Players.updatePositionRotation = function(){
+    let self = this;
+    if(timeControl.checkOnMotif()){
+        self.forEach(player=>{
+            player.keys.forEach(key=>{
+                if(key.MotifID === Motifs.current.MotifID){
+                    console.log("key - motif match!");
+                    player.collider.position.x = key.position.x;
+                    player.collider.position.y = key.position.y;
+                    player.collider.position.z = key.position.z;
+
+                    player.collider.rotation.x = key.rotation.x;
+                    player.collider.rotation.y = key.rotation.y;
+                    player.collider.rotation.z = key.rotation.z;
+                }
+            })
+        })
+    }
+}
 export let selectedPlayer = null;
 
 export let AbstractPlayer = {};
@@ -177,27 +196,36 @@ Player.prototype = {
         let keyExecute = function(){
             if(timeControl.checkOnMotif()){
                 let key = self.generateKey();
-                let storedKey = null;
+                let newKey = cloneDeep(key);
+                let oldKey = null;
                 self.keys.forEach(current=>{
                     if(current.MotifID === Motifs.current.MotifID){
-                        storedKey = cloneDeep(current);
+                        oldKey = cloneDeep(current);
                     }
                 });
                 self.addKey(key);
                 self.updateAnimation();
                 self.updateTimeline();
-                return storedKey
+                return {
+                    oldKey,
+                    newKey
+                }
             }
             else {
                 console.log("Can't assign key. No active motif found!")
             }
         };
-        let keyUndoRedo = function(storedKey){
-            self.addKey(storedKey);
+        let keyUndo = function(stored){
+            self.addKey(stored.oldKey);
             self.updateAnimation();
             self.updateTimeline();
         };
-        self.key = new HistoryAction(keyExecute, keyUndoRedo, keyUndoRedo, self);
+        let keyRedo = function(stored){
+            self.addKey(stored.newKey);
+            self.updateAnimation();
+            self.updateTimeline();
+        };
+        self.key = new HistoryAction(keyExecute, keyUndo, keyRedo, self);
     },
     generateKey: function(){
         let self = this;

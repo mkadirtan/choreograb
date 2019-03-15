@@ -15,10 +15,10 @@ export let HistoryManager = {
         console.log("Action processed!")
     },
     undo: function(){
-        if( historyIndex >= 0 ){
-            let action = history[historyIndex].action;
+        if( historyIndex > -1 ){
             let value = history[historyIndex].returned;
             if(value){
+                let action = history[historyIndex].action;
                 action.undo(value);
                 historyIndex--;
                 console.log("Undo successfull!")
@@ -27,7 +27,6 @@ export let HistoryManager = {
                 console.log("Undo has no effect!");
                 historyIndex--;
             }
-
         }
         else{
             console.log("No more undo available!")
@@ -36,9 +35,9 @@ export let HistoryManager = {
     redo: function(){
         console.log(history);
         if( historyIndex < history.length - 1 ){
-            let action = history[historyIndex+1].action;
             let value = history[historyIndex+1].returned;
             if(value){
+                let action = history[historyIndex+1].action;
                 action.redo(value);
                 historyIndex++;
                 console.log("Redo successfull!")
