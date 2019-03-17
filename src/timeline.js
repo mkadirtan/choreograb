@@ -76,7 +76,7 @@ timeControl.timeline.eventCallback("onUpdate", function(){
     if(this.music.playing() && Math.abs(this.music.seek()-self.timeline.time())>this.audioSyncSensitivity){
         this.music.seek(this.timeline.time());
     }
-    Players.forEach(e=>e.updateAnimation());
+    Players.players.forEach(e=>e.updateAnimation());
     Motifs.update();
 }, [], timeControl)
 .eventCallback("onComplete", function(){

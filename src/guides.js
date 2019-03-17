@@ -22,7 +22,28 @@ import {CreateID} from "./history";
  * LOCAL IMPORTS
  */
 
-export let Guides = [];
+export let Guides = {
+    guides: [],
+    registerElements(){
+        let elements = [];
+        this.guides.forEach(guide=>{
+            elements.push({
+                type: guide.type,
+                GuideID: guide.GuideID,
+                playerCount: guide.playerCount,
+                position: guide.position,
+                MotifID: guide.motif.MotifID,
+                points: guide.points,
+                radius: guide.radius,
+                color: guide.color,
+                material: guide.material,
+                isActive: guide.isActive
+            });
+        });
+        return elements;
+    },
+};
+
 export let selectedGuide = null;
 
 let guideMaterial = new StandardMaterial("guideMaterial", scene);
@@ -38,8 +59,7 @@ Guide.prototype = {
     initParameters: function(param){
         this.type = param.type;
         this.GuideID = param.GuideID || CreateID('Guide');
-        Guides.push(this);
-        //this.name = param.type + "_guide";
+        Guides.guides.push(this);
         this.playerCount = param.playerCount || 2;
         this.position = param.position || Vector3.Zero();
         this.motif = param.motif || Motifs.current;

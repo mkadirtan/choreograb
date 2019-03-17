@@ -27,6 +27,8 @@ import {scene, switchCamera} from './scene';
 import {timeControl} from './timeline';
 import {Motifs} from './motifs';
 import {HistoryManager} from './history';
+import {sceneControl} from "./sceneControl";
+import scenesave from  "./scenesave";
 /**
  * LOCAL IMPORTS
  */
@@ -83,11 +85,11 @@ let stopButton = new Button({name: "stop", image: "./stop.png", stack: bottomPan
     }
 });
 let previousButton = new Button({name: "previous", image: "./previous.png", stack: bottomPanel, onClick(){
-        Motifs.previousMotif();
+        sceneControl.register();
     }
 });
 let nextButton = new Button({name: "next", image: "./next.png", stack: bottomPanel, onClick(){
-        Motifs.nextMotif();
+        sceneControl.load(scenesave);
     }
 });
 //bottomPanel.addControl(playPanel);
@@ -125,7 +127,7 @@ let fastBackward = new Button({name: "fBackward", image: "./fastBackward.png", s
     }
 });
 let fastForward = new Button({name: "fForward", image: "./fastForward.png", stack: bottomPanel, onClick(){
-        HistoryManager.redo();
+        Motifs.nextMotif();
     }
 });
 
@@ -140,7 +142,6 @@ export function Button(param){
     result.height = param.height || "96px";
     result.cornerRadius = 3.5;
     if(param.onClick)result.onPointerUpObservable.add(param.onClick);
-    param.stack.addControl(result);
     if(param.stack === leftPanel){
         result.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
     }
@@ -150,6 +151,7 @@ export function Button(param){
     else if(param.stack === bottomPanel){
         result.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
     }
+    param.stack.addControl(result);
     return result;
 }
 /**

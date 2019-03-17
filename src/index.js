@@ -18,7 +18,7 @@
 import { scene } from './scene';
 import { Motif } from './motifs';
 
-new Motif({
+/*new Motif({
     name: "motif1",
     start: 0,
     end: 2
@@ -29,7 +29,7 @@ new Motif({
     start: 6,
     end: 8
 });
-
+*/
 /**
  * LOCAL IMPORTS
  */

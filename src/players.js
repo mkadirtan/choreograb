@@ -30,25 +30,40 @@ import {HistoryAction, CreateID} from './history';
 /**
  * LOCAL IMPORTS
  */
-export let Players = [];
-Players.updatePositionRotation = function(){
-    let self = this;
-    if(timeControl.checkOnMotif()){
-        self.forEach(player=>{
-            player.keys.forEach(key=>{
-                if(key.MotifID === Motifs.current.MotifID){
-                    player.collider.position.x = key.position.x;
-                    player.collider.position.y = key.position.y;
-                    player.collider.position.z = key.position.z;
+export let Players = {
+    players: [],
+    updatePositionRotation(){
+        let self = this;
+        if(timeControl.checkOnMotif()){
+            self.players.forEach(player=>{
+                player.keys.forEach(key=>{
+                    if(key.MotifID === Motifs.current.MotifID){
+                        player.collider.position.x = key.position.x;
+                        player.collider.position.y = key.position.y;
+                        player.collider.position.z = key.position.z;
 
-                    player.collider.rotation.x = key.rotation.x;
-                    player.collider.rotation.y = key.rotation.y;
-                    player.collider.rotation.z = key.rotation.z;
-                }
+                        player.collider.rotation.x = key.rotation.x;
+                        player.collider.rotation.y = key.rotation.y;
+                        player.collider.rotation.z = key.rotation.z;
+                    }
+                })
             })
-        })
-    }
+        }
+    },
+    registerElements(){
+        let elements = [];
+        this.players.forEach(player=>{
+            elements.push({
+                PlayerID: player.PlayerID,
+                perseonalInformation: player.personalInformation,
+                position: player.collider.position.clone(),
+                keys: player.keys
+            })
+        });
+        return elements;
+    },
 };
+
 export let selectedPlayer = null;
 
 export let AbstractPlayer = {};
@@ -104,10 +119,10 @@ SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(result => 
     PlayerMesh.actionManager.registerAction(
         new ExecuteCodeAction(ActionManager.OnLeftPickTrigger,
             function(evt){
-            let collider = AbstractPlayer.PlayerCollider.clone();
+            /*let collider = AbstractPlayer.PlayerCollider.clone();
             let mesh = collider.getChildren()[0];
-            mesh.skeleton = AbstractPlayer.PlayerSkeleton.clone();
-            let newPlayer = new Player({evt, collider, mesh});
+            mesh.skeleton = AbstractPlayer.PlayerSkeleton.clone();*/
+            let newPlayer = new Player({evt});
 
             scene.stopAnimation(newPlayer.mesh.skeleton);
             newPlayer.mesh.skeleton.returnToRest();
@@ -118,7 +133,7 @@ SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(result => 
     );
 });
 
-function Player(param){
+export function Player(param){
     this.initParameters(param);
     this.initBehaviors(param);
     /**
@@ -136,7 +151,7 @@ Player.prototype = {
         self.collider.isVisible = true;
         self.collider.visibility = 0;
         //Register to players
-        Players.push(self);
+        Players.players.push(self);
         selectedPlayer = self;
         //Register to timeControl
         timeControl.timeline.add(self.timeline,0);
@@ -162,9 +177,15 @@ Player.prototype = {
         else self.checkEventData();
         //Actions
         self.attachActions();
+        if(param.keys){
+            self.keys = param.keys;
+            self.updateTimeline();
+            self.updateAnimation()
+        }
     },
     initParameters: function(param){
         let self = this;
+        self.type = "Player";
         self.PlayerID = param.PlayerID || CreateID('Player');
         //Initialize variables and generic properties
         self.alive = true;
@@ -173,8 +194,13 @@ Player.prototype = {
         self.dummyRotator.isVisible = false;
         self.dummyRotator.ownerPlayer = self;
         self.keys = [];
-        self.mesh = param.mesh;
-        self.collider = param.collider;
+
+        let collider = AbstractPlayer.PlayerCollider.clone();
+        let mesh = collider.getChildren()[0];
+        mesh.skeleton = AbstractPlayer.PlayerSkeleton.clone();
+        self.mesh = mesh;
+        self.collider = collider;
+
         self.collider.ID = "PlayerCollider";
         self.collider.isVisible = false;
         self.evt = param.evt || false;
@@ -441,7 +467,7 @@ Player.prototype = {
     },*/
     checkPlayerCollisions: function(){
         let self = this;
-        Players.forEach((player)=>{
+        Players.players.forEach((player)=>{
             if(player.PlayerID !== self.PlayerID && self.collider.intersectsMesh(player.collider, false)){
                 //todo prevent collisions
             }

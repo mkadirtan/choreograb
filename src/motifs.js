@@ -89,6 +89,18 @@ export let Motifs = {
     previousMotif(){
         timeControl.shake(this.previous);
         this.update();
+    },
+    registerElements(){
+        let elements = [];
+        this.motifs.forEach(motif=>{
+            elements.push({
+                MotifID: motif.MotifID,
+                name: motif.name,
+                start: motif.start,
+                end: motif.end,
+            });
+        });
+        return elements;
     }
 };
 
@@ -122,6 +134,9 @@ Motif.prototype = {
                 a.splice(i, 1);
             }
         })
+    },
+    registerElement: function(){
+
     },
     active: function(status){
         if(status === undefined){

@@ -11,7 +11,8 @@ import {
     UniversalCamera,
     ArcRotateCamera,
     Camera,
-    Animation}
+    Animation,
+    Tools}
                         from '@babylonjs/core';
 import {GridMaterial} from "@babylonjs/materials";
 
@@ -19,7 +20,7 @@ import surroundingModel from './media/model/surrounding.babylon';
 import surroundingManifest from './media/model/surrounding.babylon.manifest';
 
 Animation.AllowMatricesInterpolation = true;
-
+Tools.LogLevels = Tools.NoneLogLevel;
 let initializeScene = function(){
     let canvas = document.getElementById("renderCanvas");
     let engine = new Engine(canvas,  true, {stencil: true}); //Stencil: Edge renderer

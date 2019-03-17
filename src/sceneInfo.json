@@ -1,95 +1,255 @@
 {
-  "background": "default",
   "Players": [
-	{
-	  "uniqueID": "player1",
-	  "personalInformation": {
-		"name": "Şahin YALDIZ",
-		"no": 17,
-		"gender": "male",
-		"height": 170
-	  },
-	  "keys": [
-		{
-		  "motif": "motif1",
-		  "position": {
-			"x": 0,
-			"y": 0,
-			"z": 0
-		  },
-		  "rotation": {
-			"x": 0,
-			"y": 0,
-			"z": 0
-		  },
-		  "snapTarget": false,
-		  "stepCount": 3
-		},
-		{
-		  "motif": "motif2",
-		  "position": {
-			"x": 0,
-			"y": 0,
-			"z": 3
-		  },
-		  "rotation": {
-			"x": 0,
-			"y": 0,
-			"z": 0
-		  },
-		  "snapTarget": false,
-		  "stepCount": 3
-		}
-	  ]
-	}
+    {
+      "PlayerID": "Player_jtd4lnfrpp164",
+      "perseonalInformation": {
+        "name": "New Player",
+        "height": 170,
+        "order": 0
+      },
+      "position": {
+        "x": 0.8288794581607913,
+        "y": 8.881784197001252e-16,
+        "z": 1.7458184632151301
+      },
+      "keys": [
+        {
+          "motif": {
+            "MotifID": "Motif_jtd4lmd85v7vv",
+            "name": "motif1",
+            "_isActive": true,
+            "start": 0,
+            "end": 2,
+            "guides": []
+          },
+          "MotifID": "Motif_jtd4lmd85v7vv",
+          "position": {
+            "x": 0.8288794581607913,
+            "y": 8.881784197001252e-16,
+            "z": 1.7458184632151301,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "stepCount": 3
+        }
+      ]
+    },
+    {
+      "PlayerID": "Player_jtd4loparnzto",
+      "perseonalInformation": {
+        "name": "New Player",
+        "height": 170,
+        "order": 0
+      },
+      "position": {
+        "x": 0.814961612681572,
+        "y": 2.6645352591003757e-15,
+        "z": -0.3051010672090122
+      },
+      "keys": [
+        {
+          "motif": {
+            "MotifID": "Motif_jtd4lmd85v7vv",
+            "name": "motif1",
+            "_isActive": true,
+            "start": 0,
+            "end": 2,
+            "guides": []
+          },
+          "MotifID": "Motif_jtd4lmd85v7vv",
+          "position": {
+            "x": 0.814961612681572,
+            "y": 2.6645352591003757e-15,
+            "z": -0.3051010672090122,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "stepCount": 3
+        }
+      ]
+    },
+    {
+      "PlayerID": "Player_jtd4lq3o6rs6o",
+      "perseonalInformation": {
+        "name": "New Player",
+        "height": 170,
+        "order": 0
+      },
+      "position": {
+        "x": 0.9156060350256227,
+        "y": 1.7763568394002505e-15,
+        "z": -2.1207917437335286
+      },
+      "keys": [
+        {
+          "motif": {
+            "MotifID": "Motif_jtd4lmd85v7vv",
+            "name": "motif1",
+            "_isActive": true,
+            "start": 0,
+            "end": 2,
+            "guides": []
+          },
+          "MotifID": "Motif_jtd4lmd85v7vv",
+          "position": {
+            "x": 0.9156060350256227,
+            "y": 1.7763568394002505e-15,
+            "z": -2.1207917437335286,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "stepCount": 3
+        }
+      ]
+    },
+    {
+      "PlayerID": "Player_jtd4ls5w8pz1w",
+      "perseonalInformation": {
+        "name": "New Player",
+        "height": 170,
+        "order": 0
+      },
+      "position": {
+        "x": 0.9235526610398209,
+        "y": 8.881784197001252e-16,
+        "z": 3.3225219926252283
+      },
+      "keys": [
+        {
+          "motif": {
+            "MotifID": "Motif_jtd4lmd85v7vv",
+            "name": "motif1",
+            "_isActive": true,
+            "start": 0,
+            "end": 2,
+            "guides": []
+          },
+          "MotifID": "Motif_jtd4lmd85v7vv",
+          "position": {
+            "x": 0.9235526610398209,
+            "y": 8.881784197001252e-16,
+            "z": 3.3225219926252283,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "stepCount": 3
+        }
+      ]
+    }
   ],
-  "motifs": [
-	{
-	  "motifID": "motif1",
-	  "start": 0,
-	  "end": 2,
-	  "guides": [
-		{
-		  "guideID": "closureGuide1",
-		  "type": "closure",
-		  "points": [
-			{
-			  "x": 0,
-			  "y": 0,
-			  "z": 0
-			},
-			{
-			  "x": 1,
-			  "y": 0,
-			  "z": 0
-			},
-			{
-			  "x": 1,
-			  "y": 0,
-			  "z": 1
-			},
-			{
-			  "x": 0,
-			  "y": 0,
-			  "z": 1
-			},
-			{
-			  "x": 0,
-			  "y": 0,
-			  "z": 0
-			}
-		  ],
-		  "isActive": true,
-		  "playerCount": 4,
-		  "motif": "motif1"
-		}
-	  ]
-	},
-	{
-	  "motifID": "motif2",
-	  "start": 6,
-	  "end": 10,
-	  "guides": []
-	}
+  "Guides": [],
+  "Motifs": [
+    {
+      "MotifID": "Motif_jtd4lmd85v7vv",
+      "name": "motif1",
+      "start": 0,
+      "end": 2
+    },
+    {
+      "MotifID": "Motif_jtd4lmd8u9fgs",
+      "name": "motif2",
+      "start": 6,
+      "end": 8
+    }
   ]
 }
