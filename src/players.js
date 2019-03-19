@@ -14,7 +14,6 @@ import { Power0 } from "gsap";
 import { SceneLoader, MeshBuilder,
     ActionManager, ExecuteCodeAction, PointerDragBehavior,
     Vector3 } from "@babylonjs/core";
-import * as cloneDeep from 'clone-deep';
 /**
  * LIBRARY IMPORTS
  */
@@ -27,11 +26,22 @@ import {timeControl} from "./timeline";
 import {selectionModeObservable, currentMode} from './GUI2';
 import {settingsObservable} from "./utility";
 import {HistoryAction, CreateID} from './history';
+
 /**
  * LOCAL IMPORTS
  */
 export let Players = {
     players: [],
+    add(player){
+        this.players.push(player)
+    },
+    remove(player){
+        this.players.forEach((_player,i,a)=>{
+            if(_player.PlayerID === player.PlayerID){
+                a.splice(i,1);
+            }
+        })
+    },
     updatePositionRotation(){
         let self = this;
         if(timeControl.checkOnMotif()){
@@ -122,8 +132,7 @@ SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(result => 
             /*let collider = AbstractPlayer.PlayerCollider.clone();
             let mesh = collider.getChildren()[0];
             mesh.skeleton = AbstractPlayer.PlayerSkeleton.clone();*/
-            let newPlayer = new Player({evt});
-
+            let newPlayer = new Player({isByEvent: evt});
             scene.stopAnimation(newPlayer.mesh.skeleton);
             newPlayer.mesh.skeleton.returnToRest();
             scene.beginAnimation(newPlayer.mesh.skeleton, walk.from+1, walk.to-1, true);
@@ -134,8 +143,8 @@ SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(result => 
 });
 
 export function Player(param){
-    this.initParameters(param);
-    this.initBehaviors(param);
+    this.initialize(param);
+    this.update(param);
     /**
      * mesh, collider, mesh.skeleton
      * keys[] = {motif, guide, snap, position, rotation}
@@ -146,112 +155,74 @@ export function Player(param){
 }
 
 Player.prototype = {
-    initBehaviors: function(param){
+    initialize(param){
+        this.definingParameters(param);
+        this.definingPlayer(param);
+    },
+    update(param){
+        this.nonDefiningParameters(param);
+        this.nonDefiningUpdate(param);
+    },
+    definingParameters(param){
         let self = this;
-        self.collider.isVisible = true;
-        self.collider.visibility = 0;
-        //Register to players
-        Players.players.push(self);
-        selectedPlayer = self;
-        //Register to timeControl
-        timeControl.timeline.add(self.timeline,0);
-        //Initialize selectionModeObservable
-        selectionModeObservable.add(mode=>{
-            if(mode === "players" && self.alive){
-                self.mesh.isPickable = true;
-                self.collider.isPickable = true;
-            }
-            else if(mode === "guides" && self.alive){
-                self.mesh.isPickable = false;
-                self.collider.isPickable = false;
-            }
+        Object.assign(this,
+            {
+                type: "Player",
+                PlayerID: param.PlayerID || CreateID('Player'),
+                alive: true,
+                dummyRotator: MeshBuilder.CreatePlane("dummy", {size: 1}, scene),
+                collider: AbstractPlayer.PlayerCollider.clone(),
+                isByEvent: param.isByEvent,
+                lastPosition: null,
+                isSnapped: false,
+                feetDrag: false,
+                timeline: new TimelineMax(),
+                keys: param.keys ||[],
+                currentKey: 0,
+                personalnformation: {
+                    name: param.name || "New Player",
+                    height: param.height || 170,
+                    order: param.order || 0
+                },
+                attachedPosition: param.position || null
+            });
+    },
+    definingPlayer(){
+        this.dummyRotator.ID = "PlayerRotator";
+        this.dummyRotator.isVisible = false;
+        this.dummyRotator.ownerPlayer = this;
+        this.collider.ID = "PlayerCollider";
+        //this.collider.isVisible = false;
+        this.hideCollider();
+        this.mesh = this.collider.getChildren()[0];
+        this.mesh.skeleton = AbstractPlayer.PlayerSkeleton.clone();
+        this.mesh.name = "Player";
+        this.mesh.ID = "Player";
+        Players.add(this);
+        if(this.isByEvent){selectedPlayer = this}
+        timeControl.add(this.timeline);
+        this.addSelectionBehavior();
+        this.attachMenu();
+        this.addDragBehavior();
+        this.checkEventData(this.attachedPosition);
+    },
+    nonDefiningParameters: function(param){
+        let newParam = {};
+        const allowedParams = ["keys", "currentKey", "personalInformation", "lastPosition", "isSnapped", "feetDrag", "alive"];
+        allowedParams.forEach(entry=>{
+            if(param.hasOwnProperty(entry)){newParam[entry] = param[entry];}
         });
-        selectionModeObservable.notifyObservers(currentMode);
-        //Initialize menu settings
-        self.attachMenu();
-        settingsObservable.notifyObservers({type: "player", attachedMesh: self.mesh});
-        //Initialize dragBehavior
-        self.addDragBehavior();
-        //Check whether object was created by user interaction or loaded from data.
-        if(param.position) self.checkEventData(param.position);
-        else self.checkEventData();
-        //Actions
-        self.attachActions();
-        if(param.keys){
-            self.keys = param.keys;
-            self.updateTimeline();
-            self.updateAnimation()
-        }
+        Object.assign(this, newParam)
     },
-    initParameters: function(param){
-        let self = this;
-        self.type = "Player";
-        self.PlayerID = param.PlayerID || CreateID('Player');
-        //Initialize variables and generic properties
-        self.alive = true;
-        self.currentKey = 0;
-        self.dummyRotator = new MeshBuilder.CreatePlane("dummy", {size: 1}, scene);
-        self.dummyRotator.isVisible = false;
-        self.dummyRotator.ownerPlayer = self;
-        self.keys = [];
-
-        let collider = AbstractPlayer.PlayerCollider.clone();
-        let mesh = collider.getChildren()[0];
-        mesh.skeleton = AbstractPlayer.PlayerSkeleton.clone();
-        self.mesh = mesh;
-        self.collider = collider;
-
-        self.collider.ID = "PlayerCollider";
-        self.collider.isVisible = false;
-        self.evt = param.evt || false;
-        self.mesh.name = "Player";
-        self.mesh.ID = "Player";
-        self.lastPosition = null;
-        self.isSnapped = false;
-        self.feetDrag = false;
-        self.timeline = new TimelineMax();
-        self.personalInformation = {
-            name: param.name || "New Player",
-            height: param.height || 170,
-            order: param.order || 0
-        };
+    nonDefiningUpdate(){
+        this.updateTimeline();
+        this.updateAnimation();
     },
-    attachActions: function(){
+    key(){
         let self = this;
-        let keyExecute = function(){
-            if(timeControl.checkOnMotif()){
-                let key = self.generateKey();
-                let newKey = cloneDeep(key);
-                let oldKey = null;
-                self.keys.forEach(current=>{
-                    if(current.MotifID === Motifs.current.MotifID){
-                        oldKey = cloneDeep(current);
-                    }
-                });
-                self.addKey(key);
-                self.updateAnimation();
-                self.updateTimeline();
-                return {
-                    oldKey,
-                    newKey
-                }
-            }
-            else {
-                console.log("Can't assign key. No active motif found!");
-                return false;
-            }
-        };
-        let keyUndo = function(stored){
-            self.addKey(stored.oldKey);
-            self.updateAnimation();
-            self.updateTimeline();
-        };
-        let keyRedo = function(stored){
-            self.addKey(stored.newKey);
-            self.updateAnimation();
-            self.updateTimeline();
-        };
-        self.key = new HistoryAction(keyExecute, keyUndo, keyRedo, self);
+        if(timeControl.checkOnMotif()){self.addKey(self.generateKey())}
+        this.updateTimeline();
+        this.updateAnimation();
     },
     generateKey: function(){
         let self = this;
@@ -371,26 +342,25 @@ Player.prototype = {
         self.pointerDragBehavior.updateDragPlane = false;
         self.collider.addBehavior(self.pointerDragBehavior);
 
-        let reference; //Required for deletion of keyboard observable
         self.dragCancelled = false;
         self.pointerDragBehavior.onDragStartObservable.add(function(eventData, eventState){
             self.lastPosition = self.collider.position.clone();
             self.collider.position = self.collider.position.clone();
-            reference = scene.onKeyboardObservable.add((event) => {
+            self.keyboardObservable = scene.onKeyboardObservable.add((event) => {
                 //Cancel object dragging or creation
                 if (event.event.code === "Space") {
-                    if (self.evt) {
-                        self.pointerDragBehavior.releaseDrag();
-                        self.destroy();
-                    } else if (self.evt === false){
-                        self.dragCancelled = true;
-                        self.pointerDragBehavior.releaseDrag();
-                        self.collider.position = self.lastPosition;
+                    if (this.isByEvent) {
+                        this.pointerDragBehavior.releaseDrag();
+                        this.destroy();
+                    } else if (this.isByEvent === false){
+                        this.dragCancelled = true;
+                        this.pointerDragBehavior.releaseDrag();
+                        this.collider.position = this.lastPosition;
                     }
                 }
             }, -1, true, self);
             //When active camera is 'fps' drag players from their feet
-            if(scene.activeCamera.name === "fps" && !self.feetDrag && !self.evt) {
+            if(scene.activeCamera.name === "fps" && !self.feetDrag && !self.isByEvent) {
                 self.feetDrag = true;
                 setTimeout(function(){
                     self.pointerDragBehavior.startDrag(eventData.pointerId);
@@ -401,14 +371,14 @@ Player.prototype = {
         });
         self.pointerDragBehavior.onDragEndObservable.add(function(){
             //Remove keyboard observable
-            scene.onKeyboardObservable.remove(reference);
+            scene.onKeyboardObservable.remove(self.keyboardObservable);
             //Apply snapping
             //self.checkSnap();
             //Player collision mechanics
             self.checkPlayerCollisions();
             //Keyframing algorithm
             if(!self.dragCancelled){
-                self.key.execute();
+                self.key();
             }
             self.dragCancelled = false;
             //Removal by trash can
@@ -416,6 +386,22 @@ Player.prototype = {
             //todo Reattaching canvas control, because sometimes it doesn't work.
             scene.activeCamera.attachControl(scene.getEngine().getRenderingCanvas(), true);
         });
+    },
+    addSelectionBehavior(){
+        this.selectionObservable = selectionModeObservable.add(mode=>{
+            if(mode === "players" && this.alive){
+                this.mesh.isPickable = true;
+                this.collider.isPickable = true;
+            }
+            else if(mode === "guides" && this.alive){
+                this.mesh.isPickable = false;
+                this.collider.isPickable = false;
+            }
+        }, null, false, this);
+        selectionModeObservable.notifyObservers(currentMode);
+        if(self.isByEvent){
+            settingsObservable.notifyObservers({type: "player", attachedMesh: self.mesh});
+        }
     },
     /*snap: function(guide, snap){
         let self = this;
@@ -431,7 +417,7 @@ Player.prototype = {
     },*/
     checkEventData: function(position){
         let self = this;
-        if(self.evt){
+        if(self.isByEvent){
             self.mesh.visibility = 0.8;
             self.mesh.renderOutline = true;
             self.pointerDragBehavior.onDragEndObservable.addOnce(function(){
@@ -441,14 +427,16 @@ Player.prototype = {
                     self.mesh.skeleton.returnToRest();
                     scene.beginAnimation(self.mesh.skeleton, AbstractPlayer.ranges.idle.from, AbstractPlayer.ranges.idle.to, true, 0.72);
                 }
-                self.evt = false;
+                self.isByEvent = false;
             });
-            let pick = scene.pick(self.evt.pointerX, self.evt.pointerY, function(mesh){return mesh.name === "AbstractPlayer"});
-            if(scene.activeCamera.name === "fps") self.pointerDragBehavior.startDrag(self.evt.sourceEvent.pointerId);
-            else self.pointerDragBehavior.startDrag(self.evt.sourceEvent.pointerId, pick.ray, pick.pickedPoint);
+            let pick = scene.pick(self.isByEvent.pointerX, self.isByEvent.pointerY, function(mesh){return mesh.name === "AbstractPlayer"});
+            if(scene.activeCamera.name === "fps") self.pointerDragBehavior.startDrag(self.isByEvent.sourceEvent.pointerId);
+            else self.pointerDragBehavior.startDrag(self.isByEvent.sourceEvent.pointerId, pick.ray, pick.pickedPoint);
         }
-        if(!self.evt){
-            self.collider.position = position || new Vector3(0, -self.collider.getBoundingInfo().minimum.y, 0);
+        else if(position){
+            self.collider.position = new Vector3(position);
+            //|| new Vector3(0, -self.collider.getBoundingInfo().minimum.y, 0);
+            delete self.attachedPosition;
         }
     },
     /*checkSnap: function(){
@@ -473,6 +461,10 @@ Player.prototype = {
             }
         });
     },
+    hideCollider(){
+        this.collider.isVisible = true;
+        this.collider.visibility = 0;
+    },
     checkTrash: function(){
         let self = this;
         if(self.collider.intersectsMesh(scene.getMeshByName("Trash"), false)){
@@ -480,10 +472,14 @@ Player.prototype = {
         }
     },
     destroy: function(){
-        let self = this;
-        self.alive = false;
-        self.mesh.dispose();
-        self.collider.dispose();
-        timeControl.timeline.remove(self.timeline);
+        const meshes = ["mesh", "collider", "dummyRotator", ];
+        scene.onKeyboardObservable.remove(this.keyboardObservable);
+        selectionModeObservable.remove(this.selectionObservable);
+        timeControl.timeline.remove(this.timeline);
+        meshes.forEach(mesh=>{this[mesh].dispose();});
+        delete this.keyboardObservable;
+        delete this.selectionObservable;
+        delete this.timeline;
+        Players.remove(this);
     }
 };

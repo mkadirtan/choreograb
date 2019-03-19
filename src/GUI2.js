@@ -67,7 +67,10 @@ advancedTexture.addControl(rightPanel);
 advancedTexture.addControl(bottomPanel);
 
 let cameraButton = new Button({name: "cameraButton", image: "./camera.png", stack: rightPanel, onClick(){
-        switchCamera();
+        console.log(scene.meshes);
+        console.log("getting by ID..");
+        //todo not working, submit PG!
+        console.log(scene.getMeshesByID("Player"));
     }
 });
 
@@ -85,7 +88,7 @@ let stopButton = new Button({name: "stop", image: "./stop.png", stack: bottomPan
     }
 });
 let previousButton = new Button({name: "previous", image: "./previous.png", stack: bottomPanel, onClick(){
-        sceneControl.register();
+        sceneControl.save();
     }
 });
 let nextButton = new Button({name: "next", image: "./next.png", stack: bottomPanel, onClick(){

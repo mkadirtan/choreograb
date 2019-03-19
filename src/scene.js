@@ -128,11 +128,5 @@ let switchCamera = function(){
     }
 };
 
-let sceneInformation = {};
-
-function updateScene(){
-
-}
-
-export {scene, updateScene, switchCamera};
+export {scene, switchCamera};
 

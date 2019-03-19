@@ -33,11 +33,15 @@ let timeControl = {
     audioSyncSensitivity: 0.05,
     slider: slider,
     music: music,
+    add(tl){
+        this.timeline.add(tl, 0);
+    },
     shake: function(motif){
         this.timeline.progress(1).progress(0);
         this.timeline.seek(motif.start, false);
         this.slider.value = motif.start;
         timePrint.text = this.slider.value.toFixed(2) + " sn";
+        Players.updatePositionRotation();
         Motifs.update();
     },
     stop: function(){
@@ -62,7 +66,10 @@ let timeControl = {
         return ((this.slider.value - margin) <= Motifs.current.end)
             &&
             ((this.slider.value + margin) >= Motifs.current.start);
-    }
+    },
+    clearAll(){
+        this.timeline = new TimelineMax();
+    },
 };
 
 /*let fuckthisshit = {

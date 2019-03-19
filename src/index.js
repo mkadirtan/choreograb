@@ -17,8 +17,10 @@
  */
 import { scene } from './scene';
 import { Motif } from './motifs';
+import {timeControl} from "./timeline";
 
-/*new Motif({
+
+new Motif({
     name: "motif1",
     start: 0,
     end: 2
@@ -29,7 +31,9 @@ new Motif({
     start: 6,
     end: 8
 });
-*/
+let asd = {dur: 0};
+timeControl.timeline.to(asd, 25, {dur: 25}, 0);
+
 /**
  * LOCAL IMPORTS
  */

@@ -2,12 +2,13 @@ import { Motif, Motifs } from "./motifs";
 import {Player, Players } from "./players";
 import { Guide , Guides } from "./guides";
 import { timeControl } from "./timeline";
+import { scene } from "./scene";
 
 export let sceneControl = {
     self: this,
     load: function(scenesave){
-        console.log(scenesave.Players.length);
         this.clear();
+
         scenesave.Motifs.forEach(motif=>{
             new Motif(motif);
         });
@@ -22,7 +23,7 @@ export let sceneControl = {
     clear: function(){
 
     },
-    register: function(){
+    save: function(){
         let sceneData = {};
         sceneData.Players = Players.registerElements() || [];
         sceneData.Guides = Guides.registerElements() || [];
