@@ -24,6 +24,17 @@ import {CreateID} from "./history";
 
 export let Guides = {
     guides: [],
+    addSelectionBehavior(){
+        let self = this;
+        selectionModeObservable.add(mode=>{
+            self.guides.forEach(guide=>{
+                guide.isSelectable(mode==="guides");
+            })
+        })
+    },
+    add(guide){
+        this.guides.push(guide);//todo
+    },
     registerElements(){
         let elements = [];
         this.guides.forEach(guide=>{
@@ -43,41 +54,51 @@ export let Guides = {
         return elements;
     },
 };
+Guides.addSelectionBehavior();
 
 export let selectedGuide = null;
 
-let guideMaterial = new StandardMaterial("guideMaterial", scene);
-guideMaterial.diffuseColor = new Color3.Yellow();
+let defaultGuideMaterial = new StandardMaterial("guideMaterial", scene);
+defaultGuideMaterial.diffuseColor = new Color3.Yellow();
 
 export function Guide(param){
-    this.initParameters(param);
-    this.initShapes();
-    this.initBehaviors();
+    this.initializeGuide(param);
+    this.updateGuideStatus(param);
 }
 
 Guide.prototype = {
-    initParameters: function(param){
-        this.type = param.type;
-        this.GuideID = param.GuideID || CreateID('Guide');
-        Guides.guides.push(this);
-        this.playerCount = param.playerCount || 2;
-        this.position = param.position || Vector3.Zero();
-        this.motif = param.motif || Motifs.current;
+    initializeGuide(param){
+        this.initializeGuideParameters(param);
+        this.initializeGuideBehavior(param);
+    },
+    updateGuideStatus(param){
+        this.updateGuideParameters(param);
+        this.updateGuideBehavior(param);
+    },
+    initializeGuideParameters(param){
+        Object.assign(this, {
+            type: param.type,
+            GuideID: param.GuideID || CreateID('Guide'),
+            playerCount: param.playerCount,
+            position: param.position || Vector3.Zero(),
+            motif: param.motif || Motifs.current,
+            points: param.points || null,
+            radius: param.radius || null,
+            color: param.color || new Color3(0.87, 0.87, 0.87),
+            material: param.material || defaultGuideMaterial,
+            resolution: 128, //todo dynamic resolution adjustment
+            snaps: [],
+            snapPoints: [],
+            snapColliders: [],
+            parametricShape: null,
+            containerShape: null,
+            isActive: true
+        })
+    },
+    initializeGuideBehavior(param){
+        Guides.add(this);
         this.motif.addGuide(this);
-        this.points = param.points || null;
-        this.radius = param.radius || null;
-        this.color = param.color || new Color3(0.87,0.87,0.87);
-        this.material = param.material || guideMaterial;
-        this.resolution = 128; //todo dynamic resolution adjustment
-        this.snaps = [];
-        this.snapPoints = [];
-        this.snapColliders = [];
-        this.parametricShape = null;
-        this.containerShape = null;
-        this.isActive = param.isActive || true;
-        if(this.type === "closure"){
-            this.points.push(this.points[0]);
-        }
+        if(this.type === "closure"){this.points.push(this.points[0]);}
         else if(this.type === "circle") {
             let temporaryPoints = [];
             for (let i = 0; i < this.resolution; i++) {
@@ -86,13 +107,11 @@ Guide.prototype = {
             temporaryPoints.push(temporaryPoints[0]);
             this.points = temporaryPoints;
         }
-    },
-    initShapes: function(){
         this.generateParametricShape();
         this.generateContainer();
         this.updateSnaps();
         this.generateColliders();
-
+        //todo investigate this structure reason why!
         this.parametricShape.setParent(this.containerShape);
         this.snaps.forEach(e=>{e.setParent(this.containerShape)});
         this.snapColliders.forEach(e=>{e.setParent(this.containerShape)});
@@ -104,58 +123,75 @@ Guide.prototype = {
         this.snapColliders.forEach(e=>{e.id = "guide"});
         this.snaps.forEach(e=>{e.id = "guide"});
         this.parametricShape.id = "guide";
+
+        this.addPointerDragBehavior();
+        this.addSettingsBehavior();
+        this.addSelectionBehavior();
+        selectionModeObservable.notifyObservers(currentMode);
     },
-    initBehaviors: function(){
-        let self = this;
-        let pointerDragBehavior = new PointerDragBehavior({dragPlaneNormal: new Vector3(0,1,0)});
+    updateGuideParameters(param){
+        const allowedParams = ["playerCount", "position", "motif", "color", "material", "isActive"];
+        let newParam = {};
+        allowedParams.forEach(entry=>{
+            if(param.hasOwnProperty(entry)){newParam[entry] = param[entry];}
+        });
+        Object.assign(this, newParam)
+    },
+    updateGuideBehavior(param){
+
+    },
+    addPointerDragBehavior(){
+        this.pointerDragBehavior = new PointerDragBehavior({dragPlaneNormal: new Vector3(0,1,0)});
         this.containerShape.addBehavior(pointerDragBehavior);
+    },
+    addSettingsBehavior(){
+        let self = this;
         self.containerShape.actionManager = new ActionManager(scene);
         self.containerShape.actionManager.registerAction(
             new ExecuteCodeAction({
-                    trigger: ActionManager.OnLeftPickTrigger
-                }, () => {
-                    selectedGuide = self;
-                    settingsObservable.notifyObservers({type: "guide", attachedMesh: self.containerShape});
-                },
-            )
+                trigger: ActionManager.OnLeftPickTrigger
+            }, () => {
+                selectedGuide = self;
+                settingsObservable.notifyObservers({type: "guide", attachedMesh: self.containerShape})
+            })
         );
-        selectionModeObservable.add(mode=>{
-            if(mode === "guides" && self.isActive){
-                self.containerShape.isPickable = true;
-                self.snapColliders.forEach(e=>e.isPickable=true);
-                self.snaps.forEach(e=>e.isPickable=true);
-                self.parametricShape.isPickable = true;
-            }
-            else if(mode === "players"){
-                self.containerShape.isPickable = false;
-                self.snapColliders.forEach(e=>e.isPickable=false);
-                self.snaps.forEach(e=>e.isPickable = false);
-                self.parametricShape.isPickable = false;
-            }
-        });
-        selectionModeObservable.notifyObservers(currentMode);
     },
-    show: function(){
+    isSelectable(status){
+        this.status = status;
+        if(this.status){
+            this.containerShape.isPickable = true;
+            this.snapColliders.forEach(e=>e.isPickable = true);
+            this.snaps.forEach(e=>e.isPickable = true);
+            this.parametricShape.isPickable = true;
+        }
+        else if(this.status === false){
+            this.containerShape.isPickable = false;
+            this.snapColliders.forEach(e=>e.isPickable = false);
+            this.snaps.forEach(e=>e.isPickable = false);
+            this.parametricShape.isPickable = false;
+        }
+    },
+    show(){
         this.parametricShape.isVisible = true;
         this.snaps.forEach(function(snap){
             snap.isVisible = true;
         });
         this.isActive = true;
     },
-    hide: function() {
+    hide() {
         this.parametricShape.isVisible = false;
         this.snaps.forEach(function(snap){
             snap.isVisible = false;
         });
         this.isActive = false;
     },
-    updateSnaps: function(){
+    updateSnaps(){
         this.snapPoints = [];
         this.snaps = [];
         this.generateSnapPoints();
         this.generateSnaps();
     },
-    getLength: function(pointArray){
+    getLength(pointArray){
         if(pointArray.length<2){
             return 0;
         }
@@ -165,7 +201,7 @@ Guide.prototype = {
         }
         return length;
     },
-    getPoint: function(length, pointA, pointB){
+    getPoint(length, pointA, pointB){
         let differenceVector = pointB.subtract(pointA);
         let ratio = length/differenceVector.length();
         if(ratio>1.001){
@@ -176,7 +212,7 @@ Guide.prototype = {
         }
         return pointA.add(differenceVector.scale(ratio));
     },
-    generateSnapPoints: function() {
+    generateSnapPoints() {
         let self = this;
         let divisionLength;
         if (self.type === "linear") {
@@ -206,8 +242,7 @@ Guide.prototype = {
         let extra = self.snapPoints.length - self.playerCount;
         if(extra > 0)self.snapPoints.splice(self.snapPoints.length-extra, extra);
     },
-    generateParametricShape: function(){
-        let self = this;
+    generateParametricShape(){
         let shape = MeshBuilder.CreateLines("parametricShape", {
             points: this.points
         }, scene);
@@ -215,7 +250,6 @@ Guide.prototype = {
         this.parametricShape = shape;
     },
     generateColliders: function(){
-        let self = this;
         this.snapPoints.forEach((e,i)=>{
             let shape = MeshBuilder.CreateBox("snapCollider", {
                 size: 0.02,
@@ -224,15 +258,14 @@ Guide.prototype = {
                 updatable: false
             });
             //shape.isVisible = false;
-            shape.position = e;
-            shape.isVisible = 0;
+            this.position = e;
+            this.isVisible = 0;
             //self.snaps[i].position;
-            self.snapColliders.push(shape);
+            this.snapColliders.push(shape);
         });
 
     },
-    generateSnaps: function(){
-        let self = this;
+    generateSnaps(){
         this.snapPoints.forEach(e=>{
             let shape = MeshBuilder.CreateCylinder("snap", {
                 diameterTop: 0.2,
@@ -240,13 +273,13 @@ Guide.prototype = {
                 height: 0.02,
                 updatable: false
             }, scene);
-            shape.material = self.material;
+            shape.material = this.material;
             shape.position = e;
             shape.isPickable = false;
-            self.snaps.push(shape);
+            this.snaps.push(shape);
         });
     },
-    generateContainer: function(){
+    generateContainer(){
         let self = this;
         let shape;
         let depth = 0.02;

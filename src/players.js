@@ -169,7 +169,7 @@ Player.prototype = {
             {
                 type: "Player",
                 PlayerID: param.PlayerID || CreateID('Player'),
-                alive: true,
+                isActive: true,
                 dummyRotator: MeshBuilder.CreatePlane("dummy", {size: 1}, scene),
                 collider: AbstractPlayer.PlayerCollider.clone(),
                 isByEvent: param.isByEvent,
@@ -208,7 +208,7 @@ Player.prototype = {
     },
     nonDefiningParameters: function(param){
         let newParam = {};
-        const allowedParams = ["keys", "currentKey", "personalInformation", "lastPosition", "isSnapped", "feetDrag", "alive"];
+        const allowedParams = ["keys", "currentKey", "personalInformation", "lastPosition", "isSnapped", "feetDrag", "isActive"];
         allowedParams.forEach(entry=>{
             if(param.hasOwnProperty(entry)){newParam[entry] = param[entry];}
         });
@@ -389,11 +389,11 @@ Player.prototype = {
     },
     addSelectionBehavior(){
         this.selectionObservable = selectionModeObservable.add(mode=>{
-            if(mode === "players" && this.alive){
+            if(mode === "players" && this.isActive){
                 this.mesh.isPickable = true;
                 this.collider.isPickable = true;
             }
-            else if(mode === "guides" && this.alive){
+            else if(mode === "guides" && this.isActive){
                 this.mesh.isPickable = false;
                 this.collider.isPickable = false;
             }
@@ -421,7 +421,7 @@ Player.prototype = {
             self.mesh.visibility = 0.8;
             self.mesh.renderOutline = true;
             self.pointerDragBehavior.onDragEndObservable.addOnce(function(){
-                if(self.alive){
+                if(self.isActive){
                     self.mesh.visibility = 1; self.mesh.renderOutline = false;
                     scene.stopAnimation(self.mesh.skeleton);
                     self.mesh.skeleton.returnToRest();

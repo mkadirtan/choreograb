@@ -59,10 +59,10 @@ export let Motifs = {
                         }
                     }
                     self.current = motif;
-                    motif.active(true);
+                    motif.isActive(true);
                 }
                 else{
-                    motif.active(false);
+                    motif.isActive(false);
                 }
             }
         );
@@ -105,45 +105,72 @@ export let Motifs = {
 };
 
 export function Motif(param){
-    this.MotifID = param.MotifID || CreateID('Motif');
-    this.name = param.name;
-    this._isActive = true;
-    this.start = param.start;
-    this.end = param.end;
-    this.guides = [];
-    Motifs.addMotif(this);
+    this.initializeMotif(param);
+    this.updateMotifStatus(param);
 }
 
 Motif.prototype = {
-    show: function(){
+    initializeMotif(param){
+        this.initializeMotifParameters(param);
+        this.initializeMotifBehavior();
+    },
+    updateMotifStatus(param){
+        this.updateMotifParameters(param);
+        this.updateMotifBehavior(param);
+    },
+    initializeMotifParameters(param){
+        Object.assign(this, {
+            MotifID: param.MotifID || CreateID('Motif'),
+            name: param.name,
+            _isActive: true,
+            start: param.start,
+            end: param.end,
+            guides: [],
+        });
+    },
+    initializeMotifBehavior(){
+        Motifs.add(this);
+    },
+    updateMotifParameters(param){
+        const allowedParams = ["start", "end", "_isActive", "guides", ];
+        let newParam = {};
+        allowedParams.forEach(entry=>{
+            if(param.hasOwnProperty(entry)){newParam[entry] = param[entry];}
+        });
+        Object.assign(this, newParam)
+    },
+    updateMotifBehavior(){
+
+    },
+    show(){
         this.guides.forEach(e=>e.show());
     },
-    hide: function(){
+    hide(){
         this.guides.forEach(e=>e.hide());
     },
-    update: function(){
-        this.active()?this.show():this.hide();
+    correctVisibility(){
+        this.isActive()?this.show():this.hide();
     },
-    addGuide: function(guide){
+    addGuide(guide){
+        let isDuplicate = false;
+        this.guides.forEach(_guide=>{
+            if(_guide.GuideID === guide.GuideID){isDuplicate = true;}
+        });
         this.guides.push(guide);
     },
     removeGuide: function(guide){
-        guide.hide();
-        this.guides.forEach(function(e, i, a){
-            if(e === guide){
-                a.splice(i, 1);
+        this.guides.forEach(function(_guide, i, guides){
+            if(_guide === guide){
+                guides.splice(i, 1);
             }
         })
     },
-    registerElement: function(){
-
-    },
-    active: function(status){
+    isActive(status){
         if(status === undefined){
-            return this._isActive;
+            return this.isActive;
         }
         else{
-            this._isActive = status;
+            this.isActive = status;
         }
         this.update();
     }
