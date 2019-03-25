@@ -1,8 +1,32 @@
 const express = require('express');
+const passport = require('passport');
+const Strategy = require('passport-local').Strategy;
 /*const Mongo = require('mongodb');
 const MongoClient = Mongo.MongoClient;
 
 const MUUID = require('uuid-mongodb');*/
+
+passport.use(new Strategy(
+    function(username, password, cb){
+        db.users.findByUsername(username, function(err, user){
+            if (err) {return cb(err)}
+            if (!user) {return cb(null, false)}
+            if (user.password !== password) {return cb(null, false)}
+            return cb(null, user);
+        })
+    })
+);
+
+passport.serializeUser(function(user, cb){
+    cb(null, user.id);
+});
+
+passport.deserializeUser(function(id,cb){
+    db.users.findByID(id, function(err, user){
+        if (err){ return cb(err); }
+        cb(null, user);
+    })
+});
 
 const app = express();
 const port = 3000;
