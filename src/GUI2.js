@@ -26,7 +26,8 @@ import {Observable} from "@babylonjs/core";
 import {scene, switchCamera} from './scene';
 import {timeControl} from './timeline';
 import {Motifs} from './motifs';
-import {HistoryManager} from './history';
+import {Guides} from "./guides";
+import {Players} from "./players";
 import {sceneControl} from "./sceneControl";
 import scenesave from  "./scenesave";
 /**
@@ -42,14 +43,14 @@ export let advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI('UI', tru
 advancedTexture.idealWidth = 1920;
 
 let leftPanel = new StackPanel("leftPanel");
-leftPanel.width = "96px";
+leftPanel.width = "160px";
 leftPanel.height = 0.75;
 leftPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
 leftPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
 leftPanel.isVertical = true;
 
 let rightPanel = new StackPanel("rightPanel");
-rightPanel.width = "96px";
+rightPanel.width = "120px";
 rightPanel.height = 0.75;
 rightPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_RIGHT;
 rightPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
@@ -57,7 +58,7 @@ rightPanel.isVertical = true;
 
 let bottomPanel = new StackPanel("bottomPanel");
 bottomPanel.width = "1920px";
-bottomPanel.height = "96px";
+bottomPanel.height = "120px";
 bottomPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
 bottomPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
 bottomPanel.isVertical = false;
@@ -79,7 +80,8 @@ let playButton = new Button({name: "play", image: "./play.png", stack: bottomPan
     }
 });
 let pauseButton = new Button({name: "pause", image: "./pause.png", stack: bottomPanel, onClick(){
-        timeControl.timeline.pause();
+        //timeControl.timeline.pause();
+        sceneControl.load(scenesave);
     }
 });
 let stopButton = new Button({name: "stop", image: "./stop.png", stack: bottomPanel, onClick(){
@@ -88,11 +90,11 @@ let stopButton = new Button({name: "stop", image: "./stop.png", stack: bottomPan
     }
 });
 let previousButton = new Button({name: "previous", image: "./previous.png", stack: bottomPanel, onClick(){
-        sceneControl.save();
+        sceneControl.undo();
     }
 });
 let nextButton = new Button({name: "next", image: "./next.png", stack: bottomPanel, onClick(){
-        sceneControl.load(scenesave);
+        sceneControl.redo();
     }
 });
 //bottomPanel.addControl(playPanel);
@@ -112,21 +114,23 @@ slider.onPointerDownObservable.add(function(){
 slider.onPointerUpObservable.add(function(){
     slider.onValueChangedObservable.clear();
 });
-slider.width = 1920-7*96 + "px";
-slider.height = "96px";
-slider.paddingRight = "5px";
-slider.paddingLeft = "5px";
+slider.width = 1920-7*120 + "px";
+slider.height = "120px";
+slider.paddingRight = "8px";
+slider.paddingLeft = "8px";
 slider.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
 slider.value = 0;
 bottomPanel.addControl(slider);
 
 export let timePrint = new TextBlock();
+
 timePrint.color = "white";
 timePrint.text = "0.00 sn";
+timePrint.fontSize = "24px";
 leftPanel.addControl(timePrint);
 
 let fastBackward = new Button({name: "fBackward", image: "./fastBackward.png", stack: bottomPanel, onClick(){
-        HistoryManager.undo();
+        Motifs.previousMotif();
     }
 });
 let fastForward = new Button({name: "fForward", image: "./fastForward.png", stack: bottomPanel, onClick(){
@@ -141,8 +145,8 @@ let fastForward = new Button({name: "fForward", image: "./fastForward.png", stac
  */
 export function Button(param){
     let result = new babylonButton.CreateImageOnlyButton(param.name, param.image);
-    result.width = param.width || "96px";
-    result.height = param.height || "96px";
+    result.width = param.width || "120px";
+    result.height = param.height || "120px";
     result.cornerRadius = 3.5;
     if(param.onClick)result.onPointerUpObservable.add(param.onClick);
     if(param.stack === leftPanel){
@@ -162,6 +166,10 @@ export function Button(param){
  */
 
 export let selectionModeObservable = new Observable();
+selectionModeObservable.add(mode=>{
+    Guides.guides.forEach(guide=>guide.isSelectable(mode==="guides"));
+    Players.players.forEach(player=>{player.isSelectable(mode==="players")});
+});
 export let currentMode = "players";
 
 scene.onKeyboardObservable.add((eventData, eventState)=>{

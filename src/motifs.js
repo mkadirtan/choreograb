@@ -7,12 +7,33 @@ import {CreateID} from "./history";
  * LOCAL IMPORTS
  */
 export let Motifs = {
+    clearAll(){
+        this.motifs.forEach(motif=>motif.destroy());
+    },
     getMotifByMotifID: function(MotifID){
         let self = this;
         self.motifs.forEach(motif=>{
             if(motif.MotifID === MotifID){
                 return motif;
             }
+        });
+        return null;
+    },
+    updateMotifs(motifs){
+        let self = this;
+        motifs.forEach(_motif => {
+            let motif = self.getMotifByMotifID(_motif.MotifID);
+            if(motif !== null)motif.updateMotifStatus(_motif);
+            else new Motif(_motif)
+        });
+        self.motifs.forEach(motif=>{
+            let found = false;
+            let index = -1;
+            motifs.forEach((_motif, i)=>{
+                if(motif.MotifID === _motif.MotifID)found=true;
+                index = i;
+            });
+            if(!found && index!==-1)self.motifs[index].destroy()
         });
     },
     current: null,
@@ -67,7 +88,7 @@ export let Motifs = {
             }
         );
         self.motifs.forEach(motif=>{
-            motif.update();
+            motif.correctVisibility();
         });
     },
     addMotif(motif){
@@ -94,10 +115,10 @@ export let Motifs = {
         let elements = [];
         this.motifs.forEach(motif=>{
             elements.push({
-                MotifID: motif.MotifID,
-                name: motif.name,
-                start: motif.start,
-                end: motif.end,
+                MotifID: JSON.parse(JSON.stringify(motif.MotifID)),
+                name: JSON.parse(JSON.stringify(motif.name)),
+                start: JSON.parse(JSON.stringify(motif.start)),
+                end: JSON.parse(JSON.stringify(motif.end))
             });
         });
         return elements;
@@ -129,7 +150,7 @@ Motif.prototype = {
         });
     },
     initializeMotifBehavior(){
-        Motifs.add(this);
+        Motifs.addMotif(this);
     },
     updateMotifParameters(param){
         const allowedParams = ["start", "end", "_isActive", "guides", ];
@@ -167,11 +188,16 @@ Motif.prototype = {
     },
     isActive(status){
         if(status === undefined){
-            return this.isActive;
+            return this._isActive;
         }
         else{
-            this.isActive = status;
+            this._isActive = status;
         }
-        this.update();
+        this.correctVisibility();
+    },
+    destroy(){
+        Motifs.removeMotif(this);
+        this.guides.forEach(guide=>guide.destroy());
+        this.MotifID += "deleted";
     }
 };

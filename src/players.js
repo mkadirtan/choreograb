@@ -21,19 +21,23 @@ import { SceneLoader, MeshBuilder,
  * LOCAL IMPORTS
  */
 import {scene} from "./scene";
-import {Motifs} from './motifs';
+import {Motif, Motifs} from './motifs';
 import {timeControl} from "./timeline";
 import {selectionModeObservable, currentMode} from './GUI2';
 import {settingsObservable} from "./utility";
 import {HistoryAction, CreateID} from './history';
+import {actionTakenObservable} from "./sceneControl";
 
 /**
  * LOCAL IMPORTS
  */
 export let Players = {
     players: [],
+    clearAll(){
+        this.players.forEach(player=>player.destroy())
+    },
     add(player){
-        this.players.push(player)
+        if(this.getPlayerByPlayerID(player.PlayerID) === null)this.players.push(player);
     },
     remove(player){
         this.players.forEach((_player,i,a)=>{
@@ -41,6 +45,43 @@ export let Players = {
                 a.splice(i,1);
             }
         })
+    },
+    getPlayerByPlayerID(PlayerID){
+        let self = this;
+        let returned = null;
+        self.players.forEach(player=>{
+            if(player.PlayerID === PlayerID){
+                returned = player;
+            }
+        });
+        return returned;
+    },
+    updatePlayers(players){
+        let self = this;
+        players.forEach(_player => {
+            let player = self.getPlayerByPlayerID(_player.PlayerID);
+            if(player !== null){
+                player.updatePlayerStatus(_player);
+            }
+            else {
+                new Player(_player)
+            }
+        });
+        let playersToRemove = [];
+        self.players.forEach((player,i,array)=>{
+            let found = false;
+            players.forEach(_player=>{
+                if(player.PlayerID === _player.PlayerID) found = true;
+            });
+            if(!found){
+                playersToRemove.push(i);
+            }
+        });
+        playersToRemove.sort((a,b)=>{return b-a});
+        playersToRemove.forEach(index=>{
+            self.players[index].destroy();
+        });
+        //playersToRemove.forEach(index=>self.remove(self.players[index]));
     },
     updatePositionRotation(){
         let self = this;
@@ -64,10 +105,10 @@ export let Players = {
         let elements = [];
         this.players.forEach(player=>{
             elements.push({
-                PlayerID: player.PlayerID,
-                perseonalInformation: player.personalInformation,
+                PlayerID: JSON.parse(JSON.stringify(player.PlayerID)),
+                personalInformation: JSON.parse(JSON.stringify(player.personalInformation)),
                 position: player.collider.position.clone(),
-                keys: player.keys
+                keys: JSON.parse(JSON.stringify(player.keys))
             })
         });
         return elements;
@@ -117,10 +158,6 @@ SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(result => 
     let walk = PlayerSkeleton.getAnimationRange("WalkCycle");
 
     Object.assign(AbstractPlayer, {PlayerMesh, PlayerSkeleton, PlayerCollider, ranges: {idle, walk}});
-    /*AbstractPlayer.PlayerMesh = PlayerMesh;
-    AbstractPlayer.PlayerSkeleton = PlayerSkeleton;
-    AbstractPlayer.PlayerCollider = PlayerCollider;
-    AbstractPlayer.ranges = {idle, walk};*/
     isPlayerLoaded = true;
 
     scene.beginAnimation(PlayerSkeleton, AbstractPlayer.ranges.idle.from, AbstractPlayer.ranges.idle.to, true);
@@ -129,41 +166,30 @@ SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(result => 
     PlayerMesh.actionManager.registerAction(
         new ExecuteCodeAction(ActionManager.OnLeftPickTrigger,
             function(evt){
-            /*let collider = AbstractPlayer.PlayerCollider.clone();
-            let mesh = collider.getChildren()[0];
-            mesh.skeleton = AbstractPlayer.PlayerSkeleton.clone();*/
             let newPlayer = new Player({isByEvent: evt});
             scene.stopAnimation(newPlayer.mesh.skeleton);
             newPlayer.mesh.skeleton.returnToRest();
             scene.beginAnimation(newPlayer.mesh.skeleton, walk.from+1, walk.to-1, true);
-
             }
         )
     );
 });
 
 export function Player(param){
-    this.initialize(param);
-    this.update(param);
-    /**
-     * mesh, collider, mesh.skeleton
-     * keys[] = {motif, guide, snap, position, rotation}
-     * isSnapped, snappedSnap, snappedGuide
-     * feetDrag, lastPosition, evt, pointerDragBehavior
-     * personalInformation, timeline
-     */
+    this.initializePlayer(param);
+    this.updatePlayerStatus(param);
 }
 
 Player.prototype = {
-    initialize(param){
-        this.definingParameters(param);
-        this.definingPlayer(param);
+    initializePlayer(param){
+        this.initializePlayerParameters(param);
+        this.initializePlayerBehavior(param);
     },
-    update(param){
-        this.nonDefiningParameters(param);
-        this.nonDefiningUpdate(param);
+    updatePlayerStatus(param){
+        this.updatePlayerParameters(param);
+        this.updatePlayerBehavior(param);
     },
-    definingParameters(param){
+    initializePlayerParameters(param){
         let self = this;
         Object.assign(this,
             {
@@ -179,7 +205,7 @@ Player.prototype = {
                 timeline: new TimelineMax(),
                 keys: param.keys ||[],
                 currentKey: 0,
-                personalnformation: {
+                personalInformation: {
                     name: param.name || "New Player",
                     height: param.height || 170,
                     order: param.order || 0
@@ -187,12 +213,11 @@ Player.prototype = {
                 attachedPosition: param.position || null
             });
     },
-    definingPlayer(){
+    initializePlayerBehavior(){
         this.dummyRotator.ID = "PlayerRotator";
         this.dummyRotator.isVisible = false;
         this.dummyRotator.ownerPlayer = this;
         this.collider.ID = "PlayerCollider";
-        //this.collider.isVisible = false;
         this.hideCollider();
         this.mesh = this.collider.getChildren()[0];
         this.mesh.skeleton = AbstractPlayer.PlayerSkeleton.clone();
@@ -206,7 +231,7 @@ Player.prototype = {
         this.addDragBehavior();
         this.checkEventData(this.attachedPosition);
     },
-    nonDefiningParameters: function(param){
+    updatePlayerParameters: function(param){
         let newParam = {};
         const allowedParams = ["keys", "currentKey", "personalInformation", "lastPosition", "isSnapped", "feetDrag", "isActive"];
         allowedParams.forEach(entry=>{
@@ -214,7 +239,7 @@ Player.prototype = {
         });
         Object.assign(this, newParam)
     },
-    nonDefiningUpdate(){
+    updatePlayerBehavior(){
         this.updateTimeline();
         this.updateAnimation();
     },
@@ -379,6 +404,7 @@ Player.prototype = {
             //Keyframing algorithm
             if(!self.dragCancelled){
                 self.key();
+                actionTakenObservable.notifyObservers("player key action");
             }
             self.dragCancelled = false;
             //Removal by trash can
@@ -387,17 +413,17 @@ Player.prototype = {
             scene.activeCamera.attachControl(scene.getEngine().getRenderingCanvas(), true);
         });
     },
+    isSelectable(status){
+        if(status){
+            this.mesh.isPickable = true;
+            this.collider.isPickable = true;
+        }
+        else{
+            this.mesh.isPickable = false;
+            this.collider.isPickable = false;
+        }
+    },
     addSelectionBehavior(){
-        this.selectionObservable = selectionModeObservable.add(mode=>{
-            if(mode === "players" && this.isActive){
-                this.mesh.isPickable = true;
-                this.collider.isPickable = true;
-            }
-            else if(mode === "guides" && this.isActive){
-                this.mesh.isPickable = false;
-                this.collider.isPickable = false;
-            }
-        }, null, false, this);
         selectionModeObservable.notifyObservers(currentMode);
         if(self.isByEvent){
             settingsObservable.notifyObservers({type: "player", attachedMesh: self.mesh});
@@ -474,12 +500,12 @@ Player.prototype = {
     destroy: function(){
         const meshes = ["mesh", "collider", "dummyRotator", ];
         scene.onKeyboardObservable.remove(this.keyboardObservable);
-        selectionModeObservable.remove(this.selectionObservable);
         timeControl.timeline.remove(this.timeline);
         meshes.forEach(mesh=>{this[mesh].dispose();});
         delete this.keyboardObservable;
         delete this.selectionObservable;
         delete this.timeline;
         Players.remove(this);
+        this.PlayerID += "deleted";
     }
 };

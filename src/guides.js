@@ -14,7 +14,7 @@ import {Color3, Vector3,
  * LOCAL IMPORTS
  */
 import {scene} from './scene';
-import {Motifs} from './motifs';
+import {Motif, Motifs} from './motifs';
 import {currentMode, selectionModeObservable} from './GUI2';
 import {settingsObservable} from "./utility";
 import {CreateID} from "./history";
@@ -24,37 +24,64 @@ import {CreateID} from "./history";
 
 export let Guides = {
     guides: [],
-    addSelectionBehavior(){
+    clearAll(){
+        this.guides.forEach(guide=>guide.destroy())
+    },
+    getGuideByGuideID(GuideID){
         let self = this;
-        selectionModeObservable.add(mode=>{
-            self.guides.forEach(guide=>{
-                guide.isSelectable(mode==="guides");
-            })
+        self.guides.forEach(guide=>{
+            if(guide.GuideID === GuideID){
+                return guide;
+            }
+        });
+        return null;
+    },
+    updateGuides(guides){
+        let self = this;
+        guides.forEach(_guide => {
+            let guide = self.getGuideByGuideID(_guide.GuideID);
+            if(guide !== null)guide.updateGuideStatus(_guide);
+            else new Guide(_guide)
+        });
+        self.guides.forEach(guide=>{
+            let found = false;
+            let index = -1;
+            guides.forEach((_guide, i)=>{
+                if(guide.GuideID === _guide.GuideID)found=true;
+                index = i;
+            });
+            if(!found && index!==-1)self.guides[index].destroy()
         })
     },
     add(guide){
         this.guides.push(guide);//todo
     },
+    remove(guide){
+        this.guides.forEach((_guide,i,a)=>{
+            if(_guide.GuideID === guide.GuideID){
+                a.splice(i,1);
+            }
+        })
+    },
     registerElements(){
         let elements = [];
         this.guides.forEach(guide=>{
             elements.push({
-                type: guide.type,
-                GuideID: guide.GuideID,
-                playerCount: guide.playerCount,
-                position: guide.position,
-                MotifID: guide.motif.MotifID,
-                points: guide.points,
-                radius: guide.radius,
-                color: guide.color,
-                material: guide.material,
-                isActive: guide.isActive
+                type: JSON.parse(JSON.stringify(guide.type)),
+                GuideID: JSON.parse(JSON.stringify(guide.GuideID)),
+                playerCount: JSON.parse(JSON.stringify(guide.playerCount)),
+                position: JSON.parse(JSON.stringify(guide.position)),
+                MotifID: JSON.parse(JSON.stringify(guide.motif.MotifID)),
+                points: JSON.parse(JSON.stringify(guide.points)),
+                radius: JSON.parse(JSON.stringify(guide.radius)),
+                color: JSON.parse(JSON.stringify(guide.color)),
+                material: JSON.parse(JSON.stringify(guide.material)),
+                isActive: JSON.parse(JSON.stringify(guide.isActive))
             });
         });
         return elements;
     },
 };
-Guides.addSelectionBehavior();
 
 export let selectedGuide = null;
 
@@ -67,6 +94,12 @@ export function Guide(param){
 }
 
 Guide.prototype = {
+    destroy(){
+        this.clearMeshes();
+        Guides.remove(this);
+        this.motif.removeGuide(this);
+        this.GuideID += "deleted";
+    },
     initializeGuide(param){
         this.initializeGuideParameters(param);
         this.initializeGuideBehavior(param);
@@ -81,7 +114,7 @@ Guide.prototype = {
             GuideID: param.GuideID || CreateID('Guide'),
             playerCount: param.playerCount,
             position: param.position || Vector3.Zero(),
-            motif: param.motif || Motifs.current,
+            motif: Motifs.getMotifByMotifID(param.MotifID)|| Motifs.current,
             points: param.points || null,
             radius: param.radius || null,
             color: param.color || new Color3(0.87, 0.87, 0.87),
@@ -107,6 +140,17 @@ Guide.prototype = {
             temporaryPoints.push(temporaryPoints[0]);
             this.points = temporaryPoints;
         }
+    },
+    updateGuideParameters(param){
+        const allowedParams = ["playerCount", "position", "color", "material", "isActive"];
+        let newParam = {};
+        allowedParams.forEach(entry=>{
+            if(param.hasOwnProperty(entry)){newParam[entry] = param[entry];}
+        });
+        Object.assign(this, newParam)
+    },
+    updateGuideBehavior(param){
+        this.clearMeshes();
         this.generateParametricShape();
         this.generateContainer();
         this.updateSnaps();
@@ -126,19 +170,13 @@ Guide.prototype = {
 
         this.addPointerDragBehavior();
         this.addSettingsBehavior();
-        this.addSelectionBehavior();
         selectionModeObservable.notifyObservers(currentMode);
     },
-    updateGuideParameters(param){
-        const allowedParams = ["playerCount", "position", "motif", "color", "material", "isActive"];
-        let newParam = {};
-        allowedParams.forEach(entry=>{
-            if(param.hasOwnProperty(entry)){newParam[entry] = param[entry];}
-        });
-        Object.assign(this, newParam)
-    },
-    updateGuideBehavior(param){
-
+    clearMeshes(){
+        this.snapColliders.forEach(e=>e.dispose());
+        this.snaps.forEach(e=>e.dispose());
+        this.parametricShape.dispose();
+        this.containerShape.dispose();
     },
     addPointerDragBehavior(){
         this.pointerDragBehavior = new PointerDragBehavior({dragPlaneNormal: new Vector3(0,1,0)});
