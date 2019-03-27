@@ -5,6 +5,7 @@ import {timeControl} from './timeline';
 import {CreateID} from "./history";
 /**
  * LOCAL IMPORTS
+ *
  */
 export let Motifs = {
     clearAll(){

@@ -1,8 +1,6 @@
 const express = require('express');
-/*const Mongo = require('mongodb');
+const Mongo = require('mongodb');
 const MongoClient = Mongo.MongoClient;
-
-const MUUID = require('uuid-mongodb');*/
 
 const app = express();
 const port = 3000;
@@ -10,14 +8,11 @@ const port = 3000;
 app.use(express.static('./dist'));
 app.use(express.json());
 
+app.get('/', (req, res)=>res.sendFile('/dist/index.html'));
+
 app.listen(port, ()=>{
     console.log("Listening on :", port);
 });
-/*
-console.log("v1", MUUID.v1().toString());
-console.log("v4", MUUID.v4());
-console.log("Mongo", Mongo.ObjectID());
-console.log("Mongo Passed", Mongo.ObjectID("123456789012"))
 
 const url = 'mongodb://localhost:27017';
 const config =
@@ -25,26 +20,27 @@ const config =
     useNewUrlParser: true,
     appname: "local choreograb test app",
     auth: {
-        user: "mkadirtan",
+        user: "mkt",
         password: "10241025",
     },
     authMechanism: "SCRAM-SHA-1"
 };
-*/
-/*MongoClient.connect(url,config, (err, client)=>{
+app.post()//todo awesomeness!
+MongoClient.connect(url,config, (err, client)=>{
     if(err) throw err;
-    const db = client.db("testDB").collection("testCollection").insertOne({_id: Mongo.ObjectID(uuid()), test2: "new uuid"});
+    const db = client.db("testDB")
+    db.collection("testCollection").insertOne({_id: Mongo.ObjectID(uuid()), test2: "new uuid"});
     client.close();
-});*/
+});
 
-
+/*
 const dbName = 'SceneInformation';
 
 app.get('/', (req,res)=>{
     res.sendFile(__dirname + '/dist/index.html');
-});
+});*/
 
-app.post('/addData', (req, res)=>{
+/*app.post('/addData', (req, res)=>{
     MongoClient.connect(url, config, (err, client)=>{
         if(err) throw err;
         const db = client.db("testDB");
@@ -78,3 +74,4 @@ app.post('/retrieveSceneInformation', (req, res)=>{
         )
     });
 });
+*/
