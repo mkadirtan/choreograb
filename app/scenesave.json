@@ -1,0 +1,567 @@
+{
+  "Players": [
+    {
+      "PlayerID": "Player_jtnr5ncnrgli0",
+      "personalInformation": {
+        "name": "New Player",
+        "height": 170,
+        "order": 0
+      },
+      "position": {
+        "x": 1.4266302469520242,
+        "y": 4.440892098500626e-15,
+        "z": 3.9460543331123077
+      },
+      "keys": [
+        {
+          "motif": {
+            "MotifID": "Motif_jtnr5mhudiazr",
+            "name": "motif1",
+            "_isActive": false,
+            "start": 0,
+            "end": 2,
+            "guides": []
+          },
+          "MotifID": "Motif_jtnr5mhudiazr",
+          "position": {
+            "x": -1.1495079160262716,
+            "y": 1.7763568394002505e-15,
+            "z": 0.7892722531887113,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "stepCount": 3
+        },
+        {
+          "motif": {
+            "MotifID": "Motif_jtnr5mhv0a6o2",
+            "name": "motif2",
+            "_isActive": true,
+            "start": 6,
+            "end": 8,
+            "guides": []
+          },
+          "MotifID": "Motif_jtnr5mhv0a6o2",
+          "position": {
+            "x": 1.4266302469520242,
+            "y": 4.440892098500626e-15,
+            "z": 3.9460543331123077,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            },
+            "immediateRender": true,
+            "startAt": {
+              "x": -1.1495079160262716,
+              "y": 1.7763568394002505e-15,
+              "z": 0.7892722531887113,
+              "ease": {
+                "_func": null,
+                "_type": 2,
+                "_power": 0,
+                "_params": [
+                  0,
+                  0,
+                  1,
+                  1
+                ]
+              }
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            },
+            "immediateRender": true,
+            "startAt": {
+              "x": 0,
+              "y": 3.141592653589793,
+              "z": 0,
+              "ease": {
+                "_func": null,
+                "_type": 2,
+                "_power": 0,
+                "_params": [
+                  0,
+                  0,
+                  1,
+                  1
+                ]
+              }
+            }
+          },
+          "stepCount": 3
+        }
+      ]
+    },
+    {
+      "PlayerID": "Player_jtnr5o0slbagt",
+      "personalInformation": {
+        "name": "New Player",
+        "height": 170,
+        "order": 0
+      },
+      "position": {
+        "x": 1.6587671569437106,
+        "y": 8.881784197001252e-16,
+        "z": -0.22770243544949764
+      },
+      "keys": [
+        {
+          "motif": {
+            "MotifID": "Motif_jtnr5mhudiazr",
+            "name": "motif1",
+            "_isActive": false,
+            "start": 0,
+            "end": 2,
+            "guides": []
+          },
+          "MotifID": "Motif_jtnr5mhudiazr",
+          "position": {
+            "x": -3.5969681371152182,
+            "y": 2.6645352591003757e-15,
+            "z": 1.1679018178318241,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "stepCount": 3
+        },
+        {
+          "motif": {
+            "MotifID": "Motif_jtnr5mhv0a6o2",
+            "name": "motif2",
+            "_isActive": true,
+            "start": 6,
+            "end": 8,
+            "guides": []
+          },
+          "MotifID": "Motif_jtnr5mhv0a6o2",
+          "position": {
+            "x": 1.6587671569437106,
+            "y": 8.881784197001252e-16,
+            "z": -0.22770243544949764,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            },
+            "immediateRender": true,
+            "startAt": {
+              "x": -3.5969681371152182,
+              "y": 2.6645352591003757e-15,
+              "z": 1.1679018178318241,
+              "ease": {
+                "_func": null,
+                "_type": 2,
+                "_power": 0,
+                "_params": [
+                  0,
+                  0,
+                  1,
+                  1
+                ]
+              }
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            },
+            "immediateRender": true,
+            "startAt": {
+              "x": 0,
+              "y": 3.141592653589793,
+              "z": 0,
+              "ease": {
+                "_func": null,
+                "_type": 2,
+                "_power": 0,
+                "_params": [
+                  0,
+                  0,
+                  1,
+                  1
+                ]
+              }
+            }
+          },
+          "stepCount": 3
+        }
+      ]
+    },
+    {
+      "PlayerID": "Player_jtnr5oze95k8y",
+      "personalInformation": {
+        "name": "New Player",
+        "height": 170,
+        "order": 0
+      },
+      "position": {
+        "x": 5.005132137079864,
+        "y": 0,
+        "z": -0.7326562404632586
+      },
+      "keys": [
+        {
+          "motif": {
+            "MotifID": "Motif_jtnr5mhudiazr",
+            "name": "motif1",
+            "_isActive": false,
+            "start": 0,
+            "end": 2,
+            "guides": []
+          },
+          "MotifID": "Motif_jtnr5mhudiazr",
+          "position": {
+            "x": 2.869352719560715,
+            "y": 8.881784197001252e-16,
+            "z": -0.7326562383330142,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "stepCount": 3
+        },
+        {
+          "motif": {
+            "MotifID": "Motif_jtnr5mhv0a6o2",
+            "name": "motif2",
+            "_isActive": true,
+            "start": 6,
+            "end": 8,
+            "guides": []
+          },
+          "MotifID": "Motif_jtnr5mhv0a6o2",
+          "position": {
+            "x": 5.005132137079864,
+            "y": 0,
+            "z": -0.7326562404632586,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            },
+            "immediateRender": true,
+            "startAt": {
+              "x": 2.869352719560715,
+              "y": 8.881784197001252e-16,
+              "z": -0.7326562383330142,
+              "ease": {
+                "_func": null,
+                "_type": 2,
+                "_power": 0,
+                "_params": [
+                  0,
+                  0,
+                  1,
+                  1
+                ]
+              }
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            },
+            "immediateRender": true,
+            "startAt": {
+              "x": 0,
+              "y": 3.141592653589793,
+              "z": 0,
+              "ease": {
+                "_func": null,
+                "_type": 2,
+                "_power": 0,
+                "_params": [
+                  0,
+                  0,
+                  1,
+                  1
+                ]
+              }
+            }
+          },
+          "stepCount": 3
+        }
+      ]
+    },
+    {
+      "PlayerID": "Player_jtnr5proq2efs",
+      "personalInformation": {
+        "name": "New Player",
+        "height": 170,
+        "order": 0
+      },
+      "position": {
+        "x": 5.6282055677694425,
+        "y": 1.7763568394002505e-15,
+        "z": 3.299822639025834
+      },
+      "keys": [
+        {
+          "motif": {
+            "MotifID": "Motif_jtnr5mhudiazr",
+            "name": "motif1",
+            "_isActive": false,
+            "start": 0,
+            "end": 2,
+            "guides": []
+          },
+          "MotifID": "Motif_jtnr5mhudiazr",
+          "position": {
+            "x": 1.649740976191394,
+            "y": 1.7763568394002505e-15,
+            "z": 3.326978847679438,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          },
+          "stepCount": 3
+        },
+        {
+          "motif": {
+            "MotifID": "Motif_jtnr5mhv0a6o2",
+            "name": "motif2",
+            "_isActive": true,
+            "start": 6,
+            "end": 8,
+            "guides": []
+          },
+          "MotifID": "Motif_jtnr5mhv0a6o2",
+          "position": {
+            "x": 5.6282055677694425,
+            "y": 1.7763568394002505e-15,
+            "z": 3.299822639025834,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            },
+            "immediateRender": true,
+            "startAt": {
+              "x": 1.649740976191394,
+              "y": 1.7763568394002505e-15,
+              "z": 3.326978847679438,
+              "ease": {
+                "_func": null,
+                "_type": 2,
+                "_power": 0,
+                "_params": [
+                  0,
+                  0,
+                  1,
+                  1
+                ]
+              }
+            }
+          },
+          "rotation": {
+            "x": 0,
+            "y": 3.141592653589793,
+            "z": 0,
+            "ease": {
+              "_func": null,
+              "_type": 2,
+              "_power": 0,
+              "_params": [
+                0,
+                0,
+                1,
+                1
+              ]
+            },
+            "immediateRender": true,
+            "startAt": {
+              "x": 0,
+              "y": 3.141592653589793,
+              "z": 0,
+              "ease": {
+                "_func": null,
+                "_type": 2,
+                "_power": 0,
+                "_params": [
+                  0,
+                  0,
+                  1,
+                  1
+                ]
+              }
+            }
+          },
+          "stepCount": 3
+        }
+      ]
+    }
+  ],
+  "Guides": [],
+  "Motifs": [
+    {
+      "MotifID": "Motif_jtnr5mhudiazr",
+      "name": "motif1",
+      "start": 0,
+      "end": 2
+    },
+    {
+      "MotifID": "Motif_jtnr5mhv0a6o2",
+      "name": "motif2",
+      "start": 6,
+      "end": 8
+    }
+  ]
+}
