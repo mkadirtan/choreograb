@@ -2,6 +2,7 @@ import { Motifs } from "./motifs";
 import { Players } from "./players";
 import { Guides } from "./guides";
 import { timeControl } from "./timeline";
+import { notify } from "./GUI2";
 import { Observable } from "@babylonjs/core";
 import { scene } from "./scene";
 
@@ -9,8 +10,9 @@ let sceneHistory = [];
 let historyIndex = -1;
 
 export let actionTakenObservable = new Observable();
-actionTakenObservable.add(()=>{
+actionTakenObservable.add(notification=>{
     sceneControl.save();
+    notify(notification)
 });
 
 export let sceneControl = {

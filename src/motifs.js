@@ -7,6 +7,21 @@ import {CreateID} from "./history";
  * LOCAL IMPORTS
  */
 export let Motifs = {
+    checkSpace(param){
+        if(this.motifs.length>0){
+            let collision = false;
+            this.motifs.forEach(motif=>{
+                if(param.start<=motif.end && param.start>=motif.start){
+                    collision = true;
+                }
+                else if(param.end<=motif.end && param.end>=motif.start){
+                    collision = true;
+                }
+            });
+            return !collision;
+        }
+        else return true;
+    },
     clearAll(){
         this.motifs.forEach(motif=>motif.destroy());
     },
@@ -54,8 +69,12 @@ export let Motifs = {
         let self = this;
         let currentTime = timeControl.slider.value;
         self.motifs.forEach((motif, index, array)=>{
-                if (motif.start <= currentTime && currentTime <= motif.end) {
-                    //En az 3 motif varsa previous ve next atamasını yap.
+                if(array.length === 1){
+                    self.next = motif;
+                    self.current = motif;
+                    self.previous = motif
+                }
+                else if (motif.start <= currentTime && currentTime <= motif.end) {
                     if(array.length > 2){
                         if(index === array.length-1){
                             self.next = array[0];
@@ -70,13 +89,14 @@ export let Motifs = {
                             self.previous = array[index-1];
                         }
                     }
-                    //Eğer motif sayısı 2 ise previous veya next ataması yap
                     else if(array.length === 2){
                         if(index === 1){
                             self.previous = array[0];
+                            self.next = array[1];
                         }
                         else{
                             self.next = array[1];
+                            self.previous = array[0]
                         }
                     }
                     self.current = motif;
@@ -104,12 +124,30 @@ export let Motifs = {
         this.update();
     },
     nextMotif(){
-        timeControl.shake(this.next);
-        this.update();
+        return new Promise((resolve, reject)=>{
+            if(this.next){
+                let motif = this.next;
+                timeControl.shake(motif);
+                this.update();
+                resolve(motif.name);
+            }
+            else{
+                reject(new Error("Unable to find motif!"));
+            }
+        })
     },
     previousMotif(){
-        timeControl.shake(this.previous);
-        this.update();
+        return new Promise((resolve, reject)=>{
+            if(this.previous){
+                let motif = this.previous;
+                timeControl.shake(motif);
+                this.update();
+                resolve(motif.name);
+            }
+            else{
+                reject(new Error("Unable to find motif!"));
+            }
+        })
     },
     registerElements(){
         let elements = [];
@@ -126,8 +164,18 @@ export let Motifs = {
 };
 
 export function Motif(param){
-    this.initializeMotif(param);
-    this.updateMotifStatus(param);
+    return new Promise((resolve, reject)=>{
+        if(isNaN(param.start+param.end))reject(new Error("Insert valid numbers!"));
+        let bool = Motifs.checkSpace(param);
+        if(!bool){
+            reject(new Error("There is already a motif on that timespan!"))
+        }
+        else{
+            this.initializeMotif(param);
+            this.updateMotifStatus(param);
+            resolve(this);
+        }
+    });
 }
 
 Motif.prototype = {

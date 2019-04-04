@@ -26,7 +26,7 @@ let initializeScene = function(){
     let engine = new Engine(canvas,  true, {stencil: true}); //Stencil: Edge renderer
     let scene = new Scene(engine);
     scene.clearColor = new Color4(0.75,0.75,0.75, 1); //Background color
-
+    setTimeout(()=>console.log(a), 10000);
     scene.gravity = new Vector3(0, -9.81, 0);
 
     let directionalLight = new DirectionalLight("directionalLight", new Vector3(2,-3,8), scene);

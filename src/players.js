@@ -21,11 +21,11 @@ import { SceneLoader, MeshBuilder,
  * LOCAL IMPORTS
  */
 import {scene} from "./scene";
-import {Motif, Motifs} from './motifs';
+import {Motifs} from './motifs';
 import {timeControl} from "./timeline";
 import {selectionModeObservable, currentMode} from './GUI2';
 import {settingsObservable} from "./utility";
-import {HistoryAction, CreateID} from './history';
+import {CreateID} from './history';
 import {actionTakenObservable} from "./sceneControl";
 
 /**
@@ -120,7 +120,7 @@ export let selectedPlayer = null;
 export let AbstractPlayer = {};
 export let isPlayerLoaded = false;
 
-SceneLoader.ImportMeshAsync("",'./newPlayer.babylon', "", scene).then(result => {
+SceneLoader.ImportMeshAsync("",playerModel, "", scene).then(result => {
     let PlayerMesh = result.meshes[0];
     let PlayerSkeleton = result.skeletons[0];
 
@@ -404,7 +404,7 @@ Player.prototype = {
             //Keyframing algorithm
             if(!self.dragCancelled){
                 self.key();
-                actionTakenObservable.notifyObservers("player key action");
+                actionTakenObservable.notifyObservers("Player key assigned!");
             }
             self.dragCancelled = false;
             //Removal by trash can

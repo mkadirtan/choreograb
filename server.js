@@ -41,7 +41,11 @@ const config =
 const dbName = 'SceneInformation';
 
 app.get('/', (req,res)=>{
-    res.sendFile(__dirname + '/dist/index.html');
+    res.sendFile(__dirname + './dist/index.html');
+});
+
+app.get('/helloWorld', (req,res)=>{
+    res.send("wtf is gentleman");
 });
 
 app.post('/addData', (req, res)=>{
