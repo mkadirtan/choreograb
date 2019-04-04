@@ -12,18 +12,43 @@ module.exports = {
     entry: './src/index.js',
     output: {
         filename: 'main.js',
-        path: path.resolve(__dirname, 'dist')
+        path: __dirname + '/dist'
     },
     module: {
         rules: [
             {
-                test: /\.(png|mp3|babylon|manifest)$/,
+                test: /\.(mp3)$/,
                 use: [
                     {
                         loader: 'file-loader',
                         options: {
-                            name: '[name].[ext]'
+                            name: '/music/[name].[ext]'
                         }
+                    }
+                ]
+            },
+            {
+                test: /\.(babylon|manifest)$/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '/babylon/[name].[ext]'
+                        }
+                    }
+                ]
+            },
+            {
+                test: /\.(png)$/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '/image/[name].[ext]'
+                        }
+                    },
+                    {
+                        loader: 'image-webpack-loader',
                     }
                 ]
             },

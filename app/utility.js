@@ -1,10 +1,10 @@
 /**
  * ASSETS
  */
-import buttonModels from '../src/media/model/buttons.babylon';
-import guideButtonModels from '../src/media/model/guideButtons.babylon';
-import texture1 from '../src/media/textures/rotate.png';
-import texture2 from '../src/media/textures/translate.png';
+import buttonModel from './media/model/buttons.babylon';
+import guideButtonModels from './media/model/guideButtons.babylon';
+import i_rotate from './media/textures/rotate.png';
+import i_translate from './media/textures/translate.png';
 /**
  * ASSETS
  */
@@ -29,7 +29,7 @@ import {UtilityLayerRenderer, SceneLoader,
     PlaneRotationGizmo, Mesh, MeshBuilder,
     Vector3, Path3D, Color3,
     TransformNode, Observable,
-    Texture, DynamicTexture,} from "@babylonjs/core/index";
+    Texture, DynamicTexture,} from "@babylonjs/core";
 
 //Settings observable
 export let settingsObservable = new Observable();
@@ -100,9 +100,9 @@ meshes.forEach(e=>{
     e.material.specularColor = Color3.Black();
 });
 
-meshes[0].material.diffuseTexture = new Texture("./translate.png", utilLayer.utilityLayerScene);
+meshes[0].material.diffuseTexture = new Texture(i_translate, utilLayer.utilityLayerScene);
 meshes[0].material.diffuseTexture.hasAlpha = true;
-meshes[1].material.diffuseTexture = new Texture("./rotate.png", utilLayer.utilityLayerScene);
+meshes[1].material.diffuseTexture = new Texture(i_rotate, utilLayer.utilityLayerScene);
 meshes[1].material.diffuseTexture.hasAlpha = true;
 let playerName = new DynamicTexture("nameTag", {width: 512, height: Math.round(512*(buttonSize/2)/(buttonSize*3+buttonPadding))}, utilLayer.utilityLayerScene);
 let content = playerName.getContext();
@@ -127,7 +127,7 @@ meshes[2].position.y += buttonSize + buttonPadding;
 
 playerButtons = [...meshes];
 
-SceneLoader.ImportMesh("",'./guideButtons.babylon', "", utilLayer.utilityLayerScene, function(meshes){
+SceneLoader.ImportMesh("", buttonModel, "", utilLayer.utilityLayerScene, function(meshes){
     meshes.forEach(e=>{
         e.convertToFlatShadedMesh();
         e.position.y = 0;
