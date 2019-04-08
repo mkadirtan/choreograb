@@ -3,6 +3,7 @@ const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const passport = require('passport');
@@ -12,12 +13,17 @@ const path = require('path');
 
 
 const url = 'mongodb://localhost:27017';
-mongoose.connect(url, {useMongoClient: true});
+mongoose.connect(url, {useMongoClient: true}).then( ()=>console.log('mongo connected!'),err=>console.log(err));
 let db = mongoose.connection;
 
 //bodyParser middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+app.use(cookieParser());
+app.use(cookieSession({
+    maxAge: 2*60*60*1000, //2 hours * 60 mins * 60 seconds * 1000 milis
+    keys: ['my secret key'],
+}));
 
 //Express session
 app.use(session({
@@ -50,10 +56,12 @@ passport.use(new LocalStrategy((username, password, done)=>{
 }));
 
 passport.serializeUser((user, done)=>{
+    console.log('serialized!');
     done(null, user.id);
 });
 
 passport.deserializeUser((id, done)=>{
+    console.log('deserialized!');
     User.getUserById(id, (err, user)=>{
         done(err, user)
     })
@@ -75,7 +83,7 @@ app.post('/register', (req, res)=>{
         User.createUser(newUser, (err, user) => {
             if (err) throw err;
             //db.insertOne(user);
-            res.send(user).end();
+            res.send({user: user, code: 12}).end();
         });
     }
     else{
@@ -96,12 +104,18 @@ app.get('logout', (req, res)=>{
     res.send(null);
 });
 
-app.use('/dist', express.static( __dirname + '/dist'));
-app.use('/interface', express.static(__dirname + '/interface'));
+app.use(express.static( __dirname + '/dist'));
 
 app.get('/', (req, res)=> {
-    console.log('asd');
-    res.sendFile(__dirname + '/interface/index.html')
+    res.sendFile(__dirname + '/dist/interface.html')
+});
+
+app.post('/console', passport.authenticate('local'), (req, res)=>{
+    res.send(req.user);
+});
+
+app.get('/app', (req, res)=>{
+    res.sendFile(__dirname + '/dist/interface.html');
 });
 
 app.listen(port, ()=>{

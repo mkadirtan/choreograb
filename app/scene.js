@@ -16,8 +16,8 @@ import {
                         from '@babylonjs/core/index';
 import {GridMaterial} from "@babylonjs/materials/index";
 
-import surroundingModel from '../src/media/model/surrounding.babylon';
-import surroundingManifest from '../src/media/model/surrounding.babylon.manifest';
+import surroundingModel from './media/model/surrounding.babylon';
+import surroundingManifest from './media/model/surrounding.babylon.manifest';
 
 Animation.AllowMatricesInterpolation = true;
 Tools.LogLevels = Tools.NoneLogLevel;

@@ -1,19 +1,20 @@
-const path = require('path');
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     mode: 'development',
     context: __dirname,
-    plugins: [
-        new webpack.ProvidePlugin({
-            'earcut': 'earcut'
-        })
-    ],
-    entry: './src/index.js',
+    entry: __dirname + '/app/index.js',
     output: {
-        filename: 'main.js',
-        path: __dirname + '/dist'
-    },
+        filename: 'app.js',
+        path: __dirname + '/dist'},
+    plugins: [
+        new webpack.ProgressPlugin(),
+        new webpack.ProvidePlugin({'earcut': 'earcut'}),
+        new HtmlWebpackPlugin({
+            'template': __dirname + '/app/index.html',
+            'filename': __dirname + '/dist/app.html',
+            'favicon': __dirname + '/shared/textures/favicon.ico'})],
     module: {
         rules: [
             {

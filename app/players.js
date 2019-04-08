@@ -1,8 +1,8 @@
 /**
  * ASSETS
  */
-import playerModel from '../src/media/model/newPlayer.babylon';
-import playerManifest from '../src/media/model/newPlayer.babylon.manifest';
+import playerModel from './media/model/newPlayer.babylon';
+import playerManifest from './media/model/newPlayer.babylon.manifest';
 /**
  * ASSETS
  */
