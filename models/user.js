@@ -47,7 +47,7 @@ module.exports.findByFacebookId = function(facebookId, callback){
 };
 
 module.exports.getUserById = function(id, callback){
-    User.findOne({id}, callback);
+    User.findOne({_id: id}, callback);
 };
 
 module.exports.comparePassword = function(candidatePassword, hash, callback){
