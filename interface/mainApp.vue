@@ -2,9 +2,44 @@
     <div id="app">
         <v-app>
             <topPage />
-            <div id="routedApp">
-                <router-view style="width:100%"></router-view>
-            </div>
+            <v-layout col>
+                <v-flex xs4>
+                    <v-card>
+                        <v-card-text>
+                            Left Column
+                        </v-card-text>
+                    </v-card>
+                    <v-card>
+                        <v-card-text>
+                            Buttons
+                        </v-card-text>
+                    </v-card>
+                </v-flex>
+                <v-flex>
+                    <v-card>
+                        <div id="routedApp">
+                            <router-view style="width:100%"></router-view>
+                        </div>
+                    </v-card>
+                    <v-card>
+                        <v-card-text>
+                            Slider
+                        </v-card-text>
+                    </v-card>
+                </v-flex>
+                <v-flex>
+                    <v-card>
+                        <v-card-text>
+                            Right column
+                        </v-card-text>
+                    </v-card>
+                    <v-card>
+                        <v-card-text>
+                            Buttons
+                        </v-card-text>
+                    </v-card>
+                </v-flex>
+            </v-layout>
         </v-app>
     </div>
 </template>

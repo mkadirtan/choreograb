@@ -23,7 +23,7 @@ import { SceneLoader, MeshBuilder,
 import {scene} from "./scene";
 import {Motifs} from './motifs';
 import {timeControl} from "./timeline";
-import {selectionModeObservable, currentMode} from './GUI2';
+import {selectionModeObservable, currentMode, notify} from './GUI2';
 import {settingsObservable} from "./utility";
 import {CreateID} from './history';
 import {actionTakenObservable} from "./sceneControl";
@@ -166,10 +166,12 @@ SceneLoader.ImportMeshAsync("",playerModel, "", scene).then(result => {
     PlayerMesh.actionManager.registerAction(
         new ExecuteCodeAction(ActionManager.OnLeftPickTrigger,
             function(evt){
-            let newPlayer = new Player({isByEvent: evt});
-            scene.stopAnimation(newPlayer.mesh.skeleton);
-            newPlayer.mesh.skeleton.returnToRest();
-            scene.beginAnimation(newPlayer.mesh.skeleton, walk.from+1, walk.to-1, true);
+                timeControl.checkOnMotif().then(()=>{
+                    let newPlayer = new Player({isByEvent: evt});
+                    scene.stopAnimation(newPlayer.mesh.skeleton);
+                    newPlayer.mesh.skeleton.returnToRest();
+                    scene.beginAnimation(newPlayer.mesh.skeleton, walk.from+1, walk.to-1, true);
+                }).catch((error)=>{notify(error, 'error')});
             }
         )
     );
@@ -224,7 +226,6 @@ Player.prototype = {
         this.mesh.name = "Player";
         this.mesh.ID = "Player";
         Players.add(this);
-        if(this.isByEvent){selectedPlayer = this}
         timeControl.add(this.timeline);
         this.addSelectionBehavior();
         this.attachMenu();
@@ -245,7 +246,7 @@ Player.prototype = {
     },
     key(){
         let self = this;
-        if(timeControl.checkOnMotif()){self.addKey(self.generateKey())}
+        timeControl.checkOnMotif().then(self.addKey(self.generateKey()));
         this.updateTimeline();
         this.updateAnimation();
     },
@@ -253,8 +254,8 @@ Player.prototype = {
         let self = this;
         let ease = Power0.easeNone;
         return {
-            motif: Motifs.current,
             MotifID: Motifs.current.MotifID,
+            //snap: self.checkSnap(),
             position: {
                 x: self.collider.position.x,
                 y: self.collider.position.y,
@@ -297,15 +298,25 @@ Player.prototype = {
         let position = self.collider.position;
         let rotation = self.collider.rotation;
 
+        let keys = [];
+        self.keys.forEach((key)=>{
+            let newKey = {};
+            Object.assign(newKey, key);
+            newKey.motif = Motifs.getMotifByMotifID(key.MotifID);
+            keys.push(newKey);
+        });
+
+        console.log(keys);
+
         self.timeline.kill({x: true, y: true, z: true}, position);
         self.timeline.kill({x: true, y: true, z: true}, rotation);
         self.timeline.kill({currentKey: true}, self);
 
-        self.keys.sort((a,b)=>{
+        keys.sort((a,b)=>{
             return a.motif.start - b.motif.start
         });
 
-        self.keys.forEach((key, i, keys)=>{
+        keys.forEach((key, i, keys)=>{
             if(i>0){
                 self.timeline.fromTo(
                     position,
@@ -316,7 +327,7 @@ Player.prototype = {
                 );
             }
         });
-        self.keys.forEach((key, i, keys)=>{
+        keys.forEach((key, i, keys)=>{
             if(i>0){
                 self.timeline.fromTo(
                     rotation,
@@ -327,7 +338,7 @@ Player.prototype = {
                 );
             }
         });
-        self.keys.forEach((key, i, keys)=>{
+        keys.forEach((key, i, keys)=>{
             if(i>0){
                 for(let step = 0; step<keys[i-1].stepCount; step++){
                     let singleStepDuration = (key.motif.start-keys[i-1].motif.end)/keys[i-1].stepCount;
@@ -347,8 +358,8 @@ Player.prototype = {
         let self = this;
         self.dummyRotator.position = self.collider.position.clone();
         self.dummyRotator.setParent(self.collider);
-        self.mesh.actionManager = new ActionManager(scene);
-        self.mesh.actionManager.registerAction(
+        self.collider.actionManager = new ActionManager(scene);
+        self.collider.actionManager.registerAction(
             new ExecuteCodeAction({
                     trigger: ActionManager.OnLeftPickTrigger
                 }, () => {
@@ -400,10 +411,13 @@ Player.prototype = {
             //Apply snapping
             //self.checkSnap();
             //Player collision mechanics
-            self.checkPlayerCollisions();
             //Keyframing algorithm
             if(!self.dragCancelled){
                 self.key();
+                let snap = self.checkSnap();
+                if(snap){
+                    snap.registerMesh(self.collider);
+                }
                 actionTakenObservable.notifyObservers("Player key assigned!");
             }
             self.dragCancelled = false;
@@ -448,6 +462,8 @@ Player.prototype = {
             self.mesh.renderOutline = true;
             self.pointerDragBehavior.onDragEndObservable.addOnce(function(){
                 if(self.isActive){
+                    selectedPlayer = this;
+                    settingsObservable.notifyObservers({type: "player", attachedMesh: self.mesh});
                     self.mesh.visibility = 1; self.mesh.renderOutline = false;
                     scene.stopAnimation(self.mesh.skeleton);
                     self.mesh.skeleton.returnToRest();
@@ -465,27 +481,18 @@ Player.prototype = {
             delete self.attachedPosition;
         }
     },
-    /*checkSnap: function(){
+    checkSnap: function(){
         let self = this;
+        let snapped = false;
         Motifs.current.guides.forEach(guide=>{
-                self.isSnapped = false;
-                if(guide.isActive)guide.snapColliders.forEach(snap=>{
-                    if(snap.intersectsMesh(self.collider, false)){
-                        self.snap(guide, snap)
-                    }
-                })
-            });
-        if(self.isSnapped === false){
-            self.desnap();
-        }
-    },*/
-    checkPlayerCollisions: function(){
-        let self = this;
-        Players.players.forEach((player)=>{
-            if(player.PlayerID !== self.PlayerID && self.collider.intersectsMesh(player.collider, false)){
-                //todo prevent collisions
-            }
+            if(guide.isActive)guide.snapColliders.forEach(snapCollider=>{
+                if(snapCollider.intersectsMesh(self.collider, false)){
+                    console.log('collided!')
+                    snapped = guide;
+                }
+            })
         });
+        return snapped;
     },
     hideCollider(){
         this.collider.isVisible = true;

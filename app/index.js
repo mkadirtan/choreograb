@@ -17,10 +17,22 @@
  */
 import { scene } from './scene';
 import { Motif } from './motifs';
+import { Guides } from "./guides";
 import {timeControl} from "./timeline";
 
-let asd = {dur: 0};
-timeControl.timeline.to(asd, 9, {dur: 100}, 0);
+(function(){
+    new Motif({
+        name: 'Sahne 1',
+        start: 0,
+        end: 2
+    });
+    new Motif({
+        name: 'Sahne 2',
+        start: 6,
+        end: 8
+    });
+    Guides.create.CircleGuide();
+})();
 
 //new Motif({name: asd, start:0, end: 2});
 

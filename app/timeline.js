@@ -73,12 +73,14 @@ let timeControl = {
     },
     stop: function(){
         return new Promise((res, rej)=>{
+            this.timeline.pause(0);
             this.slider.value = 0;
-            this.timeline.pause();
-            this.timeline.seek(0);
+            console.log(this.timeline.paused());
+            console.log(this.slider.value);
+            console.log(this.timeline.time());
             timePrint.text = "0.00 sn";
             Motifs.update();
-            if(this.slider.value === 0 && this.timeline.paused() && this.timeline.seek() === 0) res();
+            if(this.slider.value === 0 && this.timeline.paused() && this.timeline.time() === 0) res();
             else rej(new Error("Couldn't stop!"));
         })
     },
@@ -109,24 +111,29 @@ let timeControl = {
     checkOnMotif: function(){
         let margin = 0.01;
         Motifs.update();
-        return ((this.slider.value - margin) <= Motifs.current.end)
-            &&
-            ((this.slider.value + margin) >= Motifs.current.start);
+        return new Promise((res, rej)=>{
+            if(Motifs.current){
+                if(((this.slider.value - margin) <= Motifs.current.end)
+                    &&
+                    ((this.slider.value + margin) >= Motifs.current.start)){
+                    res();
+                }
+                else {
+                    rej(new Error('You must be on a motif!'));
+                }
+            }
+            else rej(new Error('There is no active motif!'))
+        });
     },
     clearAll(){
         this.timeline = new TimelineMax();
     },
 };
 
-/*let fuckthisshit = {
-    time: 0
-};
-timeControl.timeline.to(fuckthisshit, 50, {time: 50}, 0);*/
-
 timeControl.timeline.eventCallback("onUpdate", function(){
     timePrint.text = this.timeline.time().toFixed(2) + " sn";
     if(!this.timeline.paused() && this.slider.maximum >= this.timeline.duration()) this.slider.value = this.timeline.time();
-    if(this.music.playing() && Math.abs(this.music.seek()-self.timeline.time())>this.audioSyncSensitivity){
+    if(this.music.playing() && Math.abs(this.music.time()-self.timeline.time())>this.audioSyncSensitivity){
         this.music.seek(this.timeline.time());
     }
     Players.players.forEach(e=>e.updateAnimation());

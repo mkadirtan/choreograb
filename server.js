@@ -12,7 +12,7 @@ const passport = require('passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
 const User = require('./models/user');
 
-const url = 'mongodb://localhost:27017';
+const url = 'mongodb://localhost:27011117';
 mongoose.connect(url, {useMongoClient: true}).then( ()=>console.log('mongo connected!'),err=>console.log(err));
 let db = mongoose.connection;
 

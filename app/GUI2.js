@@ -131,7 +131,7 @@ let playButton = new Button({name: "play", image: i_play, stack: bottomPanel,  o
     }
 });
 let pauseButton = new Button({name: "pause", image: i_pause, stack: bottomPanel, onClick(){
-        timeControl.timeline.pause().
+        timeControl.pause().
         then(()=>notify("Scene is paused. You can continue editing!", "system")).
         catch((error)=>notify(error, "error"));
     }
@@ -181,6 +181,11 @@ let newMotifButton = new Button({name: "newMotif", image: i_newMotif, stack: lef
     new Motif({name: "generated", start, end}).
     then(()=>actionTakenObservable.notifyObservers("New motif created!")).
     catch((error)=>{notify(error.message, "error")});
+    }
+});
+
+let newCircleGuideButton = new Button({name: "newCircleGuide", image: i_next, stack: leftPanel, onClick(){
+        Guides.create.CircleGuide();
     }
 });
 

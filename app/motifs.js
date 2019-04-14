@@ -28,12 +28,13 @@ export let Motifs = {
     },
     getMotifByMotifID: function(MotifID){
         let self = this;
+        let returned = null;
         self.motifs.forEach(motif=>{
             if(motif.MotifID === MotifID){
-                return motif;
+                returned = motif;
             }
         });
-        return null;
+        return returned;
     },
     updateMotifs(motifs){
         let self = this;

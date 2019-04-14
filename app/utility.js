@@ -11,6 +11,12 @@ import i_translate from './media/textures/translate.png';
 /**
  * BABYLON IMPORTS
  */
+import {UtilityLayerRenderer, SceneLoader,
+    DirectionalLight, StandardMaterial,
+    PlaneRotationGizmo, Mesh, MeshBuilder,
+    Vector3, Path3D, Color3,
+    TransformNode, Observable,
+    Texture, DynamicTexture,} from "@babylonjs/core";
 
 /**
  * BABYLON IMPORTS
@@ -24,12 +30,6 @@ import {selectedPlayer} from "./players";
  * LOCAL IMPORTS
  */
 
-import {UtilityLayerRenderer, SceneLoader,
-    DirectionalLight, StandardMaterial,
-    PlaneRotationGizmo, Mesh, MeshBuilder,
-    Vector3, Path3D, Color3,
-    TransformNode, Observable,
-    Texture, DynamicTexture,} from "@babylonjs/core";
 
 //Settings observable
 export let settingsObservable = new Observable();
@@ -98,6 +98,7 @@ meshes[1].position.x += buttonSize/2 + buttonPadding/2;
 meshes.forEach(e=>{
     e.material = new StandardMaterial("", utilLayer.utilityLayerScene);
     e.material.specularColor = Color3.Black();
+    e.material.emissiveColor = Color3.White();
 });
 
 meshes[0].material.diffuseTexture = new Texture(i_translate, utilLayer.utilityLayerScene);
@@ -135,6 +136,7 @@ SceneLoader.ImportMesh("", buttonModel, "", utilLayer.utilityLayerScene, functio
         e.isPickable = false;
         e.parent = settings;
         e.material.specularColor = Color3.Black();
+        e.material.emissiveColor = Color3.White();
     });
     guideButtons = [...meshes];
 });
