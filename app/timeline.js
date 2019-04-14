@@ -36,6 +36,33 @@ let timeControl = {
     add(tl){
         this.timeline.add(tl, 0);
     },
+    speed(direction){
+        return new Promise((resolve, reject)=>{
+            if(direction === "increase"){
+                let tScale = this.timeline.timeScale();
+                if(tScale<8){
+                    this.timeline.timeScale(tScale*2);
+                    resolve(this.timeline.timeScale());
+                }
+                else{
+                    reject(new Error("Highest speed is reached!"));
+                }
+            }
+            else if(direction === "decrease"){
+                let tScale = this.timeline.timeScale();
+                if(tScale>1/4){
+                    this.timeline.timeScale(tScale/2);
+                    resolve(this.timeline.timeScale());
+                }
+                else{
+                    reject(new Error("Lowest speed is reached!"))
+                }
+            }
+            else{
+                reject(new Error("Undefined time scale parameter!"))
+            }
+        });
+    },
     shake: function(motif){
         this.timeline.progress(1).progress(0);
         this.timeline.seek(motif.start, false);
@@ -45,14 +72,33 @@ let timeControl = {
         Motifs.update();
     },
     stop: function(){
-        this.slider.value = 0;
-        this.timeline.pause();
-        this.timeline.seek(0);
-        timePrint.text = "0.00 sn";
-        Motifs.update();
+        return new Promise((res, rej)=>{
+            this.slider.value = 0;
+            this.timeline.pause();
+            this.timeline.seek(0);
+            timePrint.text = "0.00 sn";
+            Motifs.update();
+            if(this.slider.value === 0 && this.timeline.paused() && this.timeline.seek() === 0) res();
+            else rej(new Error("Couldn't stop!"));
+        })
+    },
+    pause(){
+        return new Promise((res, rej)=>{
+            this.timeline.pause();
+            if(this.timeline.paused()) res();
+            else rej(new Error("Couldn't pause!"));
+        })
     },
     play: function(){
-        this.timeline.play();
+        return new Promise((resolve, reject)=>{
+            this.timeline.play();
+            if(this.timeline.paused()){
+                reject(new Error("Couldn't play!"))
+            }
+            else{
+                resolve();
+            }
+        });
     },
     updateTimeline: function(){
         let time = this.slider.value;

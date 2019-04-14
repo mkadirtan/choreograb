@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-let userSchema = mongoose.Schema({
+let UserSchema = mongoose.Schema({
     username: {
         type: String,
         index: true
@@ -14,27 +14,40 @@ let userSchema = mongoose.Schema({
     },
     name: {
         type: String
-    }
+    },
+    facebook: {
+        id: String,
+        token: String,
+        email: String,
+        name: String
+    },
 });
 
-let User = module.exports = mongoose.model('User', userSchema);
+let User = module.exports = mongoose.model('User', UserSchema);
 
-module.exports.createUser = function(newUser, callback){
-    bcrypt.genSalt(10, function(err, salt){
-        bcrypt.hash(newUser.password, salt, function(err, hash){
-            newUser.password = hash;
-            newUser.save(callback);
+/*module.exports.createUser = function(newUser){
+    console.log('creating new user?');
+    if(newUser.password){
+        bcrypt.genSalt(10, function(err, salt){
+            bcrypt.hash(newUser.password, salt, function(err, hash){
+                newUser.password = hash;
+            })
         })
-    })
-};
+    }
+};*/
 
 module.exports.getUserByUsername = function(username, callback){
     let query = {username: username};
     User.findOne(query, callback);
 };
 
+module.exports.findByFacebookId = function(facebookId, callback){
+    console.log('looking for user?')
+    User.findOne({'facebook.id': facebookId}, callback);
+};
+
 module.exports.getUserById = function(id, callback){
-    User.findOne(id, callback);
+    User.findOne({_id: id}, callback);
 };
 
 module.exports.comparePassword = function(candidatePassword, hash, callback){

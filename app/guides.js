@@ -150,7 +150,7 @@ Guide.prototype = {
         Object.assign(this, newParam)
     },
     updateGuideBehavior(param){
-        this.clearMeshes();
+        //this.clearMeshes();
         this.generateParametricShape();
         this.generateContainer();
         this.updateSnaps();

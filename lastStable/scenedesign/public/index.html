@@ -44,6 +44,7 @@
             loop: false,
         });
 
+        BABYLON.Animation.AllowMatricesInterpolation = true;
         let createScene = function(){
             // BASIC SCENE ELEMENTS
             let canvas = document.getElementById("renderCanvas");
@@ -497,7 +498,7 @@
                         function(){
                             this.data.aniObject.animations["walkLikeMan"].animGroup.play();
                             this.data.aniObject.animations["walkLikeMan"].animGroup
-                            .goToFrame(Math.round(this.data.aniObject.animations["walkLikeMan"].current));
+                            .goToFrame(this.data.aniObject.animations["walkLikeMan"].current);
                             this.data.aniObject.animations["walkLikeMan"].animGroup.pause();}
                     , false)
 
