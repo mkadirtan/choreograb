@@ -24,7 +24,7 @@ import {UtilityLayerRenderer, SceneLoader,
 /**
  * LOCAL IMPORTS
  */
-import {scene} from './scene';
+import {scene} from './SceneConstructor';
 import {selectedPlayer} from "./players";
 /**
  * LOCAL IMPORTS

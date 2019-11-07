@@ -16,7 +16,6 @@ import {TimelineMax, TweenMax} from 'gsap';
  * LOCAL IMPORTS
  */
 import {slider, timePrint} from './GUI2';
-import {music} from './music';
 import {Motifs} from './motifs';
 import {Players} from './players';
 /**
@@ -32,7 +31,6 @@ let timeControl = {
     timeline: new TimelineMax(),
     audioSyncSensitivity: 0.05,
     slider: slider,
-    music: music,
     add(tl){
         this.timeline.add(tl, 0);
     },
@@ -133,14 +131,10 @@ let timeControl = {
 timeControl.timeline.eventCallback("onUpdate", function(){
     timePrint.text = this.timeline.time().toFixed(2) + " sn";
     if(!this.timeline.paused() && this.slider.maximum >= this.timeline.duration()) this.slider.value = this.timeline.time();
-    if(this.music.playing() && Math.abs(this.music.time()-self.timeline.time())>this.audioSyncSensitivity){
-        this.music.seek(this.timeline.time());
-    }
     Players.players.forEach(e=>e.updateAnimation());
     Motifs.update();
 }, [], timeControl)
 .eventCallback("onComplete", function(){
-    this.music.pause();
     this.timeline.pause();
 }, [], timeControl);
 

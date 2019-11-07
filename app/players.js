@@ -20,12 +20,12 @@ import { SceneLoader, MeshBuilder,
 /**
  * LOCAL IMPORTS
  */
-import {scene} from "./scene";
+import {scene} from "./SceneConstructor";
 import {Motifs} from './motifs';
 import {timeControl} from "./timeline";
-import {selectionModeObservable, currentMode, notify} from './GUI2';
+import {notify} from './GUI2';
 import {settingsObservable} from "./utility";
-import {CreateID} from './history';
+import {CreateID} from "./CreateID";
 import {actionTakenObservable} from "./sceneControl";
 
 /**
@@ -202,8 +202,6 @@ Player.prototype = {
                 collider: AbstractPlayer.PlayerCollider.clone(),
                 isByEvent: param.isByEvent,
                 lastPosition: null,
-                isSnapped: false,
-                feetDrag: false,
                 timeline: new TimelineMax(),
                 keys: param.keys ||[],
                 currentKey: 0,
@@ -227,14 +225,13 @@ Player.prototype = {
         this.mesh.ID = "Player";
         Players.add(this);
         timeControl.add(this.timeline);
-        this.addSelectionBehavior();
         this.attachMenu();
         this.addDragBehavior();
         this.checkEventData(this.attachedPosition);
     },
     updatePlayerParameters: function(param){
         let newParam = {};
-        const allowedParams = ["keys", "currentKey", "personalInformation", "lastPosition", "isSnapped", "feetDrag", "isActive"];
+        const allowedParams = ["keys", "currentKey", "personalInformation", "lastPosition", "feetDrag", "isActive"];
         allowedParams.forEach(entry=>{
             if(param.hasOwnProperty(entry)){newParam[entry] = param[entry];}
         });
@@ -255,7 +252,6 @@ Player.prototype = {
         let ease = Power0.easeNone;
         return {
             MotifID: Motifs.current.MotifID,
-            //snap: self.checkSnap(),
             position: {
                 x: self.collider.position.x,
                 y: self.collider.position.y,
@@ -303,9 +299,11 @@ Player.prototype = {
             let newKey = {};
             Object.assign(newKey, key);
             newKey.motif = Motifs.getMotifByMotifID(key.MotifID);
+            console.log("really?:");
+            console.log(newKey.motif);
             keys.push(newKey);
         });
-
+        console.log("now, keys:");
         console.log(keys);
 
         self.timeline.kill({x: true, y: true, z: true}, position);
@@ -408,16 +406,10 @@ Player.prototype = {
         self.pointerDragBehavior.onDragEndObservable.add(function(){
             //Remove keyboard observable
             scene.onKeyboardObservable.remove(self.keyboardObservable);
-            //Apply snapping
-            //self.checkSnap();
             //Player collision mechanics
             //Keyframing algorithm
             if(!self.dragCancelled){
                 self.key();
-                let snap = self.checkSnap();
-                if(snap){
-                    snap.registerMesh(self.collider);
-                }
                 actionTakenObservable.notifyObservers("Player key assigned!");
             }
             self.dragCancelled = false;
@@ -437,24 +429,6 @@ Player.prototype = {
             this.collider.isPickable = false;
         }
     },
-    addSelectionBehavior(){
-        selectionModeObservable.notifyObservers(currentMode);
-        if(self.isByEvent){
-            settingsObservable.notifyObservers({type: "player", attachedMesh: self.mesh});
-        }
-    },
-    /*snap: function(guide, snap){
-        let self = this;
-        self.collider.position = snap.absolutePosition;
-        self.isSnapped = true;
-        self.snappedGuide = guide;
-        self.snappedSnap = snap;
-    },
-    desnap: function(){
-        let self = this;
-        self.snappedGuide = false;
-        self.snappedSnap = false;
-    },*/
     checkEventData: function(position){
         let self = this;
         if(self.isByEvent){
@@ -481,19 +455,6 @@ Player.prototype = {
             delete self.attachedPosition;
         }
     },
-    checkSnap: function(){
-        let self = this;
-        let snapped = false;
-        Motifs.current.guides.forEach(guide=>{
-            if(guide.isActive)guide.snapColliders.forEach(snapCollider=>{
-                if(snapCollider.intersectsMesh(self.collider, false)){
-                    console.log('collided!')
-                    snapped = guide;
-                }
-            })
-        });
-        return snapped;
-    },
     hideCollider(){
         this.collider.isVisible = true;
         this.collider.visibility = 0;
@@ -510,7 +471,6 @@ Player.prototype = {
         timeControl.timeline.remove(this.timeline);
         meshes.forEach(mesh=>{this[mesh].dispose();});
         delete this.keyboardObservable;
-        delete this.selectionObservable;
         delete this.timeline;
         Players.remove(this);
         this.PlayerID += "deleted";

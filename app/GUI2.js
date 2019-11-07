@@ -25,20 +25,17 @@ import {AdvancedDynamicTexture, StackPanel, Control, Slider, TextBlock, InputTex
 import {Vector3} from "@babylonjs/core";
 import {Observable} from "@babylonjs/core";
 import {TimelineMax} from "gsap/TimelineMax";
-import * as axios from 'axios';
 /**
  * BABYLON IMPORTS
  */
 /**
  * LOCAL IMPORTS
  */
-import {scene, switchCamera} from './scene';
+import {scene, switchCamera} from './SceneConstructor';
 import {timeControl} from './timeline';
 import {Motifs, Motif} from './motifs';
-import {Guides, Guide} from "./guides";
 import {Players} from "./players";
 import {actionTakenObservable, sceneControl} from "./sceneControl";
-import scenesave from  "./scenesave";
 /**
  * LOCAL IMPORTS
  */
@@ -56,21 +53,21 @@ let fontBaseSize = 24;
 export let advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI('UI', true, scene);
 advancedTexture.idealWidth = 1920;
 
-let leftPanel = new StackPanel("leftPanel");
+const leftPanel = new StackPanel("leftPanel");
 leftPanel.width = controlBaseSize + "px";
 leftPanel.height = 0.75;
 leftPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
 leftPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
 leftPanel.isVertical = true;
 
-let rightPanel = new StackPanel("rightPanel");
+const rightPanel = new StackPanel("rightPanel");
 rightPanel.width = controlBaseSize + "px";
 rightPanel.height = 0.75;
 rightPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_RIGHT;
 rightPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
 rightPanel.isVertical = true;
 
-let bottomPanel = new StackPanel("bottomPanel");
+const bottomPanel = new StackPanel("bottomPanel");
 bottomPanel.width = "1920px";
 bottomPanel.height = controlBaseSize + "px";
 bottomPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
@@ -86,12 +83,12 @@ notificationPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
 notificationPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
 notificationPanel.isVertical = false;
 
-let notificationText = new TextBlock();
+const notificationText = new TextBlock();
 notificationText.fontSize = 1.5*fontBaseSize + "px";
 notificationText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_RIGHT;
 
 notificationPanel.addControl(notificationText);
-let fader = new TimelineMax();
+const fader = new TimelineMax();
 
 export function notify(message, type){
     let bgColor = "";
@@ -160,21 +157,6 @@ let saveButton = new Button({name: "save", image: i_save, stack: rightPanel, onC
     }
 });
 
-let loadButton = new Button({name: "load", image: i_load, stack: rightPanel, onClick(){
-        sceneControl.load();
-    }
-});
-
-let undoButton = new Button({name: "undo", image: i_undo, stack: leftPanel, onClick(){
-        sceneControl.undo();
-    }
-});
-
-let redoButton = new Button({name: "redo", image: i_redo, stack: leftPanel, onClick(){
-        sceneControl.redo();
-    }
-});
-
 let newMotifButton = new Button({name: "newMotif", image: i_newMotif, stack: leftPanel, onClick(){
     let start = parseInt(leftPanel.getChildByName("motifStart").text);
     let end = start + parseInt(leftPanel.getChildByName("motifDuration").text);
@@ -184,16 +166,11 @@ let newMotifButton = new Button({name: "newMotif", image: i_newMotif, stack: lef
     }
 });
 
-let newCircleGuideButton = new Button({name: "newCircleGuide", image: i_next, stack: leftPanel, onClick(){
-        Guides.create.CircleGuide();
-    }
-});
-
-let motifStartInput = new InputText("motifStart", "start");
+let motifStartInput = new InputText("motifStart", "");
 motifStartInput.height = controlBaseSize + "px";
 motifStartInput.width = controlBaseSize + "px";
 motifStartInput.color = "#FFFFFF";
-let motifDurationInput = new InputText("motifDuration", "duration");
+let motifDurationInput = new InputText("motifDuration", "");
 motifDurationInput.height = controlBaseSize + "px";
 motifDurationInput.width = controlBaseSize + "px";
 motifDurationInput.color = "#FFFFFF";
@@ -252,7 +229,7 @@ let fastForward = new Button({name: "fForward", image: i_forward, stack: bottomP
  * It assigns name, image, width, size, onClick function of the button,
  * then returns the created babylonButton object.
  */
-export function Button(param){
+function Button(param){
     let result = new babylonButton.CreateImageOnlyButton(param.name, param.image);
     result.width = param.width || controlBaseSize + "px";
     result.height = param.height || controlBaseSize + "px";
@@ -273,22 +250,8 @@ export function Button(param){
         result.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
     }
     param.stack.addControl(result);
-    return result;
 }
 /**
  * Default properties of generic buttons for undefined properties.
  */
 
-export let selectionModeObservable = new Observable();
-selectionModeObservable.add(mode=>{
-    Guides.guides.forEach(guide=>guide.isSelectable(mode==="guides"));
-    Players.players.forEach(player=>{player.isSelectable(mode==="players")});
-});
-export let currentMode = "players";
-
-scene.onKeyboardObservable.add((eventData, eventState)=>{
-    if(eventData.event.altKey === true && eventData.event.code === "AltLeft" && eventData.type === 1 && eventState.mask === 1){
-        selectionModeObservable.notifyObservers("guides");
-    }
-    else{selectionModeObservable.notifyObservers("players")}
-});

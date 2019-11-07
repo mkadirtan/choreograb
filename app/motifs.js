@@ -2,11 +2,34 @@
  * LOCAL IMPORTS
  */
 import {timeControl} from './timeline';
-import {CreateID} from "./history";
+import {CreateID} from "./CreateID";
+
 /**
  * LOCAL IMPORTS
  *
  */
+
+let SceneElements = (function () {
+    let instance;
+
+    function createInstance() {
+        return {
+            Motifs,
+            Players,
+            Guides
+        }
+    }
+
+    return {
+        getInstance: function () {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+})();
+
 export let Motifs = {
     checkSpace(param){
         if(this.motifs.length>0){
@@ -34,6 +57,7 @@ export let Motifs = {
                 returned = motif;
             }
         });
+        console.log(returned);
         return returned;
     },
     updateMotifs(motifs){
@@ -102,16 +126,9 @@ export let Motifs = {
                         }
                     }
                     self.current = motif;
-                    motif.isActive(true);
-                }
-                else{
-                    motif.isActive(false);
                 }
             }
         );
-        self.motifs.forEach(motif=>{
-            motif.correctVisibility();
-        });
     },
     addMotif(motif){
         this.motifs.push(motif);
@@ -193,17 +210,15 @@ Motif.prototype = {
         Object.assign(this, {
             MotifID: param.MotifID || CreateID('Motif'),
             name: param.name,
-            _isActive: true,
             start: param.start,
             end: param.end,
-            guides: [],
         });
     },
     initializeMotifBehavior(){
         Motifs.addMotif(this);
     },
     updateMotifParameters(param){
-        const allowedParams = ["start", "end", "_isActive", "guides", ];
+        const allowedParams = ["start", "end"];
         let newParam = {};
         allowedParams.forEach(entry=>{
             if(param.hasOwnProperty(entry)){newParam[entry] = param[entry];}
@@ -213,41 +228,8 @@ Motif.prototype = {
     updateMotifBehavior(){
 
     },
-    show(){
-        this.guides.forEach(e=>e.show());
-    },
-    hide(){
-        this.guides.forEach(e=>e.hide());
-    },
-    correctVisibility(){
-        this.isActive()?this.show():this.hide();
-    },
-    addGuide(guide){
-        let isDuplicate = false;
-        this.guides.forEach(_guide=>{
-            if(_guide.GuideID === guide.GuideID){isDuplicate = true;}
-        });
-        this.guides.push(guide);
-    },
-    removeGuide: function(guide){
-        this.guides.forEach(function(_guide, i, guides){
-            if(_guide === guide){
-                guides.splice(i, 1);
-            }
-        })
-    },
-    isActive(status){
-        if(status === undefined){
-            return this._isActive;
-        }
-        else{
-            this._isActive = status;
-        }
-        this.correctVisibility();
-    },
     destroy(){
         Motifs.removeMotif(this);
-        this.guides.forEach(guide=>guide.destroy());
         this.MotifID += "deleted";
     }
 };

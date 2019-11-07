@@ -18,28 +18,6 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.(mp3)$/,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            name: '/music/[name].[ext]'
-                        }
-                    }
-                ]
-            },
-            {
-                test: /\.(babylon|manifest)$/,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            name: '/babylon/[name].[ext]'
-                        }
-                    }
-                ]
-            },
-            {
                 test: /\.(png)$/,
                 use: [
                     {
