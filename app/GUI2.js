@@ -16,9 +16,6 @@ import i_undo from './media/textures/undo.png';
 import i_newMotif from './media/textures/newMotif.png';
 
 /**
- * ASSETS
- */
-/**
  * BABYLON IMPORTS
  */
 import {AdvancedDynamicTexture, StackPanel, Control, Slider, TextBlock, InputText, Button as babylonButton} from "@babylonjs/gui";
@@ -31,7 +28,7 @@ import {TimelineMax} from "gsap/TimelineMax";
 /**
  * LOCAL IMPORTS
  */
-import {scene, switchCamera} from './SceneConstructor';
+import {scene} from './SceneConstructor';
 import {timeControl} from './timeline';
 import {Motifs, Motif} from './motifs';
 import {Players} from "./players";
@@ -46,20 +43,6 @@ import {actionTakenObservable, sceneControl} from "./sceneControl";
  * All of which's size are determined via pixels and percentages, below.
  */
 
-let controlBaseSize = 80;
-let controlPadding = 1;
-let fontBaseSize = 24;
-
-export let advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI('UI', true, scene);
-advancedTexture.idealWidth = 1920;
-
-const leftPanel = new StackPanel("leftPanel");
-leftPanel.width = controlBaseSize + "px";
-leftPanel.height = 0.75;
-leftPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-leftPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
-leftPanel.isVertical = true;
-
 const rightPanel = new StackPanel("rightPanel");
 rightPanel.width = controlBaseSize + "px";
 rightPanel.height = 0.75;
@@ -73,7 +56,7 @@ bottomPanel.height = controlBaseSize + "px";
 bottomPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
 bottomPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
 bottomPanel.isVertical = false;
-
+/*
 let notificationPanel = new StackPanel("notificationPanel");
 notificationPanel.width = 1920 - 2.5*controlBaseSize + "px";
 notificationPanel.height = 1.5*fontBaseSize + "px";
@@ -110,16 +93,11 @@ export function notify(message, type){
     notificationText.text = String(message);
     notificationPanel.background = bgColor;
 }
+*/
 
 advancedTexture.addControl(bottomPanel);
-advancedTexture.addControl(leftPanel);
 advancedTexture.addControl(rightPanel);
 advancedTexture.addControl(notificationPanel);
-
-let cameraButton = new Button({name: "cameraButton", image: i_camera, stack: rightPanel, onClick(){
-        switchCamera();
-    }
-});
 
 let playButton = new Button({name: "play", image: i_play, stack: bottomPanel,  onClick(){
         timeControl.play().
@@ -229,28 +207,7 @@ let fastForward = new Button({name: "fForward", image: i_forward, stack: bottomP
  * It assigns name, image, width, size, onClick function of the button,
  * then returns the created babylonButton object.
  */
-function Button(param){
-    let result = new babylonButton.CreateImageOnlyButton(param.name, param.image);
-    result.width = param.width || controlBaseSize + "px";
-    result.height = param.height || controlBaseSize + "px";
-    result.cornerRadius = 7;
-    result.paddingBottom = controlPadding + "px";
-    result.paddingTop = controlPadding + "px";
-    result.paddingLeft = controlPadding + "px";
-    result.paddingRight = controlPadding + "px";
 
-    if(param.onClick)result.onPointerUpObservable.add(param.onClick);
-    if(param.stack === leftPanel){
-        result.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-    }
-    else if(param.stack === rightPanel){
-        result.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_RIGHT;
-    }
-    else if(param.stack === bottomPanel){
-        result.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
-    }
-    param.stack.addControl(result);
-}
 /**
  * Default properties of generic buttons for undefined properties.
  */

@@ -16,17 +16,15 @@
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.3",
-    "@babel/preset-react": "^7.0.0",
     "@babylonjs/core": "^4.0.0-alpha.18",
-    "@babylonjs/gui": "^4.0.0-alpha.18",
     "@babylonjs/loaders": "^4.0.0-alpha.18",
     "@babylonjs/materials": "^4.0.0-alpha.18",
-    "@fortawesome/fontawesome-free": "^5.8.1",
     "babel-loader": "^8.0.5",
     "webpack": "^4.28.4",
     "webpack-cli": "^3.3.9"
   },
   "dependencies": {
+    "@babylonjs/gui": "^4.0.3",
     "babylonjs": "^3.3.0",
     "babylonjs-loaders": "^3.3.0",
     "babylonjs-materials": "^3.3.0",

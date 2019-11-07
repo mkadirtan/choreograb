@@ -1,10 +1,17 @@
+"use strict";
+import {MeshBuilder} from "@babylonjs/core";
+
 import { scene } from './SceneConstructor';
+
+import { TimelineControl } from "./Controllers/TimelineControl";
+
 import {AnimatableGroup} from "./Classes/AnimatableGroup";
 import {Group} from "./Classes/Group";
-import {MeshBuilder} from "@babylonjs/core";
 
 import {PlayerMember} from "./Members/PlayerMember";
 import {MotifMember} from "./Members/MotifMember";
+
+import "./GUI/GUI"
 
 let Motifs = new Group({
     "name": "Motifs",
@@ -24,6 +31,8 @@ let Players = new AnimatableGroup({
     "intervalPipe": register => {register.interval = Motifs.getInterval(); return register}
 });
 
+TimelineControl.addGroupToTimeline(Players);
+
 Players.CreateNewMember({
     "name": "My Custom Player",
     "animatableObject": new MeshBuilder.CreateBox("playerAnimatableObject", {size: 1}, scene)
@@ -39,3 +48,4 @@ newMember.animate();
 
 window.motifs = Motifs;
 window.players = Players;
+window.timeControl = TimelineControl;
