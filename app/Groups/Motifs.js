@@ -1,35 +1,10 @@
-export class Motif{
-    constructor(param){
-        this.name = param.name;
-    }
-    setInterval(interval){
-        this.interval = interval;
-    }
-}
+import {Group} from "../Classes/Group";
+import {MotifMember} from "../Members/MotifMember";
+import {SceneControl} from "../Controllers/SceneControl";
 
-function registerHandler(members){
-    let registers = [];
-    members.forEach(member=>{
-        registers.push({
-            name: member.name,
-            ID: member.ID,
-            interval: member.interval
-        })
-    });
-    return registers;
-}
-
-function updateHandler(registers){
-    registers.forEach(register=>{
-        let member = this.getMemberByID(register.ID);
-        member.setInterval(register.interval);
-    })
-}
-
-export const MotifGroupDefinition = {
+export const Motifs = new Group({
     "name": "Motifs",
-    "memberClass": Motif,
-    "registerHandler": registerHandler,
-    "updateHandler": updateHandler,
-    "autoUpdateActiveMember": true
-};
+    "memberClass": MotifMember
+});
+
+Motifs.getInterval = ()=>{return Motifs.activeMember.interval};

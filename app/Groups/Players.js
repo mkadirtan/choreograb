@@ -1,11 +1,9 @@
-import {MeshBuilder} from "@babylonjs/core";
-import {pick, property} from "underscore";
-import {PlayerMember} from '../Members/PlayerMember';
+import {AnimatableGroup} from "../Classes/AnimatableGroup";
+import {PlayerMember} from "../Members/PlayerMember";
+import {Motifs} from "./Motifs";
 
-export const PlayerGroupDefinition = {
+export const Players = new AnimatableGroup({
     "name": "Players",
     "memberClass": PlayerMember,
-    "registerHandler": registerHandler,
-    "updateHandler": loadHandler,
-    "autoUpdateActiveMember": true
-};
+    "intervalPipe": register => {register.interval = Motifs.getInterval(); return register}
+});

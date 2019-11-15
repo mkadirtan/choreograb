@@ -1,5 +1,5 @@
 import {TimelineLite} from "gsap/TimelineLite";
-import {SceneControl} from "./SceneControl";
+import {slider} from "../GUI/Slider";
 
 let TimelineControl = {
     timeline: new TimelineLite(),
@@ -14,7 +14,18 @@ let TimelineControl = {
         //Associate future members
         group.onMemberCreateObservable.add(member=>{timeline.add(member.timeline)});
         this.groups.push(group.name)
+    },
+    update(time){
+        this.timeline.seek(time);
     }
 };
+
+TimelineControl.timeline.eventCallback("onComplete", function(timeline){
+    timeline.pause();
+},["{self}"]);
+
+TimelineControl.timeline.eventCallback("onUpdate", function(timeline) {
+    slider.value = timeline.time()
+}, ["{self}"]);
 
 export {TimelineControl};

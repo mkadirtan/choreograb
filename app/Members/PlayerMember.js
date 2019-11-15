@@ -16,12 +16,19 @@ export class PlayerMember extends AnimatableMember {
 }
 
 function attachDragBehavior(member) {
+
     let pointerDragBehavior = new PointerDragBehavior({dragPlaneNormal: new Vector3(0, 1, 0)});
     pointerDragBehavior.dragDeltaRatio = 1;
     pointerDragBehavior.useObjectOrienationForDragging = false;
     pointerDragBehavior.updateDragPlane = false;
     member.animatableObject.addBehavior(pointerDragBehavior);
-
+    //todo code sample for release drag when not on scene or playing
+    /*pointerDragBehavior.onDragStartObservable.add(()=>{
+        if(member.group.controller.TimelineControl.timeline.time() > 3){
+            pointerDragBehavior.releaseDrag()
+        }
+    });*/
+    member.pointerDragBehavior = pointerDragBehavior;
     pointerDragBehavior.onDragEndObservable.add(() => {
         member.addRegister();
         //todo actionTakenObservable.notifyObservers();
@@ -29,5 +36,4 @@ function attachDragBehavior(member) {
         //scene.activeCamera.attachControl(scene.getEngine().getRenderingCanvas(), true);
     });
 }
-
 

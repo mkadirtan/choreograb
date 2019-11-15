@@ -20,6 +20,7 @@ export class Group{
         let newMember = new this.memberClass(this, param);
         this.members.push(newMember);
         this.onMemberCreateObservable.notifyObservers(newMember);
+        return newMember;
     }
 
     getMemberByID(id){
