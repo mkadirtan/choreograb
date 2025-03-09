@@ -1,3 +1,6 @@
+# Kişisel Not 2025/03/09
+Bu benim yazılıma ciddi olarak attığım ilk proje. Üniversitenin son yılına girerken aklıma gelen bir uygulamayı, BabylonJS kullanarak web ortamında gerçekleştirmek için çıktığım yolda kendimi yazılımcı olarak bulma hikayemin ilk adımıdır. Benim için ifade ettiği anlamdan dolayı bu kaynak kodu bütün eksikliği ve kusurlarıyla açık arşive dönüştürüyorum.
+
 # choreograb
 Bu repo, hem projeye her yerden erişimim olması, hem de sorularım olduğu zaman direk yönlendirme yapabilmek amacıyla oluşturulmuştur.
 Lisans falan yok diye çalmayın :D
